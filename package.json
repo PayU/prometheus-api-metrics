@@ -1,0 +1,73 @@
+{
+  "name": "prometheus-api-metrics",
+  "version": "0.1.0",
+  "description": "API and process monitoring with Prometheus for Node.js micro-service",
+  "author": "Idan Tovi",
+  "scripts": {
+    "test": "nyc mocha \"./test/**/*-test.js\"",
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
+  },
+  "main": "src/index.js",
+  "nyc": {
+    "report-dir": "./coverage",
+    "lines": 80,
+    "statements": 80,
+    "functions": 97,
+    "branches": 97,
+    "include": [
+      "src"
+    ],
+    "exclude": [
+      "src/index.js"
+    ],
+    "reporter": [
+      "lcov",
+      "text"
+    ],
+    "cache": true,
+    "all": true
+  },
+  "dependencies": {
+    "debug": "^3.1.0",
+    "pkginfo": "^0.4.1",
+    "prom-client": "9.1.1"
+  },
+  "devDependencies": {
+    "body-parser": "^1.18.3",
+    "chai": "^4.1.2",
+    "express": "^4.16.3",
+    "mocha": "^5.2.0",
+    "node-mocks-http": "^1.7.0",
+    "nyc": "^11.8.0",
+    "rewire": "^4.0.1",
+    "sinon": "^5.0.10",
+    "supertest": "^3.1.0",
+    "eslint": "^4.19.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-chai-friendly": "^0.4.1",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-mocha": "^5.0.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "coveralls": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zooz/prometheus-api-metrics.git"
+  },
+  "keywords": [
+    "monitoring",
+    "nodejs",
+    "node",
+    "prometheus",
+    "api",
+    "express",
+    "metrics"
+  ],
+  "license": "Apache License 2.0",
+  "bugs": {
+    "url": "https://github.com/Zooz/prometheus-api-metrics/issues"
+  },
+  "homepage": "https://github.com/Zooz/prometheus-api-metrics#readme"
+}
