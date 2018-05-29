@@ -6,13 +6,12 @@
 [![Test Coverage][coveralls-image]][coveralls-url]
 [![Apache 2.0 License][license-image]][license-url]
 
-API and process monitoring with [Prometheus](https://prometheus.io) for Node.js micro-service
-
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 <!-- **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)* -->
 
 - [Prometheus API Monitoring](#prometheus-api-monitoring)
+  - [Goal](#goal)
   - [Features](#features)
   - [Usage](#usage)
     - [Options](#options)
@@ -21,6 +20,10 @@ API and process monitoring with [Prometheus](https://prometheus.io) for Node.js 
   - [Test](#test)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Goal
+
+API and process monitoring with [Prometheus](https://prometheus.io) for Node.js micro-service
 
 ## Features
 
