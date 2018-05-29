@@ -1,6 +1,26 @@
 # Prometheus API Monitoring
 
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+[![Build Status][travis-image]][travis-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
+[![Apache 2.0 License][license-image]][license-url]
+
 API and process monitoring with [Prometheus](https://prometheus.io) for Node.js micro-service
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<!-- **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)* -->
+
+- [Prometheus API Monitoring](#prometheus-api-monitoring)
+  - [Features](#features)
+  - [Usage](#usage)
+    - [Options](#options)
+    - [Access the metrics](#access-the-metrics)
+  - [Custom Metrics](#custom-metrics)
+  - [Test](#test)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Features
 
@@ -82,3 +102,13 @@ This will work only if you use the default Prometheus registry - do not use `new
 ```
 npm test
 ```
+[npm-image]: https://img.shields.io/npm/v/prometheus-api-metrics.svg?style=flat
+[npm-url]: https://npmjs.org/package/prometheus-api-metrics
+[travis-image]: https://travis-ci.org/Zooz/prometheus-api-metrics.svg?branch=master
+[travis-url]: https://travis-ci.org/Zooz/prometheus-api-metrics
+[coveralls-image]: https://coveralls.io/repos/github/Zooz/prometheus-api-metrics/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/Zooz/prometheus-api-metrics?branch=master
+[downloads-image]: http://img.shields.io/npm/dm/prometheus-api-metrics.svg?style=flat
+[downloads-url]: https://npmjs.org/package/prometheus-api-metrics
+[license-image]: https://img.shields.io/badge/license-Apache_2.0-green.svg?style=flat
+[license-url]: LICENSE
