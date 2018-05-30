@@ -32,14 +32,14 @@ module.exports = (options = {}) => {
 
     requestSizeHistogram = new Prometheus.Histogram({
         name: 'http_request_size_bytes',
-        help: 'Duration of HTTP requests in ms',
+        help: 'Size of HTTP requests in bytes',
         labelNames: ['method', 'route', 'code'],
         buckets: requestSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
     });
 
     responseSizeHistogram = new Prometheus.Histogram({
         name: 'http_response_size_bytes',
-        help: 'Duration of HTTP requests in ms',
+        help: 'Size of HTTP response in bytes',
         labelNames: ['method', 'route', 'code'],
         buckets: responseSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
     });
