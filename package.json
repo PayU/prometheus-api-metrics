@@ -10,10 +10,10 @@
   "main": "src/index.js",
   "nyc": {
     "report-dir": "./coverage",
-    "lines": 80,
-    "statements": 80,
-    "functions": 97,
-    "branches": 97,
+    "lines": 95,
+    "statements": 95,
+    "functions": 100,
+    "branches": 90,
     "include": [
       "src"
     ],

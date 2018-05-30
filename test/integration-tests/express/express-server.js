@@ -16,11 +16,18 @@ const checkoutsTotal = new Prometheus.Counter({
 app.use(middleware());
 app.use(bodyParser.json());
 
-app.get('/test/:', (req, res, next) => {
+app.get('/hello', (req, res, next) => {
     setTimeout(() => {
         res.json({ message: 'Hello World!' });
         next();
     }, Math.round(Math.random() * 200));
+});
+
+app.get('/hello/:time', (req, res, next) => {
+    setTimeout(() => {
+        res.json({ message: 'Hello World!' });
+        next();
+    }, parseInt(req.param.time));
 });
 
 app.get('/bad', (req, res, next) => {
@@ -38,8 +45,9 @@ app.get('/checkout', (req, res, next) => {
     next();
 });
 
-app.post('/', (req, res, next) => {
+app.post('/test', (req, res, next) => {
     setTimeout(() => {
+        res.status(201);
         res.json({ message: 'Hello World!' });
         next();
     }, req.body.delay);
@@ -52,20 +60,4 @@ app.use((err, req, res, next) => {
     res.json({ error: err.message });
 });
 
-const server = app.listen(port, () => {
-    console.log(`Example app listening on port ${port}!`);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    // clearInterval(metricsInterval)
-
-    server.close((err) => {
-        if (err) {
-            console.error(err);
-            process.exit(1);
-        }
-
-        process.exit(0);
-    });
-});
+module.exports = app;
