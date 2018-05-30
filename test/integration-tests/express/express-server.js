@@ -16,11 +16,18 @@ const checkoutsTotal = new Prometheus.Counter({
 app.use(middleware());
 app.use(bodyParser.json());
 
-app.get('/test/:', (req, res, next) => {
+app.get('/hello', (req, res, next) => {
     setTimeout(() => {
         res.json({ message: 'Hello World!' });
         next();
     }, Math.round(Math.random() * 200));
+});
+
+app.get('/hello/:time', (req, res, next) => {
+    setTimeout(() => {
+        res.json({ message: 'Hello World!' });
+        next();
+    }, parseInt(req.param.time));
 });
 
 app.get('/bad', (req, res, next) => {
@@ -38,8 +45,9 @@ app.get('/checkout', (req, res, next) => {
     next();
 });
 
-app.post('/', (req, res, next) => {
+app.post('/test', (req, res, next) => {
     setTimeout(() => {
+        res.status(201);
         res.json({ message: 'Hello World!' });
         next();
     }, req.body.delay);
@@ -69,3 +77,5 @@ process.on('SIGTERM', () => {
         process.exit(0);
     });
 });
+
+module.exports = app;

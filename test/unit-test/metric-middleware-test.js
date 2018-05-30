@@ -111,7 +111,7 @@ describe('metrics-middleware', () => {
                 }
             });
             req.route = {
-                path: '/path'
+                path: '/'
             };
             res = httpMocks.createResponse({
                 eventEmitter: EventEmitter
@@ -157,7 +157,7 @@ describe('metrics-middleware', () => {
                 method: 'GET'
             });
             req.route = {
-                path: '/path'
+                path: '/:id'
             };
             res = httpMocks.createResponse({
                 eventEmitter: EventEmitter
@@ -181,8 +181,8 @@ describe('metrics-middleware', () => {
                 res.emit('finish');
             });
             it('should update the histogram with the elapsed time and size', () => {
-                sinon.assert.calledWithExactly(requestSizeObserve, { method: 'GET', route: '/path', code: 200 }, 0);
-                sinon.assert.calledWith(responseTimeObserve, { method: 'GET', route: '/path', code: 200 });
+                sinon.assert.calledWithExactly(requestSizeObserve, { method: 'GET', route: '/path/:id', code: 200 }, 0);
+                sinon.assert.calledWith(responseTimeObserve, { method: 'GET', route: '/path/:id', code: 200 });
                 sinon.assert.calledOnce(responseTimeObserve);
             });
             after(() => {
@@ -203,7 +203,7 @@ describe('metrics-middleware', () => {
                 method: 'GET'
             });
             req.route = {
-                path: '/path'
+                path: '/'
             };
             res = httpMocks.createResponse({
                 eventEmitter: EventEmitter
@@ -238,7 +238,7 @@ describe('metrics-middleware', () => {
                 method: 'GET'
             });
             req.route = {
-                path: '/path'
+                path: '/'
             };
             res = httpMocks.createResponse({
                 eventEmitter: EventEmitter
@@ -261,21 +261,6 @@ describe('metrics-middleware', () => {
             Prometheus.register.clear();
         });
     });
-    describe('when calling on exit', () => {
-        let clearMetricsIntervalSpy;
-        beforeEach(() => {
-            clearMetricsIntervalSpy = sinon.spy(middleware.__get__('_clearDefaultMetricsInternal'));
-            middleware.__set__('_clearDefaultMetricsInternal', clearMetricsIntervalSpy);
-            middleware();
-            process.emit('exit');
-        });
-        it('should clear the default metrics interval', () => {
-            sinon.assert.calledOnce(clearMetricsIntervalSpy);
-        });
-        after(() => {
-            Prometheus.register.clear();
-        });
-    });
     describe('override the default path', function () {
         beforeEach(() => {
             middleware({
@@ -284,6 +269,22 @@ describe('metrics-middleware', () => {
         });
         it('should set the updated path', () => {
             expect(middleware.__get__('path')).to.equal('/v1/metrics');
+        });
+        after(() => {
+            Prometheus.register.clear();
+        });
+    });
+    describe('when calling on exit', () => {
+        let clearMetricsIntervalSpy;
+        beforeEach(() => {
+            const middleware = rewire('../../src/metrics-middleware');
+            clearMetricsIntervalSpy = sinon.spy(middleware.__get__('_clearDefaultMetricsInternal'));
+            middleware.__set__('_clearDefaultMetricsInternal', clearMetricsIntervalSpy);
+            middleware();
+            process.emit('exit');
+        });
+        it('should clear the default metrics interval', () => {
+            sinon.assert.calledOnce(clearMetricsIntervalSpy);
         });
         after(() => {
             Prometheus.register.clear();
