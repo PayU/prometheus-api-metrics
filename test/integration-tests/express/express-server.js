@@ -60,22 +60,4 @@ app.use((err, req, res, next) => {
     res.json({ error: err.message });
 });
 
-const server = app.listen(port, () => {
-    console.log(`Example app listening on port ${port}!`);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    // clearInterval(metricsInterval)
-
-    server.close((err) => {
-        if (err) {
-            console.error(err);
-            process.exit(1);
-        }
-
-        process.exit(0);
-    });
-});
-
 module.exports = app;
