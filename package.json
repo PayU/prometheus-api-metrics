@@ -7,7 +7,7 @@
     "test": "nyc mocha \"./test/**/*-test.js\"",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
-  "main": "src/index.js",
+  "main": "src/metrics-middleware.js",
   "nyc": {
     "report-dir": "./coverage",
     "lines": 95,
