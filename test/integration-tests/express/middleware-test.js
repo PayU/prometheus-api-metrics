@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const supertest = require('supertest');
-const app = require('./express-server');
+const app = require('./server/express-server');
 
 describe('when using express framework', () => {
     describe('when start up', () => {
@@ -44,7 +44,7 @@ describe('when using express framework', () => {
                     expect(res.text).to.contain('nodejs_heap_space_size_available_bytes{space="large_object"}');
 
                     expect(res.text).to.contain('nodejs_version_info');
-                    expect(res.text).to.contain('app_version');
+                    expect(res.text).to.contain('app_version{version="1.0.0",major="1",minor="0",patch="0"}');
                 });
         });
         describe('when calling a GET endpoint', function () {

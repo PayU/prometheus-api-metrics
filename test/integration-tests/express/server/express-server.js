@@ -4,8 +4,7 @@ const express = require('express');
 const Prometheus = require('prom-client');
 const bodyParser = require('body-parser');
 const app = express();
-const port = process.env.PORT || 3001;
-const middleware = require('../../../src/index');
+const middleware = require('../../../../src/metrics-middleware.js');
 
 const checkoutsTotal = new Prometheus.Counter({
     name: 'checkouts_total',

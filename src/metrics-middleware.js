@@ -1,17 +1,18 @@
 'use strict';
-
 const Prometheus = require('prom-client');
-require('pkginfo')(module, 'version', 'name');
+require('pkginfo')(module, 'name', 'version');
+const Path = require('path');
 const debug = require('debug')(module.exports.name);
-const appVersion = module.exports.version;
-let metricsInterval, path, responseTimeHistogram, requestSizeHistogram, responseSizeHistogram, onExitEvent;
+let metricsInterval, route, responseTimeHistogram, requestSizeHistogram, responseSizeHistogram, onExitEvent;
 
 module.exports = (options = {}) => {
+    require('pkginfo')(module, { dir: Path.dirname(module.parent.filename) }, 'version');
+    const appVersion = module.exports.version;
     const { metricsPath, defaultMetricsInterval, durationBuckets, requestSizeBuckets, responseSizeBuckets } = options;
     debug(`Init metrics middleware with options: ${JSON.stringify(options)}`);
     metricsInterval = Prometheus.collectDefaultMetrics(defaultMetricsInterval);
 
-    path = metricsPath || '/metrics';
+    route = metricsPath || '/metrics';
 
     const version = new Prometheus.Gauge({
         name: 'app_version',
@@ -52,12 +53,12 @@ module.exports = (options = {}) => {
 };
 
 function middleware (req, res, next) {
-    if (req.url === path) {
+    if (req.url === route) {
         debug('Request to /metrics endpoint');
         res.set('Content-Type', Prometheus.register.contentType);
         return res.end(Prometheus.register.metrics());
     }
-    if (req.url === `${path}.json`) {
+    if (req.url === `${route}.json`) {
         debug('Request to /metrics endpoint');
         return res.json(Prometheus.register.getMetricsAsJSON());
     }
