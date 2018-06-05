@@ -267,8 +267,8 @@ describe('metrics-middleware', () => {
                 metricsPath: '/v1/metrics'
             });
         });
-        it('should set the updated path', () => {
-            expect(middleware.__get__('path')).to.equal('/v1/metrics');
+        it('should set the updated route', () => {
+            expect(middleware.__get__('route')).to.equal('/v1/metrics');
         });
         after(() => {
             Prometheus.register.clear();
