@@ -105,6 +105,45 @@ This will work only if you use the default Prometheus registry - do not use `new
 ```
 npm test
 ```
+
+## Prometheus Examples Queries
+
+### [Apdex](https://en.wikipedia.org/wiki/Apdex)
+
+```
+(sum(rate(http_request_duration_ms_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>">, route="<ROUTE_NAME>", le="50"}[10m])) by (<SERVICE_LABLE_FIELD>) + sum(rate(http_request_duration_ms_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>", le="100"}[10m])) by (<SERVICE_LABLE_FIELD>)) / 2 / sum(rate(http_request_duration_ms_count{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>"}[10m])) by (<SERVICE_LABLE_FIELD>)
+```
+
+### 95th Response Time by specific route and status code
+```
+histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>", code="200"}[10m])) by (le))
+```
+
+### Median Response Time Overall
+```
+histogram_quantile(0.50, sum(rate(http_request_duration_ms_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
+```
+
+### Median Request Size Overall
+```
+histogram_quantile(0.50, sum(rate(http_request_size_bytes_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
+```
+
+### Median Response Size Overall
+```
+histogram_quantile(0.50, sum(rate(http_response_size_bytes_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
+```
+
+### Avarage Memory Usage - All services
+```
+avg(nodejs_external_memory_bytes / 1024 / 1024) by (<SERVICE_LABLE_FIELD)
+```
+
+### Avarage Eventloop Latency - All services
+```
+avg(nodejs_eventloop_lag_seconds) by (<SERVICE_LABLE_FIELD)
+```
+
 [npm-image]: https://img.shields.io/npm/v/prometheus-api-metrics.svg?style=flat
 [npm-url]: https://npmjs.org/package/prometheus-api-metrics
 [travis-image]: https://travis-ci.org/Zooz/prometheus-api-metrics.svg?branch=master
