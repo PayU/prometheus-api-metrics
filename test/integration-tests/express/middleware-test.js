@@ -59,7 +59,7 @@ describe('when using express framework', () => {
                     .get('/metrics')
                     .expect(200)
                     .then((res) => {
-                        expect(res.text).to.contain('code="200",route="/hello",method="GET"');
+                        expect(res.text).to.contain('method="GET",route="/hello",code="200"');
                     });
             });
         });
@@ -75,7 +75,7 @@ describe('when using express framework', () => {
                     .get('/metrics')
                     .expect(200)
                     .then((res) => {
-                        expect(res.text).to.contain('code="200",route="/hello/:time",method="GET"');
+                        expect(res.text).to.contain('method="GET",route="/hello/:time",code="200"');
                     });
             });
         });
@@ -93,7 +93,7 @@ describe('when using express framework', () => {
                     .get('/metrics')
                     .expect(200)
                     .then((res) => {
-                        expect(res.text).to.contain('code="201",route="/test",method="POST"');
+                        expect(res.text).to.contain('method="POST",route="/test",code="201"');
                     });
             });
         });
@@ -109,7 +109,7 @@ describe('when using express framework', () => {
                     .get('/metrics')
                     .expect(200)
                     .then((res) => {
-                        expect(res.text).to.contain('code="500",route="/bad",method="GET"');
+                        expect(res.text).to.contain('method="GET",route="/bad",code="500"');
                     });
             });
         });

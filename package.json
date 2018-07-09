@@ -29,8 +29,10 @@
   },
   "dependencies": {
     "debug": "^3.1.0",
-    "pkginfo": "^0.4.1",
-    "prom-client": "9.1.1"
+    "pkginfo": "^0.4.1"
+  },
+  "peerDependencies": {
+    "prom-client": "11.x"
   },
   "devDependencies": {
     "body-parser": "^1.18.3",
@@ -49,6 +51,7 @@
     "mocha": "^5.2.0",
     "node-mocks-http": "^1.7.0",
     "nyc": "^11.8.0",
+    "prom-client": "^11.x",
     "rewire": "^4.0.1",
     "sinon": "^5.0.10",
     "supertest": "^3.1.0"
