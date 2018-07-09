@@ -1,4 +1,5 @@
 'use strict';
+
 const Prometheus = require('prom-client');
 require('pkginfo')(module, 'name', 'version');
 const Path = require('path');
