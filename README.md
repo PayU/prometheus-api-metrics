@@ -25,6 +25,9 @@
 
 API and process monitoring with [Prometheus](https://prometheus.io) for Node.js micro-service
 
+### Note
+**Prometheus (`prom-client`) is a peer defendecy since 1.x version**
+
 ## Features
 
 - Collect API metrics for each call
