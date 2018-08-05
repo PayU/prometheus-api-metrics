@@ -106,6 +106,13 @@ function _getRoute(req) {
         }
     }
 
+    // nest.js - build request url pattern if exists
+    if (typeof req.params === 'object') {
+        Object.keys(req.params).forEach((paramName) => {
+            route = route.replace(req.params[paramName], ':' + paramName);
+        });
+    }
+
     return route;
 }
 
