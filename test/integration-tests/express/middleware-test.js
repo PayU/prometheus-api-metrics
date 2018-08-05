@@ -141,5 +141,24 @@ describe('when using express framework', () => {
             const Prometheus = require('prom-client');
             Prometheus.register.clear();
         });
+
+        describe('when calling not existing endpoint', function() {
+            let notExistingPath = '/notExistingPath' + Math.floor(Math.random() * 10);
+
+            before(() => {
+                return supertest(app)
+                    .get(notExistingPath)
+                    .expect(404)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', function () {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.not.contain("method='GET',route='" + notExistingPath + "',code='404'");
+                    });
+            });
+        });
     });
 });

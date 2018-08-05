@@ -84,15 +84,18 @@ function _handleResponse (req, res) {
 
     const route = _getRoute(req);
 
-    requestSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, req.metrics.contentLength);
-    responseTimeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseTime);
-    responseSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseLength);
+    if (route) {
+        requestSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, req.metrics.contentLength);
+        responseTimeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseTime);
+        responseSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseLength);
 
-    debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}, response time: ${responseTime}`);
+        debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}, response time: ${responseTime}`);
+    }
 }
 
 function _getRoute(req) {
-    var route = req.baseUrl; // express
+    let res = req.res;
+    let route = req.baseUrl; // express
     if (req.swagger) { // swagger
         route = req.swagger.apiPath;
     } else if (req.route && route) { // express
@@ -111,6 +114,13 @@ function _getRoute(req) {
         Object.keys(req.params).forEach((paramName) => {
             route = route.replace(req.params[paramName], ':' + paramName);
         });
+    }
+
+    // this condition will evaluate to true only in
+    // express framework and no route was found for the request. if we log this metrics
+    // we'll risk in a memory leak since the route is not a pattern but a hardcoded string.
+    if (!req.route && res && res.statusCode === 404) {
+        return undefined;
     }
 
     return route;
