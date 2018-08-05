@@ -9,21 +9,21 @@ const expect = require('chai').expect;
 
 describe('when using nest-js framework', () => {
     const server = express();
-    const userService = { findAll: () => ['test'] };
+    const userService = {};
 
-    before(async () => {
-        const module = await Test.createTestingModule({
-            imports: [UsersModule],
-        })
-            .overrideProvider(UsersController).useValue(userService)
-            .compile();
+    before(() => {
+        let module = Test.createTestingModule({imports: [UsersModule]});
 
-        const app = module.createNestApplication(server);
+        module = module.overrideProvider(UsersController).useValue(userService);
 
-        app.use(middleware());
+        return module.compile()
+            .then((compiledModule) => {
+                let app = compiledModule.createNestApplication(server);
 
-        await app.init();
+                app.use(middleware());
 
+                return app.init();
+            });
     });
 
     describe('when calling a POST user/:user_id endpoint with user_id as pattern', function () {
