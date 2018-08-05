@@ -6,7 +6,7 @@
   "scripts": {
     "test": "nyc mocha \"./test/**/*-test.js\" --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
-    "test2": "nyc mocha "
+    "test2": "nyc mocha --require ts-node/register test/integration-tests/nest-js/*.spec.ts"
   },
   "main": "src/metrics-middleware.js",
   "nyc": {

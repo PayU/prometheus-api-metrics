@@ -14,7 +14,7 @@ module.exports = (options = {}) => {
     metricsInterval = Prometheus.collectDefaultMetrics(defaultMetricsInterval);
 
     route = metricsPath || '/metrics';
-    
+
     const version = new Prometheus.Gauge({
         name: 'app_version',
         help: 'The service version by package.json',
