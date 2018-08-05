@@ -4,8 +4,9 @@
   "description": "API and process monitoring with Prometheus for Node.js micro-service",
   "author": "Idan Tovi",
   "scripts": {
-    "test": "nyc mocha \"./test/**/*-test.js\"",
-    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
+    "test": "nyc mocha \"./test/**/*-test.js\" --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
+    "test2": "nyc mocha "
   },
   "main": "src/metrics-middleware.js",
   "nyc": {
@@ -53,8 +54,20 @@
     "nyc": "^11.8.0",
     "prom-client": "^11.x",
     "rewire": "^4.0.1",
+    "rxjs": "^6.0.0",
     "sinon": "^5.0.10",
-    "supertest": "^3.1.0"
+    "supertest": "^3.1.0",
+    "@nestjs/common": "^5.1.0",
+    "@nestjs/core": "^5.1.0",
+    "@types/node": "^9.6.1",
+    "@types/supertest": "^2.0.5",
+    "@types/express": "^4.16.0",
+    "@types/mocha": "^5.0.0",
+    "@types/chai": "^4.1.4",
+    "ts-node": "^7.0.0",
+    "typescript": "^3.0.1",
+    "reflect-metadata": "^0.1.12",
+    "@nestjs/testing": "^5.1.0"
   },
   "repository": {
     "type": "git",

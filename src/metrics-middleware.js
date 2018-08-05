@@ -14,7 +14,7 @@ module.exports = (options = {}) => {
     metricsInterval = Prometheus.collectDefaultMetrics(defaultMetricsInterval);
 
     route = metricsPath || '/metrics';
-
+    
     const version = new Prometheus.Gauge({
         name: 'app_version',
         help: 'The service version by package.json',
@@ -104,6 +104,13 @@ function _getRoute(req) {
         if (req.route) {
             route = req.route.path;
         }
+    }
+
+    // nest.js - build request url pattern if exists
+    if (typeof req.params === 'object') {
+        Object.keys(req.params).forEach((paramName) => {
+            route = route.replace(req.params[paramName], ':' + paramName);
+        });
     }
 
     return route;
