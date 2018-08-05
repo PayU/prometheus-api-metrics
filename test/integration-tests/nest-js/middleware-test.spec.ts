@@ -2,19 +2,15 @@ import * as express from 'express';
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { UsersModule } from "./users.module";
-import { UsersController} from "./users.controller";
 
 const middleware = require('../../../src/metrics-middleware.js');
 const expect = require('chai').expect;
 
 describe('when using nest-js framework', () => {
     const server = express();
-    const userService = {};
 
     before(() => {
         let module = Test.createTestingModule({imports: [UsersModule]});
-
-        module = module.overrideProvider(UsersController).useValue(userService);
 
         return module.compile()
             .then((compiledModule) => {
