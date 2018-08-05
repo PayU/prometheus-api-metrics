@@ -1,6 +1,6 @@
 {
   "name": "prometheus-api-metrics",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "API and process monitoring with Prometheus for Node.js micro-service",
   "author": "Idan Tovi",
   "scripts": {
