@@ -261,7 +261,7 @@ describe('metrics-middleware', () => {
             Prometheus.register.clear();
         });
     });
-    describe('override the default path', function () {
+    describe('override the default path', () => {
         beforeEach(() => {
             middleware({
                 metricsPath: '/v1/metrics'
@@ -285,6 +285,28 @@ describe('metrics-middleware', () => {
         });
         it('should clear the default metrics interval', () => {
             sinon.assert.calledOnce(clearMetricsIntervalSpy);
+        });
+        after(() => {
+            Prometheus.register.clear();
+        });
+    });
+    describe('when initialize the middleware twice', () => {
+        let firstFunction, secondFunction;
+        before(() => {
+            firstFunction = middleware();
+            secondFunction = middleware();
+        });
+        it('should return the same middleware fundtion', () => {
+            expect(firstFunction).to.equal(secondFunction);
+        });
+        it('should have http_request_size_bytes with the right labels', () => {
+            expect(Prometheus.register.getSingleMetric('http_request_size_bytes').labelNames).to.have.members(['method', 'route', 'code']);
+        });
+        it('should have http_request_duration_ms with the right labels', () => {
+            expect(Prometheus.register.getSingleMetric('http_request_duration_ms').labelNames).to.have.members(['method', 'route', 'code']);
+        });
+        it('should have http_response_size_bytes with the right labels', () => {
+            expect(Prometheus.register.getSingleMetric('http_response_size_bytes').labelNames).to.have.members(['method', 'route', 'code']);
         });
         after(() => {
             Prometheus.register.clear();
