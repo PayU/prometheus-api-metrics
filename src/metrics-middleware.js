@@ -15,36 +15,44 @@ module.exports = (options = {}) => {
 
     route = metricsPath || '/metrics';
 
-    const version = new Prometheus.Gauge({
-        name: 'app_version',
-        help: 'The service version by package.json',
-        labelNames: ['version', 'major', 'minor', 'patch']
-    });
+    if (!Prometheus.register.getSingleMetric('app_version')) {
+        const version = new Prometheus.Gauge({
+            name: 'app_version',
+            help: 'The service version by package.json',
+            labelNames: ['version', 'major', 'minor', 'patch']
+        });
 
-    const versionSegments = appVersion.split('.').map(Number);
-    version.labels(appVersion, versionSegments[0], versionSegments[1], versionSegments[2]).set(1);
+        const versionSegments = appVersion.split('.').map(Number);
+        version.labels(appVersion, versionSegments[0], versionSegments[1], versionSegments[2]).set(1);
+    }
 
-    responseTimeHistogram = new Prometheus.Histogram({
-        name: 'http_request_duration_ms',
-        help: 'Duration of HTTP requests in ms',
-        labelNames: ['method', 'route', 'code'],
-        // buckets for response time from 0.1ms to 500ms
-        buckets: durationBuckets || [0.10, 5, 15, 50, 100, 200, 300, 400, 500]
-    });
+    if (!Prometheus.register.getSingleMetric('http_request_duration_ms')) {
+        responseTimeHistogram = new Prometheus.Histogram({
+            name: 'http_request_duration_ms',
+            help: 'Duration of HTTP requests in ms',
+            labelNames: ['method', 'route', 'code'],
+            // buckets for response time from 0.1ms to 500ms
+            buckets: durationBuckets || [0.10, 5, 15, 50, 100, 200, 300, 400, 500]
+        });
+    }
 
-    requestSizeHistogram = new Prometheus.Histogram({
-        name: 'http_request_size_bytes',
-        help: 'Size of HTTP requests in bytes',
-        labelNames: ['method', 'route', 'code'],
-        buckets: requestSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
-    });
+    if (!Prometheus.register.getSingleMetric('http_request_size_bytes')) {
+        requestSizeHistogram = new Prometheus.Histogram({
+            name: 'http_request_size_bytes',
+            help: 'Size of HTTP requests in bytes',
+            labelNames: ['method', 'route', 'code'],
+            buckets: requestSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+        });
+    }
 
-    responseSizeHistogram = new Prometheus.Histogram({
-        name: 'http_response_size_bytes',
-        help: 'Size of HTTP response in bytes',
-        labelNames: ['method', 'route', 'code'],
-        buckets: responseSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
-    });
+    if (!Prometheus.register.getSingleMetric('http_response_size_bytes')) {
+        responseSizeHistogram = new Prometheus.Histogram({
+            name: 'http_response_size_bytes',
+            help: 'Size of HTTP response in bytes',
+            labelNames: ['method', 'route', 'code'],
+            buckets: responseSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+        });
+    }
 
     if (!onExitEvent) {
         onExitEvent = process.on('exit', _clearDefaultMetricsInternal);
