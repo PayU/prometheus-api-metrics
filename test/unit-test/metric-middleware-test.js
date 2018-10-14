@@ -81,7 +81,7 @@ describe('metrics-middleware', () => {
             expect(Prometheus.register.getSingleMetric('http_request_size_bytes').labelNames).to.have.members(['method', 'route', 'code']);
         });
         it('should have http_request_duration_ms metrics with default buckets', () => {
-            expect(Prometheus.register.getSingleMetric('http_request_duration_ms').bucketValues).to.have.all.keys([0.10, 5, 15, 50, 100, 200, 300, 400, 500]);
+            expect(Prometheus.register.getSingleMetric('http_request_duration_ms').bucketValues).to.have.all.keys([1, 5, 15, 50, 100, 200, 300, 400, 500]);
         });
         it('should have http_request_duration_ms with the right labels', () => {
             expect(Prometheus.register.getSingleMetric('http_request_duration_ms').labelNames).to.have.members(['method', 'route', 'code']);

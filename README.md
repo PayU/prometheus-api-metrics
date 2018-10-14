@@ -51,7 +51,7 @@ app.use(apiMetrics())
 
 - metricsPath - Path to access the metrics. `default: /metrics`
 - defaultMetricsInterval - the inverval to collect the process metrics in milliseconds. `default: 10000`
-- durationBuckets - Buckets for response time in milliseconds. `default: [0.10, 5, 15, 50, 100, 200, 300, 400, 500]`
+- durationBuckets - Buckets for response time in milliseconds. `default: [1, 5, 15, 50, 100, 200, 300, 400, 500]`
 - requestSizeBuckets - Buckets for request size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
 - responseSizeBuckets - Buckets for response size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
 
