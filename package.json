@@ -4,7 +4,9 @@
   "description": "API and process monitoring with Prometheus for Node.js micro-service",
   "author": "Idan Tovi",
   "scripts": {
-    "test": "nyc mocha \"./test/**/*-test.js\" --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
+    "unit-tests": "nyc mocha \"./test/**/*-test.js\"",
+    "test": "npm run unit-tests && npm run integration-tests",
+    "integration-tests": "mocha ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
   "main": "src/metrics-middleware.js",

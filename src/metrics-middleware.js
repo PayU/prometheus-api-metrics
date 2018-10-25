@@ -4,7 +4,7 @@ const Prometheus = require('prom-client');
 require('pkginfo')(module, 'name', 'version');
 const Path = require('path');
 const debug = require('debug')(module.exports.name);
-let metricsInterval, route, responseTimeHistogram, requestSizeHistogram, responseSizeHistogram, onExitEvent;
+let metricsInterval, metricsRoute, responseTimeHistogram, requestSizeHistogram, responseSizeHistogram, onExitEvent;
 
 module.exports = (options = {}) => {
     require('pkginfo')(module, { dir: Path.dirname(module.parent.filename) }, 'version');
@@ -13,7 +13,7 @@ module.exports = (options = {}) => {
     debug(`Init metrics middleware with options: ${JSON.stringify(options)}`);
     metricsInterval = Prometheus.collectDefaultMetrics(defaultMetricsInterval);
 
-    route = metricsPath || '/metrics';
+    metricsRoute = metricsPath || '/metrics';
 
     if (!Prometheus.register.getSingleMetric('app_version')) {
         const version = new Prometheus.Gauge({
@@ -26,13 +26,13 @@ module.exports = (options = {}) => {
         version.labels(appVersion, versionSegments[0], versionSegments[1], versionSegments[2]).set(1);
     }
 
-    if (!Prometheus.register.getSingleMetric('http_request_duration_ms')) {
+    if (!Prometheus.register.getSingleMetric('http_request_duration_seconds')) {
         responseTimeHistogram = new Prometheus.Histogram({
-            name: 'http_request_duration_ms',
-            help: 'Duration of HTTP requests in ms',
+            name: 'http_request_duration_seconds',
+            help: 'Duration of HTTP requests in seconds',
             labelNames: ['method', 'route', 'code'],
             // buckets for response time from 1ms to 500ms
-            buckets: durationBuckets || [1, 5, 15, 50, 100, 200, 300, 400, 500]
+            buckets: durationBuckets || [0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]
         });
     }
 
@@ -62,20 +62,24 @@ module.exports = (options = {}) => {
 };
 
 function middleware (req, res, next) {
-    if (req.url === route) {
+    if (req.url === metricsRoute) {
         debug('Request to /metrics endpoint');
         res.set('Content-Type', Prometheus.register.contentType);
         return res.end(Prometheus.register.metrics());
     }
-    if (req.url === `${route}.json`) {
+    if (req.url === `${metricsRoute}.json`) {
         debug('Request to /metrics endpoint');
         return res.json(Prometheus.register.getMetricsAsJSON());
     }
 
-    req.metrics = {
-        startEpoch: Date.now(),
-        contentLength: parseInt(req.get('content-length')) || 0
-    };
+    const route = _getRoute(req);
+    if (route) {
+        req.metrics = {
+            timer: responseTimeHistogram.startTimer({method: req.method, route: route}),
+            contentLength: parseInt(req.get('content-length')) || 0
+        };
+    }
+
     debug(`Set start time and content length for request. url: ${req.url}, method: ${req.method}`);
 
     res.once('finish', () => {
@@ -87,17 +91,18 @@ function middleware (req, res, next) {
 }
 
 function _handleResponse (req, res) {
-    const responseTime = Date.now() - req.metrics.startEpoch;
+    // const responseTime = Date.now() - req.metrics.startEpoch;
     const responseLength = parseInt(res.get('Content-Length')) || 0;
 
     const route = _getRoute(req);
 
     if (route) {
         requestSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, req.metrics.contentLength);
-        responseTimeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseTime);
+        req.metrics.timer({ code: res.statusCode });
+        // responseTimeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseTime);
         responseSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseLength);
 
-        debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}, response time: ${responseTime}`);
+        // debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}, response time: ${responseTime}`);
     }
 }
 

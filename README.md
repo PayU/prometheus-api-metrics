@@ -31,7 +31,7 @@ API and process monitoring with [Prometheus](https://prometheus.io) for Node.js 
 ## Features
 
 - Collect API metrics for each call
-   - Response time in milliseconds
+   - Response time in seconds
    - Request size in bytes
    - Response size in bytes
 - Process Metrics as recommended by Prometheus [itself](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors)
@@ -51,7 +51,7 @@ app.use(apiMetrics())
 
 - metricsPath - Path to access the metrics. `default: /metrics`
 - defaultMetricsInterval - the inverval to collect the process metrics in milliseconds. `default: 10000`
-- durationBuckets - Buckets for response time in milliseconds. `default: [1, 5, 15, 50, 100, 200, 300, 400, 500]`
+- durationBuckets - Buckets for response time in seconds. `default: [0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]`
 - requestSizeBuckets - Buckets for request size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
 - responseSizeBuckets - Buckets for response size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
 
@@ -119,17 +119,17 @@ npm test
 ### [Apdex](https://en.wikipedia.org/wiki/Apdex)
 
 ```
-(sum(rate(http_request_duration_ms_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>">, route="<ROUTE_NAME>", le="50"}[10m])) by (<SERVICE_LABLE_FIELD>) + sum(rate(http_request_duration_ms_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>", le="100"}[10m])) by (<SERVICE_LABLE_FIELD>)) / 2 / sum(rate(http_request_duration_ms_count{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>"}[10m])) by (<SERVICE_LABLE_FIELD>)
+(sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>">, route="<ROUTE_NAME>", le="0.05"}[10m])) by (<SERVICE_LABLE_FIELD>) + sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>", le="0.1"}[10m])) by (<SERVICE_LABLE_FIELD>)) / 2 / sum(rate(http_request_duration_seconds_count{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>"}[10m])) by (<SERVICE_LABLE_FIELD>)
 ```
 
 ### 95th Response Time by specific route and status code
 ```
-histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>", code="200"}[10m])) by (le))
+histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>", code="200"}[10m])) by (le))
 ```
 
 ### Median Response Time Overall
 ```
-histogram_quantile(0.50, sum(rate(http_request_duration_ms_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
+histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
 ```
 
 ### Median Request Size Overall
