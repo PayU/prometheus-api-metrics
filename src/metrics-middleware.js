@@ -91,7 +91,6 @@ function middleware (req, res, next) {
 }
 
 function _handleResponse (req, res) {
-    // const responseTime = Date.now() - req.metrics.startEpoch;
     const responseLength = parseInt(res.get('Content-Length')) || 0;
 
     const route = _getRoute(req);
@@ -99,10 +98,8 @@ function _handleResponse (req, res) {
     if (route) {
         requestSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, req.metrics.contentLength);
         req.metrics.timer({ code: res.statusCode });
-        // responseTimeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseTime);
         responseSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseLength);
-
-        // debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}, response time: ${responseTime}`);
+        debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}`);
     }
 }
 
