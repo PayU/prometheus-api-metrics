@@ -4,8 +4,7 @@ node_js:
   - "8"
   - "node"
 script: "npm test"
-after_success: >
-  node_version=$(node_v)
-  if  [ ${node_version:1:1} -ne 6 ]; then
-     npm run coveralls
-  fi
+after_success:
+  - node_version=$(node_v)
+  - echo $node_version
+  - if [ ${node_version:1:1} -ne 6 ]; then npm run coveralls fi
