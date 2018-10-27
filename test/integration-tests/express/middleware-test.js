@@ -75,7 +75,9 @@ describe('when using express framework', () => {
                     .get('/metrics')
                     .expect(200)
                     .then((res) => {
-                        expect(res.text).to.contain('method="GET",route="/hello/:time",code="200"');
+                        expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/hello/:time",code="200"} 1');
+                        expect(res.text).to.contain('http_response_size_bytes_bucket{le="+Inf",method="GET",route="/hello/:time",code="200"} 1');
+                        expect(res.text).to.contain('http_request_size_bytes_bucket{le="+Inf",method="GET",route="/hello/:time",code="200"} 1');
                     });
             });
         });
