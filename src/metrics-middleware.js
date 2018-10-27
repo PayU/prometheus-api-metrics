@@ -72,13 +72,10 @@ function middleware (req, res, next) {
         return res.json(Prometheus.register.getMetricsAsJSON());
     }
 
-    const route = _getRoute(req);
-    if (route) {
-        req.metrics = {
-            timer: responseTimeHistogram.startTimer({method: req.method, route: route}),
-            contentLength: parseInt(req.get('content-length')) || 0
-        };
-    }
+    req.metrics = {
+        timer: responseTimeHistogram.startTimer({method: req.method}),
+        contentLength: parseInt(req.get('content-length')) || 0
+    };
 
     debug(`Set start time and content length for request. url: ${req.url}, method: ${req.method}`);
 
@@ -97,7 +94,7 @@ function _handleResponse (req, res) {
 
     if (route) {
         requestSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, req.metrics.contentLength);
-        req.metrics.timer({ code: res.statusCode });
+        req.metrics.timer({ route: route, code: res.statusCode });
         responseSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseLength);
         debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}`);
     }

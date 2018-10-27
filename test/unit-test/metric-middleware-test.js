@@ -134,8 +134,8 @@ describe('metrics-middleware', () => {
             });
             it('should update the histogram with the elapsed time and size', () => {
                 sinon.assert.calledWithExactly(requestSizeObserve, { method: 'GET', route: '/path', code: 200 }, 25);
-                sinon.assert.calledWith(responseTimeObserve, { method: 'GET', route: '/path' });
-                sinon.assert.calledWith(endTimerStub, { code: 200 });
+                sinon.assert.calledWith(responseTimeObserve, { method: 'GET' });
+                sinon.assert.calledWith(endTimerStub, { route: '/path', code: 200 });
                 sinon.assert.calledOnce(responseTimeObserve);
                 sinon.assert.calledOnce(endTimerStub);
             });
@@ -181,8 +181,8 @@ describe('metrics-middleware', () => {
             });
             it('should update the histogram with the elapsed time and size', () => {
                 sinon.assert.calledWithExactly(requestSizeObserve, { method: 'GET', route: '/path/:id', code: 200 }, 0);
-                sinon.assert.calledWith(responseTimeObserve, { method: 'GET', route: '/path/:id' });
-                sinon.assert.calledWith(endTimerStub, { code: 200 });
+                sinon.assert.calledWith(responseTimeObserve, { method: 'GET' });
+                sinon.assert.calledWith(endTimerStub, { route: '/path/:id', code: 200 });
                 sinon.assert.calledOnce(endTimerStub);
                 sinon.assert.calledOnce(responseTimeObserve);
             });
@@ -222,8 +222,8 @@ describe('metrics-middleware', () => {
         });
         it('should update the histogram with the elapsed time and size', () => {
             sinon.assert.calledWithExactly(responseSizeObserve, { method: 'GET', route: '/path', code: 200 }, 25);
-            sinon.assert.calledWith(responseTimeObserve, { method: 'GET', route: '/path' });
-            sinon.assert.calledWith(endTimerStub, {code: 200});
+            sinon.assert.calledWith(responseTimeObserve, { method: 'GET' });
+            sinon.assert.calledWith(endTimerStub, { route: '/path', code: 200 });
             sinon.assert.calledOnce(responseTimeObserve);
             sinon.assert.calledOnce(endTimerStub);
         });
@@ -257,8 +257,8 @@ describe('metrics-middleware', () => {
         });
         it('should update the histogram with the elapsed time and size', () => {
             sinon.assert.calledWithExactly(responseSizeObserve, { method: 'GET', route: '/path', code: 200 }, 0);
-            sinon.assert.calledWith(responseTimeObserve, { method: 'GET', route: '/path' });
-            sinon.assert.calledWith(endTimerStub, { code: 200 });
+            sinon.assert.calledWith(responseTimeObserve, { method: 'GET' });
+            sinon.assert.calledWith(endTimerStub, { route: '/path', code: 200 });
             sinon.assert.calledOnce(responseTimeObserve);
             sinon.assert.calledOnce(endTimerStub);
         });
