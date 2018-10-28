@@ -1,7 +1,8 @@
 'use strict';
-
+const prom = require('prom-client');
 const expect = require('chai').expect;
 const supertest = require('supertest');
+const config = require('./server/config');
 const app = require('./server/express-server');
 
 describe('when using express framework', () => {
@@ -143,7 +144,6 @@ describe('when using express framework', () => {
             const Prometheus = require('prom-client');
             Prometheus.register.clear();
         });
-
         describe('when calling not existing endpoint', function() {
             let notExistingPath = '/notExistingPath' + Math.floor(Math.random() * 10);
 
@@ -159,6 +159,74 @@ describe('when using express framework', () => {
                     .expect(200)
                     .then((res) => {
                         expect(res.text).to.not.contain("method='GET',route='" + notExistingPath + "',code='404'");
+                    });
+            });
+        });
+    });
+    describe('when start up with unique metric names', function () {
+        let app;
+        before(function () {
+            prom.register.clear();
+            config.useUniqueHistogramName = true;
+            delete require.cache[require.resolve('./server/express-server')];
+            delete require.cache[require.resolve('../../../src/metrics-middleware.js')];
+            app = require('./server/express-server');
+        });
+        it('should populate default metrics', () => {
+            return supertest(app)
+                .get('/metrics')
+                .expect(200)
+                .then((res) => {
+                    expect(res.text).to.contain('express_test_process_cpu_user_seconds_total');
+                    expect(res.text).to.contain('express_test_process_cpu_system_seconds_total');
+                    expect(res.text).to.contain('express_test_process_cpu_seconds_total');
+                    expect(res.text).to.contain('express_test_process_start_time_seconds');
+                    expect(res.text).to.contain('express_test_process_resident_memory_bytes');
+                    expect(res.text).to.contain('express_test_nodejs_eventloop_lag_seconds');
+
+                    expect(res.text).to.contain('express_test_nodejs_active_handles_total');
+                    expect(res.text).to.contain('express_test_nodejs_active_requests_total');
+
+                    expect(res.text).to.contain('express_test_nodejs_heap_size_total_bytes');
+                    expect(res.text).to.contain('express_test_nodejs_heap_size_used_bytes');
+                    expect(res.text).to.contain('express_test_nodejs_external_memory_bytes');
+
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="new"}');
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="old"}');
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="code"}');
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="map"}');
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="large_object"}');
+
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="new"}');
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="old"}');
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="code"}');
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="map"}');
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="large_object"}');
+
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="new"}');
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="old"}');
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="code"}');
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="map"}');
+                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="large_object"}');
+
+                    expect(res.text).to.contain('express_test_nodejs_version_info');
+                    expect(res.text).to.contain('express_test_app_version{version="1.0.0",major="1",minor="0",patch="0"}');
+                });
+        });
+        describe('when calling a GET endpoint', function () {
+            before(() => {
+                return supertest(app)
+                    .get('/hello')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', function () {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('method="GET",route="/hello",code="200"');
+                        expect(res.text).to.contain('express_test');
                     });
             });
         });
