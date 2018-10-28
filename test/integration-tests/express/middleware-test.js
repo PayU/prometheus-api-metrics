@@ -1,5 +1,4 @@
 'use strict';
-const prom = require('prom-client');
 const expect = require('chai').expect;
 const supertest = require('supertest');
 const config = require('./server/config');
@@ -166,7 +165,6 @@ describe('when using express framework', () => {
     describe('when start up with unique metric names', function () {
         let app;
         before(function () {
-            prom.register.clear();
             config.useUniqueHistogramName = true;
             delete require.cache[require.resolve('./server/express-server')];
             delete require.cache[require.resolve('../../../src/metrics-middleware.js')];
