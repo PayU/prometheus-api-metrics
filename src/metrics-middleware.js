@@ -6,31 +6,17 @@ const Path = require('path');
 const debug = require('debug')(module.exports.name);
 let metricsInterval, metricsRoute, responseTimeHistogram, requestSizeHistogram, responseSizeHistogram, onExitEvent;
 
-const metricNames = {
-    http_request_duration_seconds: 'http_request_duration_seconds',
-    app_version: 'app_version',
-    http_request_size_bytes: 'http_request_size_bytes',
-    http_response_size_bytes: 'http_response_size_bytes',
-    defaultMetricsPrefix: ''
-};
-
 module.exports = (options = {}) => {
     const metricsMiddleware = { exports: {} };
     require('pkginfo')(metricsMiddleware, { dir: Path.dirname(module.parent.filename), include: ['name', 'version'] });
     const appVersion = metricsMiddleware.exports.version;
     const projectName = metricsMiddleware.exports.name.replace(/-/g, '_');
 
-    const { metricsPath, defaultMetricsInterval, durationBuckets, requestSizeBuckets, responseSizeBuckets, useUniqueHistogramName } = options;
+    const { metricsPath, defaultMetricsInterval, durationBuckets, requestSizeBuckets, responseSizeBuckets, useUniqueHistogramName, metricsPrefix } = options;
     debug(`Init metrics middleware with options: ${JSON.stringify(options)}`);
     metricsRoute = metricsPath || '/metrics';
 
-    if (useUniqueHistogramName === true) {
-        metricNames.http_request_duration_seconds = `${projectName}_${metricNames.http_request_duration_seconds}`;
-        metricNames.app_version = `${projectName}_${metricNames.app_version}`;
-        metricNames.http_request_size_bytes = `${projectName}_${metricNames.http_request_size_bytes}`;
-        metricNames.http_response_size_bytes = `${projectName}_${metricNames.http_response_size_bytes}`;
-        metricNames.defaultMetricsPrefix = `${projectName}_`;
-    }
+    const metricNames = _getMetricNames(useUniqueHistogramName === true ? projectName : metricsPrefix);
 
     metricsInterval = Prometheus.collectDefaultMetrics({ timeout: defaultMetricsInterval, prefix: `${metricNames.defaultMetricsPrefix}` });
 
@@ -73,6 +59,26 @@ module.exports = (options = {}) => {
 
     return middleware;
 };
+
+function _getMetricNames(metricsPrefix) {
+    const metricNames = {
+        http_request_duration_seconds: 'http_request_duration_seconds',
+        app_version: 'app_version',
+        http_request_size_bytes: 'http_request_size_bytes',
+        http_response_size_bytes: 'http_response_size_bytes',
+        defaultMetricsPrefix: ''
+    };
+
+    if (metricsPrefix) {
+        metricNames.http_request_duration_seconds = `${metricsPrefix}_${metricNames.http_request_duration_seconds}`;
+        metricNames.app_version = `${metricsPrefix}_${metricNames.app_version}`;
+        metricNames.http_request_size_bytes = `${metricsPrefix}_${metricNames.http_request_size_bytes}`;
+        metricNames.http_response_size_bytes = `${metricsPrefix}_${metricNames.http_response_size_bytes}`;
+        metricNames.defaultMetricsPrefix = `${metricsPrefix}_`;
+    }
+
+    return metricNames;
+}
 
 function middleware (req, res, next) {
     if (req.url === metricsRoute) {

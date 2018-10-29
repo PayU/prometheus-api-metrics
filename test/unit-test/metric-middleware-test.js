@@ -39,6 +39,57 @@ describe('metrics-middleware', () => {
             Prometheus.register.clear();
         });
     });
+    describe('when calling the function with options (metrics prefix)', () => {
+        before(() => {
+            middleware({
+                durationBuckets: [1, 10, 50, 100, 300, 500, 1000],
+                requestSizeBuckets: [0, 1, 5, 10, 15],
+                responseSizeBuckets: [250, 500, 1000, 2500, 5000, 10000, 15000, 20000],
+                metricsPrefix: 'prefix'
+            });
+        });
+        it('should have prefix_http_request_size_bytes metrics with custom buckets', () => {
+            expect(Prometheus.register.getSingleMetric('prefix_http_request_size_bytes').bucketValues).to.have.all.keys([0, 1, 5, 10, 15]);
+        });
+        it('should have prefix_http_request_size_bytes with the right labels', () => {
+            expect(Prometheus.register.getSingleMetric('prefix_http_request_size_bytes').labelNames).to.have.members(['method', 'route', 'code']);
+        });
+        it('should have prefix_http_request_duration_seconds metrics with custom buckets', () => {
+            expect(Prometheus.register.getSingleMetric('prefix_http_request_duration_seconds').bucketValues).to.have.all.keys([1, 10, 50, 100, 300, 500, 1000]);
+        });
+        it('should have prefix_http_request_duration_seconds with the right labels', () => {
+            expect(Prometheus.register.getSingleMetric('prefix_http_request_duration_seconds').labelNames).to.have.members(['method', 'route', 'code']);
+        });
+        it('should have prefix_http_response_size_bytes metrics with custom buckets', () => {
+            expect(Prometheus.register.getSingleMetric('prefix_http_response_size_bytes').bucketValues).to.have.all.keys([250, 500, 1000, 2500, 5000, 10000, 15000, 20000]);
+        });
+        it('should have prefix_http_response_size_bytes with the right labels', () => {
+            expect(Prometheus.register.getSingleMetric('prefix_http_response_size_bytes').labelNames).to.have.members(['method', 'route', 'code']);
+        });
+        it('should have default metrics with prefix', () => {
+            expect(Prometheus.register.getSingleMetric('prefix_process_cpu_user_seconds_total')).to.exist;
+            expect(Prometheus.register.getSingleMetric('prefix_process_cpu_system_seconds_total')).to.exist;
+            expect(Prometheus.register.getSingleMetric('prefix_process_cpu_seconds_total')).to.exist;
+            expect(Prometheus.register.getSingleMetric('prefix_process_start_time_seconds')).to.exist;
+            expect(Prometheus.register.getSingleMetric('prefix_process_resident_memory_bytes')).to.exist;
+            expect(Prometheus.register.getSingleMetric('prefix_nodejs_eventloop_lag_seconds')).to.exist;
+
+            expect(Prometheus.register.getSingleMetric('prefix_nodejs_active_handles_total')).to.exist;
+            expect(Prometheus.register.getSingleMetric('prefix_nodejs_active_requests_total')).to.exist;
+
+            expect(Prometheus.register.getSingleMetric('prefix_nodejs_heap_size_total_bytes')).to.exist;
+            expect(Prometheus.register.getSingleMetric('prefix_nodejs_heap_size_used_bytes')).to.exist;
+            expect(Prometheus.register.getSingleMetric('prefix_nodejs_external_memory_bytes')).to.exist;
+            expect(Prometheus.register.getSingleMetric('prefix_nodejs_heap_space_size_total_bytes')).to.exist;
+            expect(Prometheus.register.getSingleMetric('prefix_nodejs_heap_space_size_used_bytes')).to.exist;
+            expect(Prometheus.register.getSingleMetric('prefix_nodejs_heap_space_size_available_bytes')).to.exist;
+
+            expect(Prometheus.register.getSingleMetric('prefix_app_version')).to.exist;
+        });
+        after(() => {
+            Prometheus.register.clear();
+        });
+    });
     describe('when calling the function with options empty arrays', () => {
         before(() => {
             middleware({
