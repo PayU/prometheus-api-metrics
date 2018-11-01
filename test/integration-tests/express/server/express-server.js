@@ -5,7 +5,7 @@ const Prometheus = require('prom-client');
 const bodyParser = require('body-parser');
 const config = require('./config');
 const app = express();
-const middleware = require('../../../../src/metrics-middleware.js');
+const middleware = require('../../../../src/index.js');
 
 const checkoutsTotal = Prometheus.register.getSingleMetric('checkouts_total') || new Prometheus.Counter({
     name: 'checkouts_total',

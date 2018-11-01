@@ -1,10 +1,19 @@
 'use strict';
+const Prometheus = require('prom-client');
 const expect = require('chai').expect;
 const supertest = require('supertest');
-const config = require('./server/config');
-const app = require('./server/express-server');
+let app, config;
 
 describe('when using express framework', () => {
+    before(() => {
+        delete require.cache[require.resolve('./server/express-server')];
+        delete require.cache[require.resolve('../../../src/metrics-middleware.js')];
+        app = require('./server/express-server');
+        config = require('./server/config');
+    });
+    after(() => {
+        Prometheus.register.clear();
+    });
     describe('when start up', () => {
         it('should populate default metrics', () => {
             return supertest(app)
@@ -47,14 +56,14 @@ describe('when using express framework', () => {
                     expect(res.text).to.contain('app_version{version="1.0.0",major="1",minor="0",patch="0"}');
                 });
         });
-        describe('when calling a GET endpoint', function () {
+        describe('when calling a GET endpoint', () => {
             before(() => {
                 return supertest(app)
                     .get('/hello')
                     .expect(200)
                     .then((res) => {});
             });
-            it('should add it to the histogram', function () {
+            it('should add it to the histogram', () => {
                 return supertest(app)
                     .get('/metrics')
                     .expect(200)
@@ -63,14 +72,14 @@ describe('when using express framework', () => {
                     });
             });
         });
-        describe('when calling a GET endpoint with path params', function () {
+        describe('when calling a GET endpoint with path params', () => {
             before(() => {
                 return supertest(app)
                     .get('/hello/200')
                     .expect(200)
                     .then((res) => {});
             });
-            it('should add it to the histogram', function () {
+            it('should add it to the histogram', () => {
                 return supertest(app)
                     .get('/metrics')
                     .expect(200)
@@ -81,7 +90,7 @@ describe('when using express framework', () => {
                     });
             });
         });
-        describe('when calling a POST endpoint', function () {
+        describe('when calling a POST endpoint', () => {
             before(() => {
                 return supertest(app)
                     .post('/test')
@@ -90,7 +99,7 @@ describe('when using express framework', () => {
                     .expect(201)
                     .then((res) => {});
             });
-            it('should add it to the histogram', function () {
+            it('should add it to the histogram', () => {
                 return supertest(app)
                     .get('/metrics')
                     .expect(200)
@@ -99,14 +108,14 @@ describe('when using express framework', () => {
                     });
             });
         });
-        describe('when calling endpoint and getting an error', function () {
+        describe('when calling endpoint and getting an error', () => {
             before(() => {
                 return supertest(app)
                     .get('/bad')
                     .expect(500)
                     .then((res) => {});
             });
-            it('should add it to the histogram', function () {
+            it('should add it to the histogram', () => {
                 return supertest(app)
                     .get('/metrics')
                     .expect(200)
@@ -115,14 +124,14 @@ describe('when using express framework', () => {
                     });
             });
         });
-        describe('when using custom metrics', function () {
+        describe('when using custom metrics', () => {
             before(() => {
                 return supertest(app)
                     .get('/checkout')
                     .expect(200)
                     .then((res) => {});
             });
-            it('should add it to the histogram', function () {
+            it('should add it to the histogram', () => {
                 return supertest(app)
                     .get('/metrics')
                     .expect(200)
@@ -131,7 +140,7 @@ describe('when using express framework', () => {
                     });
             });
         });
-        it('should get metrics as json', function () {
+        it('should get metrics as json', () => {
             return supertest(app)
                 .get('/metrics.json')
                 .expect(200)
@@ -139,7 +148,7 @@ describe('when using express framework', () => {
                     JSON.parse(res.text);
                 });
         });
-        after(function () {
+        after(() => {
             const Prometheus = require('prom-client');
             Prometheus.register.clear();
         });
@@ -152,7 +161,7 @@ describe('when using express framework', () => {
                     .expect(404)
                     .then((res) => {});
             });
-            it('should add it to the histogram', function () {
+            it('should add it to the histogram', () => {
                 return supertest(app)
                     .get('/metrics')
                     .expect(200)
@@ -162,9 +171,9 @@ describe('when using express framework', () => {
             });
         });
     });
-    describe('when start up with unique metric names', function () {
+    describe('when start up with unique metric names', () => {
         let app;
-        before(function () {
+        before(() => {
             config.useUniqueHistogramName = true;
             delete require.cache[require.resolve('./server/express-server')];
             delete require.cache[require.resolve('../../../src/metrics-middleware.js')];
@@ -211,20 +220,77 @@ describe('when using express framework', () => {
                     expect(res.text).to.contain('express_test_app_version{version="1.0.0",major="1",minor="0",patch="0"}');
                 });
         });
-        describe('when calling a GET endpoint', function () {
+        describe('when calling a GET endpoint', () => {
             before(() => {
                 return supertest(app)
                     .get('/hello')
                     .expect(200)
                     .then((res) => {});
             });
-            it('should add it to the histogram', function () {
+            it('should add it to the histogram', () => {
                 return supertest(app)
                     .get('/metrics')
                     .expect(200)
                     .then((res) => {
                         expect(res.text).to.contain('method="GET",route="/hello",code="200"');
                         expect(res.text).to.contain('express_test');
+                    });
+            });
+        });
+    });
+    describe('when start up with exclude route', () => {
+        let app;
+        before(() => {
+            config.useUniqueHistogramName = true;
+            delete require.cache[require.resolve('./server/express-server')];
+            delete require.cache[require.resolve('../../../src/metrics-middleware.js')];
+            app = require('./server/express-server-exclude-routes');
+        });
+        describe('when calling a GET endpoint', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/hello')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('method="GET",route="/hello",code="200"');
+                    });
+            });
+        });
+        describe('when calling a GET endpoint of excluded path', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/health')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.not.contain('method="GET",route="/health",code="200"');
+                    });
+            });
+        });
+        describe('when calling a GET endpoint of excluded path with variables', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/health/1234')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.not.contain('method="GET",route="/health/:id",code="200"');
                     });
             });
         });

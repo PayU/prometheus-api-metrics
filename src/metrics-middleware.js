@@ -2,62 +2,55 @@
 
 const Prometheus = require('prom-client');
 require('pkginfo')(module, ['name']);
-const Path = require('path');
 const debug = require('debug')(module.exports.name);
-let metricsInterval, metricsRoute, responseTimeHistogram, requestSizeHistogram, responseSizeHistogram, onExitEvent;
+const setupOptions = {};
 
-module.exports = (options = {}) => {
-    const metricsMiddleware = { exports: {} };
-    require('pkginfo')(metricsMiddleware, { dir: Path.dirname(module.parent.filename), include: ['name', 'version'] });
-    const appVersion = metricsMiddleware.exports.version;
-    const projectName = metricsMiddleware.exports.name.replace(/-/g, '_');
+module.exports = (appVersion, projectName) => {
+    return (options = {}) => {
+        const { metricsPath, defaultMetricsInterval, durationBuckets, requestSizeBuckets, responseSizeBuckets, useUniqueHistogramName, metricsPrefix, excludeRoutes } = options;
+        debug(`Init metrics middleware with options: ${JSON.stringify(options)}`);
+        setupOptions.metricsRoute = metricsPath || '/metrics';
+        setupOptions.excludeRoutes = excludeRoutes || [];
 
-    const { metricsPath, defaultMetricsInterval, durationBuckets, requestSizeBuckets, responseSizeBuckets, useUniqueHistogramName, metricsPrefix } = options;
-    debug(`Init metrics middleware with options: ${JSON.stringify(options)}`);
-    metricsRoute = metricsPath || '/metrics';
+        const metricNames = _getMetricNames(useUniqueHistogramName === true ? projectName : metricsPrefix);
 
-    const metricNames = _getMetricNames(useUniqueHistogramName === true ? projectName : metricsPrefix);
+        Prometheus.collectDefaultMetrics({ timeout: defaultMetricsInterval, prefix: `${metricNames.defaultMetricsPrefix}` });
 
-    metricsInterval = Prometheus.collectDefaultMetrics({ timeout: defaultMetricsInterval, prefix: `${metricNames.defaultMetricsPrefix}` });
+        if (!Prometheus.register.getSingleMetric(metricNames.app_version)) {
+            const version = new Prometheus.Gauge({
+                name: metricNames.app_version,
+                help: 'The service version by package.json',
+                labelNames: ['version', 'major', 'minor', 'patch']
+            });
 
-    if (!Prometheus.register.getSingleMetric(metricNames.app_version)) {
-        const version = new Prometheus.Gauge({
-            name: metricNames.app_version,
-            help: 'The service version by package.json',
-            labelNames: ['version', 'major', 'minor', 'patch']
+            const versionSegments = appVersion.split('.').map(Number);
+            version.labels(appVersion, versionSegments[0], versionSegments[1], versionSegments[2]).set(1);
+        }
+
+        setupOptions.responseTimeHistogram = Prometheus.register.getSingleMetric(metricNames.http_request_duration_seconds) || new Prometheus.Histogram({
+            name: metricNames.http_request_duration_seconds,
+            help: 'Duration of HTTP requests in seconds',
+            labelNames: ['method', 'route', 'code'],
+            // buckets for response time from 1ms to 500ms
+            buckets: durationBuckets || [0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]
         });
 
-        const versionSegments = appVersion.split('.').map(Number);
-        version.labels(appVersion, versionSegments[0], versionSegments[1], versionSegments[2]).set(1);
-    }
+        setupOptions.requestSizeHistogram = Prometheus.register.getSingleMetric(metricNames.http_request_size_bytes) || new Prometheus.Histogram({
+            name: metricNames.http_request_size_bytes,
+            help: 'Size of HTTP requests in bytes',
+            labelNames: ['method', 'route', 'code'],
+            buckets: requestSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000] // buckets for response time from 5 bytes to 10000 bytes
+        });
 
-    responseTimeHistogram = Prometheus.register.getSingleMetric(metricNames.http_request_duration_seconds) || new Prometheus.Histogram({
-        name: metricNames.http_request_duration_seconds,
-        help: 'Duration of HTTP requests in seconds',
-        labelNames: ['method', 'route', 'code'],
-        // buckets for response time from 1ms to 500ms
-        buckets: durationBuckets || [0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]
-    });
+        setupOptions.responseSizeHistogram = Prometheus.register.getSingleMetric(metricNames.http_response_size_bytes) || new Prometheus.Histogram({
+            name: metricNames.http_response_size_bytes,
+            help: 'Size of HTTP response in bytes',
+            labelNames: ['method', 'route', 'code'],
+            buckets: responseSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000] // buckets for response time from 5 bytes to 10000 bytes
+        });
 
-    requestSizeHistogram = Prometheus.register.getSingleMetric(metricNames.http_request_size_bytes) || new Prometheus.Histogram({
-        name: metricNames.http_request_size_bytes,
-        help: 'Size of HTTP requests in bytes',
-        labelNames: ['method', 'route', 'code'],
-        buckets: requestSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000] // buckets for response time from 5 bytes to 10000 bytes
-    });
-
-    responseSizeHistogram = Prometheus.register.getSingleMetric(metricNames.http_response_size_bytes) || new Prometheus.Histogram({
-        name: metricNames.http_response_size_bytes,
-        help: 'Size of HTTP response in bytes',
-        labelNames: ['method', 'route', 'code'],
-        buckets: responseSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000] // buckets for response time from 5 bytes to 10000 bytes
-    });
-
-    if (!onExitEvent) {
-        onExitEvent = process.on('exit', _clearDefaultMetricsInternal);
-    }
-
-    return middleware;
+        return middleware;
+    };
 };
 
 function _getMetricNames(metricsPrefix) {
@@ -81,18 +74,18 @@ function _getMetricNames(metricsPrefix) {
 }
 
 function middleware (req, res, next) {
-    if (req.url === metricsRoute) {
+    if (req.url === setupOptions.metricsRoute) {
         debug('Request to /metrics endpoint');
         res.set('Content-Type', Prometheus.register.contentType);
         return res.end(Prometheus.register.metrics());
     }
-    if (req.url === `${metricsRoute}.json`) {
+    if (req.url === `${setupOptions.metricsRoute}.json`) {
         debug('Request to /metrics endpoint');
         return res.json(Prometheus.register.getMetricsAsJSON());
     }
 
     req.metrics = {
-        timer: responseTimeHistogram.startTimer({method: req.method}),
+        timer: setupOptions.responseTimeHistogram.startTimer({method: req.method}),
         contentLength: parseInt(req.get('content-length')) || 0
     };
 
@@ -111,10 +104,10 @@ function _handleResponse (req, res) {
 
     const route = _getRoute(req);
 
-    if (route) {
-        requestSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, req.metrics.contentLength);
+    if (route && _shouldLogMetrics(setupOptions.excludeRoutes, route)) {
+        setupOptions.requestSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, req.metrics.contentLength);
         req.metrics.timer({ route: route, code: res.statusCode });
-        responseSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseLength);
+        setupOptions.responseSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseLength);
         debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}`);
     }
 }
@@ -152,7 +145,8 @@ function _getRoute(req) {
     return route;
 }
 
-function _clearDefaultMetricsInternal() {
-    debug('Process is closing, stop the process metrics collection interval');
-    clearInterval(metricsInterval);
+function _shouldLogMetrics(excludeRoutes, route) {
+    return excludeRoutes.every((path) => {
+        return !route.includes(path);
+    });
 }
