@@ -10,14 +10,20 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 <!-- **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)* -->
 
-- [Prometheus API Monitoring](#prometheus-api-monitoring)
-  - [Goal](#goal)
-  - [Features](#features)
-  - [Usage](#usage)
-    - [Options](#options)
-    - [Access the metrics](#access-the-metrics)
-  - [Custom Metrics](#custom-metrics)
-  - [Test](#test)
+- [Goal](#goal)
+- [Features](#features)
+- [Usage](#usage)
+  - [Options](#options)
+  - [Access the metrics](#access-the-metrics)
+- [Custom Metrics](#custom-metrics)
+  - [Note](#note)
+- [Request.js HTTP request duration collector](#requestjs-http-request-duration-collector)
+  - [Usage](#usage-1)
+    - [request](#request)
+    - [request-promise-native](#request-promise-native)
+  - [Configuration](#configuration)
+- [Test](#test)
+- [Prometheus Examples Queries](#prometheus-examples-queries)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -25,20 +31,22 @@
 
 API and process monitoring with [Prometheus](https://prometheus.io) for Node.js micro-service
 
-### Note
-**Prometheus (`prom-client`) is a peer defendecy since 1.x version**
+**Note: Prometheus (`prom-client`) is a peer defendecy since 1.x version**
 
 ## Features
 
-- Collect API metrics for each call
+- [Collect API metrics for each call](#usage)
    - Response time in seconds
    - Request size in bytes
    - Response size in bytes
+   - Add prefix to metrics names - custom or project name
+   - Exclude specifc routes from being collect
 - Process Metrics as recommended by Prometheus [itself](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors)
 - Endpoint to retrive the matrics - used for Prometheus scraping
    - Prometheus format
    - JSON format (`${path}.json`)
 - Support custom metrics
+- [Http function to collect request.js HTTP request duration](#requestjs-http-request-duration-collector)
 
 ## Usage
 
@@ -54,6 +62,9 @@ app.use(apiMetrics())
 - durationBuckets - Buckets for response time in seconds. `default: [0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]`
 - requestSizeBuckets - Buckets for request size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
 - responseSizeBuckets - Buckets for response size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
+- useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
+- metricsPrefix - A custom matrics names prefix, the package will add underscode between your prefix to the metric name.
+- excludeRoutes - Array of routes to exclude. Routes sould be in your framework syntax
 
 ### Access the metrics
 
@@ -67,12 +78,11 @@ To get the metrics in JSON format use:
 curl http[s]://<host>:[port]/metrics.json
 ```
 
-#### Note
-If you pass to the middleware the `metricsPath` option the path will be the one the you choosed.
+**Note:**
 
-If you are using express framework and no route was found for the request (e.g: 404 status code), the request will not be collected.
+1. If you pass to the middleware the `metricsPath` option the path will be the one the you choosed.
 
-that's because we'll risk in a memory leak since the route is not a pattern but a hardcoded string.
+2. If you are using express framework and no route was found for the request (e.g: 404 status code), the request will not be collected. that's because we'll risk in a memory leak since the route is not a pattern but a hardcoded string.
 
 
 ## Custom Metrics
@@ -107,6 +117,70 @@ For more info about the Node.js Prometheus client you can read [here](https://gi
 
 ### Note
 This will work only if you use the default Prometheus registry - do not use `new Prometheus.Registry()`
+
+## Request.js HTTP request duration collector
+This feature enbale you to easily process the result of Request.js timings feature.
+
+### Usage
+In order to use this feature you must use `{ time: true }` as part of your request configuration and then pass to the collector the response or error you got.
+
+For Example:
+
+#### request
+**Success**
+```js
+request({ url: 'http://www.google.com', time: true }, (err, response) => {
+  if (err) {
+    done(err);
+    }
+    Collector.collect(response);
+    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="total"} 1');
+    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="socket"} 1');
+    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="lookup"} 1');
+    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="connect"} 1');
+    done();
+});
+```
+**Error**
+```js
+request({ url: 'http://www.google1234.com', time: true, route: 'route' }, (err, response) => {
+    if (err) {
+        Collector.collect(err);
+        expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
+        return done();
+    }
+    done(new Error('Expect to get error from the http request'));
+});
+```
+
+#### request-promise-native
+**Success**
+```js
+return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', route: 'v2/:id', time: true, resolveWithFullResponse: true }).then((response) => {
+    Collector.collectHttpTiming(response);
+    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="total"} 1');
+    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="socket"} 1');
+    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="lookup"} 1');
+    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="connect"} 1');
+});
+```
+**Error**
+```js
+return requestPromise({ method: 'POST', url: 'http://www.google1234.com', route: 'v2/:id', time: true, resolveWithFullResponse: true }).catch((error) => {
+    Collector.collect(error);
+    expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
+});
+```
+
+**Notes:** 
+1. In order to use the timing feature in request-promise/request-promise-native you must also use `resolveWithFullResponse: true`
+2. In case the request has variables in the url you should set a `route` attribute as part of the request, the `collect` function will set the route to be this value in any other case it will take the request path.
+
+### Configuration
+- durationBuckets - the histogram buckets for request duration.
+- countClientErrors - Boolean that indicates if to collect client errors as Counter, this counter will have target and error code labels.
+- useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
+- prefix - A custom matrics names prefix, the package will add underscode between your prefix to the metric name.
 
 ## Test
 
