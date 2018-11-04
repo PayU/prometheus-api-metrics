@@ -127,34 +127,17 @@ In order to use this feature you must use `{ time: true }` as part of your reque
 For Example:
 
 #### request
-**Success**
 ```js
 request({ url: 'http://www.google.com', time: true }, (err, response) => {
-    if (err) {
-        throw err;
-    }
-    Collector.collect(response);
-});
-```
-**Error**
-```js
-request({ url: 'http://www.google1234.com', time: true, route: 'route' }, (err, response) => {
-    if (err) {
-        Collector.collect(err);
-    }
+    Collector.collect(err || response);
 });
 ```
 
 #### request-promise-native
-**Success**
 ```js
 return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', route: 'v2/:id', time: true, resolveWithFullResponse: true }).then((response) => {
-    Collector.collectHttpTiming(response);
-});
-```
-**Error**
-```js
-return requestPromise({ method: 'POST', url: 'http://www.google1234.com', route: 'v2/:id', time: true, resolveWithFullResponse: true }).catch((error) => {
+    Collector.collect(response);
+}).catch((error) => {
     Collector.collect(error);
 });
 ```
