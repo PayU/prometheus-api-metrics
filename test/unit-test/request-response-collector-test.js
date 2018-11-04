@@ -4,7 +4,7 @@ const Prometheus = require('prom-client');
 const expect = require('chai').expect;
 const request = require('request');
 const requestPromise = require('request-promise-native');
-const Collector = require('../../src/request-response-Collector');
+const Collector = require('../../src/request-response-collector');
 
 describe('request.js response time collector', () => {
     describe('while using request', () => {
