@@ -130,15 +130,10 @@ For Example:
 **Success**
 ```js
 request({ url: 'http://www.google.com', time: true }, (err, response) => {
-  if (err) {
-    done(err);
+    if (err) {
+        throw err;
     }
     Collector.collect(response);
-    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="total"} 1');
-    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="socket"} 1');
-    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="lookup"} 1');
-    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="connect"} 1');
-    done();
 });
 ```
 **Error**
@@ -146,10 +141,7 @@ request({ url: 'http://www.google.com', time: true }, (err, response) => {
 request({ url: 'http://www.google1234.com', time: true, route: 'route' }, (err, response) => {
     if (err) {
         Collector.collect(err);
-        expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
-        return done();
     }
-    done(new Error('Expect to get error from the http request'));
 });
 ```
 
@@ -158,29 +150,29 @@ request({ url: 'http://www.google1234.com', time: true, route: 'route' }, (err, 
 ```js
 return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', route: 'v2/:id', time: true, resolveWithFullResponse: true }).then((response) => {
     Collector.collectHttpTiming(response);
-    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="total"} 1');
-    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="socket"} 1');
-    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="lookup"} 1');
-    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="connect"} 1');
 });
 ```
 **Error**
 ```js
 return requestPromise({ method: 'POST', url: 'http://www.google1234.com', route: 'v2/:id', time: true, resolveWithFullResponse: true }).catch((error) => {
     Collector.collect(error);
-    expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
 });
 ```
-
-**Notes:** 
-1. In order to use the timing feature in request-promise/request-promise-native you must also use `resolveWithFullResponse: true`
-2. In case the request has variables in the url you should set a `route` attribute as part of the request, the `collect` function will set the route to be this value in any other case it will take the request path.
 
 ### Configuration
 - durationBuckets - the histogram buckets for request duration.
 - countClientErrors - Boolean that indicates if to collect client errors as Counter, this counter will have target and error code labels.
 - useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
 - prefix - A custom matrics names prefix, the package will add underscode between your prefix to the metric name.
+
+**Notes:** 
+1. In order to use the timing feature in request-promise/request-promise-native you must also use `resolveWithFullResponse: true`
+2. Override - you can override the `route` and `target` attribute instead of taking them from the request object. In order to do that you should set a `metrics` object on your request with those attribute:
+``` js
+request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { target: 'www.google.com', route: 'v2/:id' }, time: true }, (err, response) => {...};
+});
+```
+
 
 ## Test
 
