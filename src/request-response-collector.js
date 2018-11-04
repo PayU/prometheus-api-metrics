@@ -74,6 +74,6 @@ module.exports.init = (options) => {
     southboundResponseTimeHistogram = setup.southboundResponseTimeHistogram;
     southboundClientErrors = setup.southboundClientErrors;
 };
-module.exports.collectHttpTiming = (res) => {
+module.exports.collect = (res) => {
     _collectHttpTiming(res, southboundResponseTimeHistogram, southboundClientErrors);
 };

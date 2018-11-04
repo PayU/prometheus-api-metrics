@@ -23,7 +23,7 @@ describe('request.js response time collector', () => {
                     if (err) {
                         done(err);
                     }
-                    Collector.collectHttpTiming(response);
+                    Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="total"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="socket"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="lookup"} 1');
@@ -36,7 +36,7 @@ describe('request.js response time collector', () => {
                     if (err) {
                         done(err);
                     }
-                    Collector.collectHttpTiming(response);
+                    Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="GET",route="/v2/5bd57525310000680041daf2",status_code="500",type="total"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="GET",route="/v2/5bd57525310000680041daf2",status_code="500",type="socket"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="GET",route="/v2/5bd57525310000680041daf2",status_code="500",type="lookup"} 1');
@@ -49,7 +49,7 @@ describe('request.js response time collector', () => {
                     if (err) {
                         done(err);
                     }
-                    Collector.collectHttpTiming(response);
+                    Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="/v2/5bd9984b2f00006d0006d1fd",status_code="201",type="total"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="/v2/5bd9984b2f00006d0006d1fd",status_code="201",type="socket"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="/v2/5bd9984b2f00006d0006d1fd",status_code="201",type="lookup"} 1');
@@ -62,7 +62,7 @@ describe('request.js response time collector', () => {
                     if (err) {
                         done(err);
                     }
-                    Collector.collectHttpTiming(response);
+                    Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="total"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="socket"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="lookup"} 1');
@@ -73,7 +73,7 @@ describe('request.js response time collector', () => {
             it('should count client error in counter', (done) => {
                 request({ url: 'http://www.google1234.com', time: true, route: 'route' }, (err, response) => {
                     if (err) {
-                        Collector.collectHttpTiming(err);
+                        Collector.collect(err);
                         expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
                         return done();
                     }
@@ -91,7 +91,7 @@ describe('request.js response time collector', () => {
             it('should count client error in counter', (done) => {
                 request({ url: 'http://www.google1234.com', time: true, route: 'route' }, (err, response) => {
                     if (err) {
-                        Collector.collectHttpTiming(err);
+                        Collector.collect(err);
                         expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
                         return done();
                     }
@@ -109,7 +109,7 @@ describe('request.js response time collector', () => {
             it('shouldn\'t count client error in counter', (done) => {
                 request({ url: 'http://www.google1234.com', time: true, route: 'route' }, (err, response) => {
                     if (err) {
-                        Collector.collectHttpTiming(err);
+                        Collector.collect(err);
                         expect(Prometheus.register.metrics()).to.not.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
                         return done();
                     }
@@ -131,7 +131,7 @@ describe('request.js response time collector', () => {
             });
             it('should collect metrics with path and method for valid request', () => {
                 return requestPromise({ url: 'http://www.google.com', time: true, resolveWithFullResponse: true }).then((response) => {
-                    Collector.collectHttpTiming(response);
+                    Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="total"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="socket"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="lookup"} 1');
@@ -142,7 +142,7 @@ describe('request.js response time collector', () => {
                 return requestPromise({ url: 'http://www.mocky.io/v2/5bd57525310000680041daf2', time: true, resolveWithFullResponse: true }).then((response) => {
                     Promise.reject(new Error('Expect to get 500 from the request'));
                 }).catch((error) => {
-                    Collector.collectHttpTiming(error);
+                    Collector.collect(error);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="GET",route="/v2/5bd57525310000680041daf2",status_code="500",type="total"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="GET",route="/v2/5bd57525310000680041daf2",status_code="500",type="socket"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="GET",route="/v2/5bd57525310000680041daf2",status_code="500",type="lookup"} 1');
@@ -151,7 +151,7 @@ describe('request.js response time collector', () => {
             });
             it('should collect metrics with path and method for valid request (POST)', () => {
                 return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', time: true, resolveWithFullResponse: true }).then((response) => {
-                    Collector.collectHttpTiming(response);
+                    Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="/v2/5bd9984b2f00006d0006d1fd",status_code="201",type="total"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="/v2/5bd9984b2f00006d0006d1fd",status_code="201",type="socket"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="/v2/5bd9984b2f00006d0006d1fd",status_code="201",type="lookup"} 1');
@@ -160,7 +160,7 @@ describe('request.js response time collector', () => {
             });
             it('should collect metrics with path and method for valid request with route field on the request', () => {
                 return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', route: 'v2/:id', time: true, resolveWithFullResponse: true }).then((response) => {
-                    Collector.collectHttpTiming(response);
+                    Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="total"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="socket"} 1');
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="lookup"} 1');
@@ -169,7 +169,7 @@ describe('request.js response time collector', () => {
             });
             it('should not collect metrics when time = true in the request is missing', () => {
                 return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', route: 'v2/:id', resolveWithFullResponse: true }).then((response) => {
-                    Collector.collectHttpTiming(response);
+                    Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.not.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="total"} 1');
                     expect(Prometheus.register.metrics()).to.not.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="socket"} 1');
                     expect(Prometheus.register.metrics()).to.not.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="lookup"} 1');
@@ -178,7 +178,7 @@ describe('request.js response time collector', () => {
             });
             it('should count client error in counter by default', () => {
                 return requestPromise({ method: 'POST', url: 'http://www.google1234.com', route: 'v2/:id', time: true, resolveWithFullResponse: true }).catch((error) => {
-                    Collector.collectHttpTiming(error);
+                    Collector.collect(error);
                     expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
                 });
             });
@@ -195,7 +195,7 @@ describe('request.js response time collector', () => {
             });
             it('should count client error in counter', () => {
                 return requestPromise({ method: 'POST', url: 'http://www.google1234.com', route: 'v2/:id', time: true, resolveWithFullResponse: true }).catch((error) => {
-                    Collector.collectHttpTiming(error);
+                    Collector.collect(error);
                     expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
                 });
             });
@@ -212,7 +212,7 @@ describe('request.js response time collector', () => {
             });
             it('shouldn\'t count client error in counter', () => {
                 return requestPromise({ method: 'POST', url: 'http://www.google1234.com', route: 'v2/:id', time: true, resolveWithFullResponse: true }).catch((error) => {
-                    Collector.collectHttpTiming(error);
+                    Collector.collect(error);
                     expect(Prometheus.register.metrics()).to.not.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
                 });
             });
@@ -233,14 +233,14 @@ describe('request.js response time collector', () => {
                 if (err) {
                     done(err);
                 }
-                Collector.collectHttpTiming(response);
+                Collector.collect(response);
                 expect(Prometheus.register.metrics()).to.include('prometheus_api_metrics_southbound_request_duration_seconds_bucket');
                 done();
             });
         });
         it('should count client error in counter with project name', () => {
             return requestPromise({ method: 'POST', url: 'http://www.google1234.com', route: 'v2/:id', time: true, resolveWithFullResponse: true }).catch((error) => {
-                Collector.collectHttpTiming(error);
+                Collector.collect(error);
                 expect(Prometheus.register.metrics()).to.include('prometheus_api_metrics_southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
             });
         });
@@ -260,14 +260,14 @@ describe('request.js response time collector', () => {
                 if (err) {
                     done(err);
                 }
-                Collector.collectHttpTiming(response);
+                Collector.collect(response);
                 expect(Prometheus.register.metrics()).to.include('prefix_southbound_request_duration_seconds_bucket');
                 done();
             });
         });
         it('should count client error in counter with prefix', () => {
             return requestPromise({ method: 'POST', url: 'http://www.google1234.com', route: 'v2/:id', time: true, resolveWithFullResponse: true }).catch((error) => {
-                Collector.collectHttpTiming(error);
+                Collector.collect(error);
                 expect(Prometheus.register.metrics()).to.include('prefix_southbound_client_errors_count');
             });
         });
@@ -287,7 +287,7 @@ describe('request.js response time collector', () => {
                 if (err) {
                     done(err);
                 }
-                Collector.collectHttpTiming(response);
+                Collector.collect(response);
                 expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="0.002"');
                 expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="0.01"');
                 expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="0.025"');
@@ -313,7 +313,7 @@ describe('request.js response time collector', () => {
         });
         it('shouldn\'t count client error in counter with project name', () => {
             return requestPromise({ method: 'POST', url: 'http://www.google1234.com', route: 'v2/:id', time: true, resolveWithFullResponse: true }).catch((error) => {
-                Collector.collectHttpTiming(error);
+                Collector.collect(error);
                 expect(Prometheus.register.metrics()).to.include('prometheus_api_metrics_southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
                 expect(Prometheus.register.metrics()).to.not.include('prefix_southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
             });
