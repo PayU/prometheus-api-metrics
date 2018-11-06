@@ -3,6 +3,7 @@
 const Prometheus = require('prom-client');
 require('pkginfo')(module, ['name']);
 const debug = require('debug')(module.exports.name);
+const utils = require('./utils');
 const setupOptions = {};
 
 module.exports = (appVersion, projectName) => {
@@ -12,7 +13,14 @@ module.exports = (appVersion, projectName) => {
         setupOptions.metricsRoute = metricsPath || '/metrics';
         setupOptions.excludeRoutes = excludeRoutes || [];
 
-        const metricNames = _getMetricNames(useUniqueHistogramName === true ? projectName : metricsPrefix);
+        let metricNames = {
+            http_request_duration_seconds: 'http_request_duration_seconds',
+            app_version: 'app_version',
+            http_request_size_bytes: 'http_request_size_bytes',
+            http_response_size_bytes: 'http_response_size_bytes',
+            defaultMetricsPrefix: ''
+        };
+        metricNames = utils.getMetricNames(metricNames, useUniqueHistogramName, metricsPrefix, projectName);
 
         Prometheus.collectDefaultMetrics({ timeout: defaultMetricsInterval, prefix: `${metricNames.defaultMetricsPrefix}` });
 
@@ -53,26 +61,6 @@ module.exports = (appVersion, projectName) => {
     };
 };
 
-function _getMetricNames(metricsPrefix) {
-    const metricNames = {
-        http_request_duration_seconds: 'http_request_duration_seconds',
-        app_version: 'app_version',
-        http_request_size_bytes: 'http_request_size_bytes',
-        http_response_size_bytes: 'http_response_size_bytes',
-        defaultMetricsPrefix: ''
-    };
-
-    if (metricsPrefix) {
-        metricNames.http_request_duration_seconds = `${metricsPrefix}_${metricNames.http_request_duration_seconds}`;
-        metricNames.app_version = `${metricsPrefix}_${metricNames.app_version}`;
-        metricNames.http_request_size_bytes = `${metricsPrefix}_${metricNames.http_request_size_bytes}`;
-        metricNames.http_response_size_bytes = `${metricsPrefix}_${metricNames.http_response_size_bytes}`;
-        metricNames.defaultMetricsPrefix = `${metricsPrefix}_`;
-    }
-
-    return metricNames;
-}
-
 function middleware (req, res, next) {
     if (req.url === setupOptions.metricsRoute) {
         debug('Request to /metrics endpoint');
@@ -104,7 +92,7 @@ function _handleResponse (req, res) {
 
     const route = _getRoute(req);
 
-    if (route && _shouldLogMetrics(setupOptions.excludeRoutes, route)) {
+    if (route && utils.shouldLogMetrics(setupOptions.excludeRoutes, route)) {
         setupOptions.requestSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, req.metrics.contentLength);
         req.metrics.timer({ route: route, code: res.statusCode });
         setupOptions.responseSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseLength);
@@ -143,10 +131,4 @@ function _getRoute(req) {
     }
 
     return route;
-}
-
-function _shouldLogMetrics(excludeRoutes, route) {
-    return excludeRoutes.every((path) => {
-        return !route.includes(path);
-    });
 }

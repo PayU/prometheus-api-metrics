@@ -1,6 +1,16 @@
 const Prometheus = require('prom-client');
-const Path = require('path');
+const utils = require('./utils');
 let southboundResponseTimeHistogram, southboundClientErrors = null;
+let projectName;
+
+module.exports = (name) => {
+    projectName = name;
+    const httpMetricsCollector = HttpMetricsCollector;
+    httpMetricsCollector.init = init;
+    httpMetricsCollector.collect = collect;
+
+    return httpMetricsCollector;
+};
 
 class HttpMetricsCollector {
     constructor(options){
@@ -31,21 +41,13 @@ function _collectHttpTiming(res, southboundResponseTimeHistogram, southboundClie
 }
 
 function _init(options = {}) {
-    const metricNames = {
+    let metricNames = {
         southbound_request_duration_seconds: 'southbound_request_duration_seconds',
         southbound_client_errors_count: 'southbound_client_errors_count'
     };
 
-    const metricsMiddleware = { exports: {} };
-    require('pkginfo')(metricsMiddleware, { dir: Path.dirname(module.parent.filename), include: ['name'] });
-    const projectName = metricsMiddleware.exports.name.replace(/-/g, '_');
     const { durationBuckets, countClientErrors, useUniqueHistogramName, prefix } = options;
-
-    if (useUniqueHistogramName === true || prefix) {
-        let metricsPrefix = useUniqueHistogramName === true ? projectName : prefix;
-        metricNames.southbound_request_duration_seconds = `${metricsPrefix}_${metricNames.southbound_request_duration_seconds}`;
-        metricNames.southbound_client_errors_count = `${metricsPrefix}_${metricNames.southbound_client_errors_count}`;
-    }
+    metricNames = utils.getMetricNames(metricNames, useUniqueHistogramName, prefix, projectName);
 
     southboundResponseTimeHistogram = Prometheus.register.getSingleMetric(metricNames.southbound_request_duration_seconds) ||
         new Prometheus.Histogram({
@@ -69,12 +71,11 @@ function _init(options = {}) {
     };
 };
 
-module.exports = HttpMetricsCollector;
-module.exports.init = (options) => {
+function init(options) {
     const setup = _init(options);
     southboundResponseTimeHistogram = setup.southboundResponseTimeHistogram;
     southboundClientErrors = setup.southboundClientErrors;
 };
-module.exports.collect = (res) => {
+function collect(res) {
     _collectHttpTiming(res, southboundResponseTimeHistogram, southboundClientErrors);
 };
