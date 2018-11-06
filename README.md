@@ -64,7 +64,7 @@ app.use(apiMetrics())
 - responseSizeBuckets - Buckets for response size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
 - useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
 - metricsPrefix - A custom matrics names prefix, the package will add underscode between your prefix to the metric name.
-- excludeRoutes - Array of routes to exclude. Routes sould be in your framework syntax
+- excludeRoutes - Array of routes to exclude. Routes should be in your framework syntax.
 
 ### Access the metrics
 
@@ -80,9 +80,9 @@ curl http[s]://<host>:[port]/metrics.json
 
 **Note:**
 
-1. If you pass to the middleware the `metricsPath` option the path will be the one the you choosed.
+1. If you pass to the middleware the `metricsPath` option the path will be the one that you chose.
 
-2. If you are using express framework and no route was found for the request (e.g: 404 status code), the request will not be collected. that's because we'll risk in a memory leak since the route is not a pattern but a hardcoded string.
+2. If you are using express framework and no route was found for the request (e.g: 404 status code), the request will not be collected. that's because we'll risk memory leak since the route is not a pattern but a hardcoded string.
 
 
 ## Custom Metrics
@@ -119,7 +119,7 @@ For more info about the Node.js Prometheus client you can read [here](https://gi
 This will work only if you use the default Prometheus registry - do not use `new Prometheus.Registry()`
 
 ## Request.js HTTP request duration collector
-This feature enbale you to easily process the result of Request.js timings feature.
+This feature enbales you to easily process the result of Request.js timings feature.
 
 ### Usage
 ####Initialize
