@@ -319,14 +319,21 @@ describe('metrics-middleware', () => {
             Prometheus.register.clear();
         });
     });
-    describe.skip('override the default path', () => {
+    describe('override the default path', () => {
+        let func;
         beforeEach(() => {
-            middleware({
+            func = middleware({
                 metricsPath: '/v1/metrics'
             });
         });
         it('should set the updated route', () => {
-            expect(middleware.__get__('setupOptions.metricsRoute')).to.equal('/v1/metrics');
+            const end = sinon.stub();
+            const set = sinon.stub();
+            func({ url: '/v1/metrics' }, { end: end, set: set });
+            sinon.assert.calledOnce(end);
+            sinon.assert.calledWith(end, Prometheus.register.metrics());
+            sinon.assert.calledWith(set, 'Content-Type', Prometheus.register.contentType);
+            sinon.assert.calledOnce(set);
         });
         after(() => {
             Prometheus.register.clear();
