@@ -140,7 +140,7 @@ HttpMetricsCollector.init();
 
 #### Options
 - durationBuckets - the histogram buckets for request duration.
-- countClientErrors - Boolean that indicates if to collect client errors as Counter, this counter will have target and error code labels.
+- countClientErrors - Boolean that indicates whether to collect client errors as Counter, this counter will have target and error code labels.
 - useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
 - prefix - A custom matrics names prefix, the package will add underscode between your prefix to the metric name.
 
