@@ -119,7 +119,7 @@ For more info about the Node.js Prometheus client you can read [here](https://gi
 This will work only if you use the default Prometheus registry - do not use `new Prometheus.Registry()`
 
 ## Request.js HTTP request duration collector
-This feature enbale you to easily process the result of Request.js timings feature.
+This feature enbales you to easily process the result of Request.js timings feature.
 
 ### Usage
 ####Initialize
