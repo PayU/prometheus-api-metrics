@@ -64,7 +64,7 @@ app.use(apiMetrics())
 - responseSizeBuckets - Buckets for response size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
 - useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
 - metricsPrefix - A custom matrics names prefix, the package will add underscode between your prefix to the metric name.
-- excludeRoutes - Array of routes to exclude. Routes sould be in your framework syntax
+- excludeRoutes - Array of routes to exclude. Routes should be in your framework syntax.
 
 ### Access the metrics
 
