@@ -80,7 +80,7 @@ curl http[s]://<host>:[port]/metrics.json
 
 **Note:**
 
-1. If you pass to the middleware the `metricsPath` option the path will be the one the you choosed.
+1. If you pass to the middleware the `metricsPath` option the path will be the one that you chose.
 
 2. If you are using express framework and no route was found for the request (e.g: 404 status code), the request will not be collected. that's because we'll risk in a memory leak since the route is not a pattern but a hardcoded string.
 
