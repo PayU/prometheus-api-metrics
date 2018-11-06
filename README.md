@@ -122,7 +122,28 @@ This will work only if you use the default Prometheus registry - do not use `new
 This feature enbale you to easily process the result of Request.js timings feature.
 
 ### Usage
-In order to use this feature you must use `{ time: true }` as part of your request configuration and then pass to the collector the response or error you got.
+####Initialize
+You can choose to initialozed this functionality as a Class or not
+
+**Class:**
+```js
+const HttpMetricsCollector = require('prometheus-api-metrics').HttpMetricsCollector;
+const collector = new HttpMetricsCollector();
+collector.init();
+```
+
+**Singelton:**
+```js
+const HttpMetricsCollector = require('prometheus-api-metrics').HttpMetricsCollector;
+HttpMetricsCollector.init();
+```
+
+#### Options
+- durationBuckets - the histogram buckets for request duration.
+- countClientErrors - Boolean that indicates if to collect client errors as Counter, this counter will have target and error code labels.
+- useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
+- prefix - A custom matrics names prefix, the package will add underscode between your prefix to the metric name.
+
 
 For Example:
 
@@ -142,15 +163,10 @@ return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f0
 });
 ```
 
-### Configuration
-- durationBuckets - the histogram buckets for request duration.
-- countClientErrors - Boolean that indicates if to collect client errors as Counter, this counter will have target and error code labels.
-- useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
-- prefix - A custom matrics names prefix, the package will add underscode between your prefix to the metric name.
-
 **Notes:** 
-1. In order to use the timing feature in request-promise/request-promise-native you must also use `resolveWithFullResponse: true`
-2. Override - you can override the `route` and `target` attribute instead of taking them from the request object. In order to do that you should set a `metrics` object on your request with those attribute:
+1. In order to use this feature you must use `{ time: true }` as part of your request configuration and then pass to the collector the response or error you got.
+2. In order to use the timing feature in request-promise/request-promise-native you must also use `resolveWithFullResponse: true`
+3. Override - you can override the `route` and `target` attribute instead of taking them from the request object. In order to do that you should set a `metrics` object on your request with those attribute:
 ``` js
 request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { target: 'www.google.com', route: 'v2/:id' }, time: true }, (err, response) => {...};
 });

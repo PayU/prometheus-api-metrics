@@ -6,8 +6,5 @@ require('pkginfo')(metricsMiddleware, { dir: Path.dirname(module.parent.filename
 const appVersion = metricsMiddleware.exports.version;
 const projectName = metricsMiddleware.exports.name.replace(/-/g, '_');
 
-const middleware = require('./metrics-middleware')(appVersion, projectName);
-const httpCollector = require('./request-response-collector');
-
-module.exports = middleware;
-module.exports.httpCollector = httpCollector;
+module.exports = require('./metrics-middleware')(appVersion, projectName);
+module.exports.HttpMetricsCollector = require('./request-response-collector');
