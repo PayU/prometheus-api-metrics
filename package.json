@@ -4,12 +4,12 @@
   "description": "API and process monitoring with Prometheus for Node.js micro-service",
   "author": "Idan Tovi",
   "scripts": {
-    "unit-tests": "nyc mocha \"./test/**/*-test.js\"",
-    "test": "npm run unit-tests && npm run integration-tests",
-    "integration-tests": "mocha ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
+    "unit-tests": "nyc mocha ./test/unit-test/*-test.js",
+    "test": "nyc mocha ./test/unit-test/*-test.js ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
+    "integration-tests": "nyc mocha ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
-  "main": "src/metrics-middleware.js",
+  "main": "src/index.js",
   "nyc": {
     "report-dir": "./coverage",
     "lines": 95,
@@ -17,7 +17,7 @@
     "functions": 100,
     "branches": 90,
     "include": [
-      "src"
+      "src/*.js"
     ],
     "exclude": [
       "src/index.js"
@@ -37,6 +37,13 @@
     "prom-client": "11.x"
   },
   "devDependencies": {
+    "@nestjs/common": "^4.6.4",
+    "@nestjs/core": "^4.6.4",
+    "@nestjs/testing": "^4.6.4",
+    "@types/express": "^4.16.0",
+    "@types/mocha": "^5.0.0",
+    "@types/node": "^9.6.1",
+    "@types/supertest": "^2.0.5",
     "body-parser": "^1.18.3",
     "chai": "^4.1.2",
     "coveralls": "^3.0.0",
@@ -52,22 +59,22 @@
     "express": "^4.16.3",
     "mocha": "^5.2.0",
     "node-mocks-http": "^1.7.0",
-    "nyc": "^11.8.0",
+    "nyc": "^13.1.0",
     "prom-client": "^11.x",
+    "reflect-metadata": "0.1.10",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.5",
     "rewire": "^4.0.1",
     "rxjs": "^5.4.2",
     "sinon": "^5.0.10",
+    "stryker": "^0.30.1",
+    "stryker-api": "^0.21.4",
+    "stryker-javascript-mutator": "^0.11.2",
+    "stryker-mocha-framework": "^0.12.5",
+    "stryker-mocha-runner": "^0.14.5",
     "supertest": "^3.1.0",
-    "@nestjs/common": "^4.6.4",
-    "@nestjs/core": "^4.6.4",
-    "@types/node": "^9.6.1",
-    "@types/supertest": "^2.0.5",
-    "@types/express": "^4.16.0",
-    "@types/mocha": "^5.0.0",
     "ts-node": "^7.0.0",
-    "typescript": "^3.0.1",
-    "reflect-metadata": "0.1.10",
-    "@nestjs/testing": "^4.6.4"
+    "typescript": "^3.0.1"
   },
   "repository": {
     "type": "git",

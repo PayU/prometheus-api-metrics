@@ -1,15 +1,16 @@
 import * as express from 'express';
+import * as Prometheus from 'prom-client';
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { UsersModule } from "./users.module";
 
-const middleware = require('../../../src/metrics-middleware.js');
 const expect = require('chai').expect;
-
+let server;
 describe('when using nest-js framework', () => {
-    const server = express();
-
     before(() => {
+        const middleware = require('../../../src/index.js');
+        server = express();
+
         let module = Test.createTestingModule({imports: [UsersModule]});
 
         return module.compile()
@@ -21,8 +22,10 @@ describe('when using nest-js framework', () => {
                 return app.init();
             });
     });
-
-    describe('when calling a POST user/:user_id endpoint with user_id as pattern', function () {
+    after(() => {
+        Prometheus.register.clear();
+    });
+    describe('when calling a POST user/:user_id endpoint with user_id as pattern', () => {
         before(() => {
             return request(server)
                 .post('/users/123')
@@ -31,7 +34,7 @@ describe('when using nest-js framework', () => {
                     result: 'success'
                 });
         });
-        it('should add it to the histogram', function () {
+        it('should add it to the histogram', () => {
             return request(server)
                 .get('/metrics')
                 .expect(200)
@@ -40,8 +43,7 @@ describe('when using nest-js framework', () => {
                 });
         });
     });
-
-    describe('When calling a GET user/:user_id/app-id/:app_id with user_id and app_id as pattern', function() {
+    describe('When calling a GET user/:user_id/app-id/:app_id with user_id and app_id as pattern', () => {
         before(() => {
             return request(server)
                 .get('/users/123/app-id/456')
@@ -51,7 +53,7 @@ describe('when using nest-js framework', () => {
                 });
         });
 
-        it('should add it to the histogram', function () {
+        it('should add it to the histogram', () => {
             return request(server)
                 .get('/metrics')
                 .expect(200)

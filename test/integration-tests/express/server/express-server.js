@@ -3,16 +3,17 @@
 const express = require('express');
 const Prometheus = require('prom-client');
 const bodyParser = require('body-parser');
+const config = require('./config');
 const app = express();
-const middleware = require('../../../../src/metrics-middleware.js');
+const middleware = require('../../../../src/index.js');
 
-const checkoutsTotal = new Prometheus.Counter({
+const checkoutsTotal = Prometheus.register.getSingleMetric('checkouts_total') || new Prometheus.Counter({
     name: 'checkouts_total',
     help: 'Total number of checkouts',
     labelNames: ['payment_method']
 });
 
-app.use(middleware());
+app.use(middleware({ useUniqueHistogramName: config.useUniqueHistogramName }));
 app.use(bodyParser.json());
 
 app.get('/hello', (req, res, next) => {
