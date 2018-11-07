@@ -32,10 +32,10 @@ function _collectHttpTiming(res, southboundResponseTimeHistogram, southboundClie
         let response = res.response || res;
         if (response.timings) {
             response.request.metrics = response.request.metrics || {};
-            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'total' }, response.timingPhases.total);
-            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'socket' }, response.timingPhases.wait); // timings.socket
-            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'lookup' }, response.timingPhases.dns); // timings.lookup - timings.socket
-            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'connect' }, response.timingPhases.tcp); // timings.connect - timings.socket
+            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'total' }, response.timingPhases.total / 1000);
+            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'socket' }, response.timingPhases.wait / 1000); // timings.socket
+            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'lookup' }, response.timingPhases.dns / 1000); // timings.lookup - timings.socket
+            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'connect' }, response.timingPhases.tcp / 1000); // timings.connect - timings.socket
         }
     }
 }
