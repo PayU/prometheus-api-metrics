@@ -1,8 +1,12 @@
-.test/
+test/*
 node_modules
 .history/
 .vscode/
 coverage/
 .nyc_output/
 .idea/*
-.stryker-tmp*
+.stryker-tmp/*
+tsconfig.json
+.travis.yml
+.eslintrc.json
+LICENSE
