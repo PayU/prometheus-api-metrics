@@ -7,4 +7,4 @@ const appVersion = metricsMiddleware.exports.version;
 const projectName = metricsMiddleware.exports.name.replace(/-/g, '_');
 
 module.exports = require('./metrics-middleware')(appVersion, projectName);
-module.exports.HttpMetricsCollector = require('./request-response-collector');
+module.exports.HttpMetricsCollector = require('./request-response-collector')(projectName);
