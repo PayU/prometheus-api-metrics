@@ -8,7 +8,7 @@ const setupOptions = {};
 
 module.exports = (appVersion, projectName) => {
     return (options = {}) => {
-        const { metricsPath, defaultMetricsInterval, durationBuckets, requestSizeBuckets, responseSizeBuckets, useUniqueHistogramName, metricsPrefix, excludeRoutes } = options;
+        const { metricsPath, defaultMetricsInterval = 10000, durationBuckets, requestSizeBuckets, responseSizeBuckets, useUniqueHistogramName, metricsPrefix, excludeRoutes } = options;
         debug(`Init metrics middleware with options: ${JSON.stringify(options)}`);
         setupOptions.metricsRoute = metricsPath || '/metrics';
         setupOptions.excludeRoutes = excludeRoutes || [];
