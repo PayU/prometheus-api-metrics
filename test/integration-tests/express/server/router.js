@@ -2,9 +2,17 @@
 var express = require('express');
 var router = express.Router();
 
+router.use((req, res, next) => {
+    if (req.headers.error) {
+        next(new Error('Error'));
+    }
+    next();
+});
+
 router.route('/').get(bad);
 router.route('/bad').get(bad);
 router.route('/bad/:time').get(bad);
+router.route('/bad/:var1/:var2').get(bad);
 router.route('/test').post(test);
 router.route('/:time').patch(helloTime);
 router.route('/hello/:time').get(helloTime);

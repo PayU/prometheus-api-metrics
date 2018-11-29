@@ -16,6 +16,12 @@ const checkoutsTotal = Prometheus.register.getSingleMetric('checkouts_total') ||
 
 app.use(middleware({ useUniqueHistogramName: config.useUniqueHistogramName }));
 app.use(bodyParser.json());
+app.use((req, res, next) => {
+    if (req.headers.error) {
+        next(new Error('Error'));
+    }
+    next();
+});
 app.use('/v2', router);
 
 app.get('/hello', (req, res, next) => {
