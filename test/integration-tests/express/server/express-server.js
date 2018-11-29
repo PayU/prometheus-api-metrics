@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const config = require('./config');
 const app = express();
 const middleware = require('../../../../src/index.js');
+const router = require('./router');
 
 const checkoutsTotal = Prometheus.register.getSingleMetric('checkouts_total') || new Prometheus.Counter({
     name: 'checkouts_total',
@@ -15,6 +16,7 @@ const checkoutsTotal = Prometheus.register.getSingleMetric('checkouts_total') ||
 
 app.use(middleware({ useUniqueHistogramName: config.useUniqueHistogramName }));
 app.use(bodyParser.json());
+app.use('/v2', router);
 
 app.get('/hello', (req, res, next) => {
     setTimeout(() => {

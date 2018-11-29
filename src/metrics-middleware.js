@@ -105,14 +105,19 @@ function _getRoute(req) {
     let route = req.baseUrl; // express
     if (req.swagger) { // swagger
         route = req.swagger.apiPath;
-    } else if (req.route && route) { // express
+    } else if (req.route) { // express
         if (req.route.path !== '/') {
             route = route + req.route.path;
         }
-    } else if (req.url && !route) { // restify
-        route = req.url;
-        if (req.route) {
-            route = req.route.path;
+
+        // In case you have base route and error handler in the root
+        let routeRegex = route;
+        routeRegex = routeRegex.replace(/\/:.+/, '/.+');
+        routeRegex = routeRegex.replace(/\/:.+\//, '/.+/');
+        let regex = new RegExp(routeRegex);
+        let regexMatch = regex.exec(req.originalUrl);
+        if (regexMatch && regexMatch.index > 0) {
+            route = req.originalUrl.substring(0, regexMatch.index) + route;
         }
     }
 
@@ -127,7 +132,7 @@ function _getRoute(req) {
     // express framework and no route was found for the request. if we log this metrics
     // we'll risk in a memory leak since the route is not a pattern but a hardcoded string.
     if (!req.route && res && res.statusCode === 404) {
-        return undefined;
+        return 'N/A';
     }
 
     return route;

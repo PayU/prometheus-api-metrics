@@ -124,6 +124,58 @@ describe('when using express framework', () => {
                     });
             });
         });
+        describe('when calling a GET endpoint with path params and inner router', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/v2/hello/200')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/v2/hello/:time",code="200"} 1');
+                        expect(res.text).to.contain('http_response_size_bytes_bucket{le="+Inf",method="GET",route="/v2/hello/:time",code="200"} 1');
+                        expect(res.text).to.contain('http_request_size_bytes_bucket{le="+Inf",method="GET",route="/v2/hello/:time",code="200"} 1');
+                    });
+            });
+        });
+        describe('when calling a POST endpoint with inner router', () => {
+            before(() => {
+                return supertest(app)
+                    .post('/v2/test')
+                    .send({name: 'john'})
+                    .set('Accept', 'application/json')
+                    .expect(201)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('method="POST",route="/v2/test",code="201"');
+                    });
+            });
+        });
+        describe('when calling endpoint and getting an error with inner router', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/v2/bad/500')
+                    .expect(500)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('method="GET",route="/v2/bad/:time",code="500"');
+                    });
+            });
+        });
         describe('when using custom metrics', () => {
             before(() => {
                 return supertest(app)
@@ -140,6 +192,23 @@ describe('when using express framework', () => {
                     });
             });
         });
+        describe('when calling not existing endpoint', function() {
+            before(() => {
+                let notExistingPath = '/notExistingPath' + Math.floor(Math.random() * 10);
+                return supertest(app)
+                    .get(notExistingPath)
+                    .expect(404)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('method="GET",route="N/A",code="404"');
+                    });
+            });
+        });
         it('should get metrics as json', () => {
             return supertest(app)
                 .get('/metrics.json')
@@ -151,24 +220,6 @@ describe('when using express framework', () => {
         after(() => {
             const Prometheus = require('prom-client');
             Prometheus.register.clear();
-        });
-        describe('when calling not existing endpoint', function() {
-            let notExistingPath = '/notExistingPath' + Math.floor(Math.random() * 10);
-
-            before(() => {
-                return supertest(app)
-                    .get(notExistingPath)
-                    .expect(404)
-                    .then((res) => {});
-            });
-            it('should add it to the histogram', () => {
-                return supertest(app)
-                    .get('/metrics')
-                    .expect(200)
-                    .then((res) => {
-                        expect(res.text).to.not.contain("method='GET',route='" + notExistingPath + "',code='404'");
-                    });
-            });
         });
     });
     describe('when start up with unique metric names', () => {
