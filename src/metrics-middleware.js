@@ -5,6 +5,7 @@ require('pkginfo')(module, ['name']);
 const debug = require('debug')(module.exports.name);
 const utils = require('./utils');
 const setupOptions = {};
+const routers = {};
 
 module.exports = (appVersion, projectName) => {
     return (options = {}) => {
@@ -101,18 +102,23 @@ function _handleResponse (req, res) {
 }
 
 function _getRoute(req) {
-    let res = req.res;
     let route = req.baseUrl; // express
     if (req.swagger) { // swagger
         route = req.swagger.apiPath;
-    } else if (req.route && route) { // express
+    } else if (req.route) { // express
         if (req.route.path !== '/') {
             route = route + req.route.path;
         }
-    } else if (req.url && !route) { // restify
-        route = req.url;
-        if (req.route) {
-            route = req.route.path;
+
+        if (route === '') {
+            route = req.originalUrl;
+        } else {
+            const splittedRoute = route.split('/');
+            const splittedUrl = req.originalUrl.split('/');
+            const routeIndex = splittedUrl.length - splittedRoute.length + 1;
+
+            const baseUrl = splittedUrl.slice(0, routeIndex).join('/');
+            route = baseUrl + route;
         }
     }
 
@@ -126,8 +132,9 @@ function _getRoute(req) {
     // this condition will evaluate to true only in
     // express framework and no route was found for the request. if we log this metrics
     // we'll risk in a memory leak since the route is not a pattern but a hardcoded string.
-    if (!req.route && res && res.statusCode === 404) {
-        return undefined;
+    if (!route || route === '') {
+    // if (!req.route && res && res.statusCode === 404) {
+        route = 'N/A';
     }
 
     return route;
