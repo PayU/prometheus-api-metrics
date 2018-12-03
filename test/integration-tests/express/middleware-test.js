@@ -124,120 +124,425 @@ describe('when using express framework', () => {
                     });
             });
         });
-        describe('when calling a GET endpoint with path params and sub router', () => {
-            before(() => {
-                return supertest(app)
-                    .get('/v2/hello/200')
-                    .expect(200)
-                    .then((res) => {});
+        describe('sub app', function () {
+            describe('when calling a GET endpoint with path params', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/hello/200')
+                        .expect(200)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/v2/hello/:time",code="200"} 1');
+                            expect(res.text).to.contain('http_response_size_bytes_bucket{le="+Inf",method="GET",route="/v2/hello/:time",code="200"} 1');
+                            expect(res.text).to.contain('http_request_size_bytes_bucket{le="+Inf",method="GET",route="/v2/hello/:time",code="200"} 1');
+                        });
+                });
             });
-            it('should add it to the histogram', () => {
-                return supertest(app)
-                    .get('/metrics')
-                    .expect(200)
-                    .then((res) => {
-                        expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/v2/hello/:time",code="200"} 1');
-                        expect(res.text).to.contain('http_response_size_bytes_bucket{le="+Inf",method="GET",route="/v2/hello/:time",code="200"} 1');
-                        expect(res.text).to.contain('http_request_size_bytes_bucket{le="+Inf",method="GET",route="/v2/hello/:time",code="200"} 1');
-                    });
+            describe('when calling a POST endpoint', () => {
+                before(() => {
+                    return supertest(app)
+                        .post('/v2/test')
+                        .send({name: 'john'})
+                        .set('Accept', 'application/json')
+                        .expect(201)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="POST",route="/v2/test",code="201"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error only variables', () => {
+                before(() => {
+                    return supertest(app)
+                        .patch('/v2/500')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="PATCH",route="/v2/:time",code="500"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error with 1 variable', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/bad/500')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/bad/:time",code="500"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error with two variables', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/bad/500/400')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/bad/:var1/:var2",code="500"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error with no variables', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/bad')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/bad",code="500"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error (root)', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2",code="500"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error (error handler in the sub app)', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/error/500')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/error/:var1",code="500"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error from a middleware before sub route', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/hello')
+                        .set('error', 'error')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2",code="500"');
+                        });
+                });
             });
         });
-        describe('when calling a POST endpoint with sub router', () => {
-            before(() => {
-                return supertest(app)
-                    .post('/v2/test')
-                    .send({name: 'john'})
-                    .set('Accept', 'application/json')
-                    .expect(201)
-                    .then((res) => {});
+        describe('sub-sub app with error handler in the sub app', function () {
+            describe('when calling a GET endpoint with path params and sub router', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v3/hello/200')
+                        .expect(200)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/v2/v3/hello/:time",code="200"} 1');
+                            expect(res.text).to.contain('http_response_size_bytes_bucket{le="+Inf",method="GET",route="/v2/v3/hello/:time",code="200"} 1');
+                            expect(res.text).to.contain('http_request_size_bytes_bucket{le="+Inf",method="GET",route="/v2/v3/hello/:time",code="200"} 1');
+                        });
+                });
             });
-            it('should add it to the histogram', () => {
-                return supertest(app)
-                    .get('/metrics')
-                    .expect(200)
-                    .then((res) => {
-                        expect(res.text).to.contain('method="POST",route="/v2/test",code="201"');
-                    });
+            describe('when calling a POST endpoint with sub router', () => {
+                before(() => {
+                    return supertest(app)
+                        .post('/v2/v3/test')
+                        .send({name: 'john'})
+                        .set('Accept', 'application/json')
+                        .expect(201)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="POST",route="/v2/v3/test",code="201"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error with sub router only variables', () => {
+                before(() => {
+                    return supertest(app)
+                        .patch('/v2/v3/500')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="PATCH",route="/v2/v3/:time",code="500"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error with sub router with 1 variable', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v3/bad/500')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/v3/bad/:time",code="500"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error with sub router with two variables', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v3/bad/500/400')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/v3/bad/:var1/:var2",code="500"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error with sub router with no variables', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v3/bad')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/v3/bad",code="500"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error with sub router (root)', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v3')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/v3",code="500"');
+                        });
+                });
+            });
+            describe('when calling endpoint and getting an error from a middleware before sub route', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v3/hello')
+                        .set('error', 'error')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/v3",code="500"');
+                        });
+                });
             });
         });
-        describe('when calling endpoint and getting an error with sub router only variables', () => {
-            before(() => {
-                return supertest(app)
-                    .patch('/v2/500')
-                    .expect(500)
-                    .then((res) => {});
+        describe('sub-sub app with error handler in the sub-sub app', function () {
+            describe('when calling a GET endpoint with path params and sub router', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v4/hello/200')
+                        .expect(200)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/v2/v4/hello/:time",code="200"} 1');
+                            expect(res.text).to.contain('http_response_size_bytes_bucket{le="+Inf",method="GET",route="/v2/v4/hello/:time",code="200"} 1');
+                            expect(res.text).to.contain('http_request_size_bytes_bucket{le="+Inf",method="GET",route="/v2/v4/hello/:time",code="200"} 1');
+                        });
+                });
             });
-            it('should add it to the histogram', () => {
-                return supertest(app)
-                    .get('/metrics')
-                    .expect(200)
-                    .then((res) => {
-                        expect(res.text).to.contain('method="PATCH",route="/v2/:time",code="500"');
-                    });
+            describe('when calling a POST endpoint with sub router', () => {
+                before(() => {
+                    return supertest(app)
+                        .post('/v2/v4/test')
+                        .send({name: 'john'})
+                        .set('Accept', 'application/json')
+                        .expect(201)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="POST",route="/v2/v4/test",code="201"');
+                        });
+                });
             });
-        });
-        describe('when calling endpoint and getting an error with sub router with 1 variable', () => {
-            before(() => {
-                return supertest(app)
-                    .get('/v2/bad/500')
-                    .expect(500)
-                    .then((res) => {});
+            describe('when calling endpoint and getting an error with sub router only variables', () => {
+                before(() => {
+                    return supertest(app)
+                        .patch('/v2/v4/500')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="PATCH",route="/v2/v4/:time",code="500"');
+                        });
+                });
             });
-            it('should add it to the histogram', () => {
-                return supertest(app)
-                    .get('/metrics')
-                    .expect(200)
-                    .then((res) => {
-                        expect(res.text).to.contain('method="GET",route="/v2/bad/:time",code="500"');
-                    });
+            describe('when calling endpoint and getting an error with sub router with 1 variable', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v4/bad/500')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/v4/bad/:time",code="500"');
+                        });
+                });
             });
-        });
-        describe('when calling endpoint and getting an error with sub router with two variables', () => {
-            before(() => {
-                return supertest(app)
-                    .get('/v2/bad/500/400')
-                    .expect(500)
-                    .then((res) => {});
+            describe('when calling endpoint and getting an error with sub router with two variables', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v4/bad/500/400')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/v4/bad/:var1/:var2",code="500"');
+                        });
+                });
             });
-            it('should add it to the histogram', () => {
-                return supertest(app)
-                    .get('/metrics')
-                    .expect(200)
-                    .then((res) => {
-                        expect(res.text).to.contain('method="GET",route="/v2/bad/:var1/:var2",code="500"');
-                    });
+            describe('when calling endpoint and getting an error with sub router with no variables', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v4/bad')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/v4/bad",code="500"');
+                        });
+                });
             });
-        });
-        describe('when calling endpoint and getting an error with sub router with no variables', () => {
-            before(() => {
-                return supertest(app)
-                    .get('/v2/bad')
-                    .expect(500)
-                    .then((res) => {});
+            describe('when calling endpoint and getting an error with sub router (root)', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v4')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/v4",code="500"');
+                        });
+                });
             });
-            it('should add it to the histogram', () => {
-                return supertest(app)
-                    .get('/metrics')
-                    .expect(200)
-                    .then((res) => {
-                        expect(res.text).to.contain('method="GET",route="/v2/bad",code="500"');
-                    });
-            });
-        });
-        describe('when calling endpoint and getting an error with sub router (root)', () => {
-            before(() => {
-                return supertest(app)
-                    .get('/v2')
-                    .expect(500)
-                    .then((res) => {});
-            });
-            it('should add it to the histogram', () => {
-                return supertest(app)
-                    .get('/metrics')
-                    .expect(200)
-                    .then((res) => {
-                        expect(res.text).to.contain('method="GET",route="/v2",code="500"');
-                    });
+            describe('when calling endpoint and getting an error from a middleware before sub route', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v4/hello')
+                        .set('error', 'error')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('method="GET",route="/v2/v4",code="500"');
+                        });
+                });
             });
         });
         describe('when calling endpoint and getting an error from a middleware before route', () => {
@@ -254,23 +559,6 @@ describe('when using express framework', () => {
                     .expect(200)
                     .then((res) => {
                         expect(res.text).to.contain('method="GET",route="N/A",code="500"');
-                    });
-            });
-        });
-        describe('when calling endpoint and getting an error from a middleware before sub route', () => {
-            before(() => {
-                return supertest(app)
-                    .get('/v2/hello')
-                    .set('error', 'error')
-                    .expect(500)
-                    .then((res) => {});
-            });
-            it('should add it to the histogram', () => {
-                return supertest(app)
-                    .get('/metrics')
-                    .expect(200)
-                    .then((res) => {
-                        expect(res.text).to.contain('method="GET",route="/v2",code="500"');
                     });
             });
         });

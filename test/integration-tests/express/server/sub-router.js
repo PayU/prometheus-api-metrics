@@ -1,7 +1,7 @@
 'use strict';
 var express = require('express');
 var router = express.Router();
-const subRouter = require('./sub-router');
+
 router.use((req, res, next) => {
     if (req.headers.error) {
         next(new Error('Error'));
@@ -9,8 +9,6 @@ router.use((req, res, next) => {
     next();
 });
 
-router.use('/v3', subRouter, errorHandler);
-router.use('/v4', subRouter);
 router.route('/').get(bad);
 router.route('/bad').get(bad);
 router.route('/bad/:time').get(bad);
@@ -18,7 +16,6 @@ router.route('/bad/:var1/:var2').get(bad);
 router.route('/test').post(test);
 router.route('/:time').patch(bad);
 router.route('/hello/:time').get(helloTime);
-router.route('/error/:var1').get(bad, errorHandler);
 
 function test (req, res, next) {
     setTimeout(() => {
