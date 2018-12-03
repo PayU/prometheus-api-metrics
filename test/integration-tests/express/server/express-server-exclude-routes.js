@@ -5,8 +5,15 @@ const bodyParser = require('body-parser');
 const app = express();
 const middleware = require('../../../../src/index.js');
 
-app.use(middleware({ excludeRoutes: ['/health', '/health/:id'] }));
+app.use(middleware({ excludeRoutes: ['/health', '/health/:id'], includeQuery: true }));
 app.use(bodyParser.json());
+
+app.get('', (req, res, next) => {
+    setTimeout(() => {
+        res.json({ message: 'Hello World!' });
+        next();
+    }, Math.round(Math.random() * 200));
+});
 
 app.get('/hello', (req, res, next) => {
     setTimeout(() => {
