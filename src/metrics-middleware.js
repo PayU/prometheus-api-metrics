@@ -5,7 +5,6 @@ require('pkginfo')(module, ['name']);
 const debug = require('debug')(module.exports.name);
 const utils = require('./utils');
 const setupOptions = {};
-const routers = {};
 
 module.exports = (appVersion, projectName) => {
     return (options = {}) => {
