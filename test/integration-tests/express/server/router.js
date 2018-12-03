@@ -14,7 +14,7 @@ router.route('/bad').get(bad);
 router.route('/bad/:time').get(bad);
 router.route('/bad/:var1/:var2').get(bad);
 router.route('/test').post(test);
-router.route('/:time').patch(helloTime);
+router.route('/:time').patch(bad);
 router.route('/hello/:time').get(helloTime);
 
 function test (req, res, next) {

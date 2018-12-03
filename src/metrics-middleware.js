@@ -5,6 +5,7 @@ require('pkginfo')(module, ['name']);
 const debug = require('debug')(module.exports.name);
 const utils = require('./utils');
 const setupOptions = {};
+const routers = {};
 
 module.exports = (appVersion, projectName) => {
     return (options = {}) => {
@@ -101,7 +102,6 @@ function _handleResponse (req, res) {
 }
 
 function _getRoute(req) {
-    let res = req.res;
     let route = req.baseUrl; // express
     if (req.swagger) { // swagger
         route = req.swagger.apiPath;
@@ -113,15 +113,12 @@ function _getRoute(req) {
         if (route === '') {
             route = req.originalUrl;
         } else {
-            // In case you have base route and error handler in the root
-            let routeRegex = route;
-            routeRegex = routeRegex.replace(/\/:.+/, '/.+');
-            routeRegex = routeRegex.replace(/\/:.+\//, '/.+/');
-            const regex = new RegExp(routeRegex);
-            const regexMatch = regex.exec(req.originalUrl);
-            if (regexMatch && regexMatch.index > 0) {
-                route = req.originalUrl.substring(0, regexMatch.index) + route;
-            }
+            const splittedRoute = route.split('/');
+            const splittedUrl = req.originalUrl.split('/');
+            const routeIndex = splittedUrl.length - splittedRoute.length + 1;
+
+            const baseUrl = splittedUrl.slice(0, routeIndex).join('/');
+            route = baseUrl + route;
         }
     }
 

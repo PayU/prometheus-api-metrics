@@ -160,6 +160,22 @@ describe('when using express framework', () => {
                     });
             });
         });
+        describe('when calling endpoint and getting an error with sub router only variables', () => {
+            before(() => {
+                return supertest(app)
+                    .patch('/v2/500')
+                    .expect(500)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('method="PATCH",route="/v2/:time",code="500"');
+                    });
+            });
+        });
         describe('when calling endpoint and getting an error with sub router with 1 variable', () => {
             before(() => {
                 return supertest(app)
