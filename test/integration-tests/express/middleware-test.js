@@ -124,6 +124,22 @@ describe('when using express framework', () => {
                     });
             });
         });
+        describe('when calling a GET endpoint with query parmas', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/hello?test=test')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/hello",code="200"} 2');
+                    });
+            });
+        });
         describe('sub app', function () {
             describe('when calling a GET endpoint with path params', () => {
                 before(() => {
@@ -274,6 +290,22 @@ describe('when using express framework', () => {
                         });
                 });
             });
+            describe('when calling a GET endpoint with query parmas', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2?test=test')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/v2",code="500"} 2');
+                        });
+                });
+            });
         });
         describe('sub-sub app with error handler in the sub app', function () {
             describe('when calling a GET endpoint with path params and sub router', () => {
@@ -409,6 +441,22 @@ describe('when using express framework', () => {
                         });
                 });
             });
+            describe('when calling a GET endpoint with query parmas', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v3?test=test')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/v2/v3",code="500"} 2');
+                        });
+                });
+            });
         });
         describe('sub-sub app with error handler in the sub-sub app', function () {
             describe('when calling a GET endpoint with path params and sub router', () => {
@@ -541,6 +589,22 @@ describe('when using express framework', () => {
                         .expect(200)
                         .then((res) => {
                             expect(res.text).to.contain('method="GET",route="/v2/v4",code="500"');
+                        });
+                });
+            });
+            describe('when calling a GET endpoint with query parmas', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v4?test=test')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/v2/v4",code="500"} 2');
                         });
                 });
             });

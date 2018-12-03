@@ -111,7 +111,7 @@ function _getRoute(req) {
         }
 
         if (route === '') {
-            route = req.originalUrl;
+            route = req.originalUrl.split('?')[0];
         } else {
             const splittedRoute = route.split('/');
             const splittedUrl = req.originalUrl.split('/');
