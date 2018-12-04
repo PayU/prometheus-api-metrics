@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const middleware = require('../../../../src/index.js');
 
-app.use(middleware({ excludeRoutes: ['/health', '/health/:id'], includeQuery: true }));
+app.use(middleware({ excludeRoutes: ['/health', '/health/:id'], includeQueryParams: true }));
 app.use(bodyParser.json());
 
 app.get('', (req, res, next) => {
