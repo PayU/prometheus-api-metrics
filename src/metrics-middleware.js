@@ -121,7 +121,7 @@ function _getRoute(req) {
             route = baseUrl + route;
         }
 
-        if (setupOptions.includeQueryParams === true && req.query && Object.keys(req.query).length > 0) {
+        if (setupOptions.includeQueryParams === true && Object.keys(req.query).length > 0) {
             route = `${route}?${Object.keys(req.query).sort().map((queryParam) => `${queryParam}=<?>`).join('&')}`;
         }
     }
