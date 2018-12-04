@@ -5,14 +5,14 @@ require('pkginfo')(module, ['name']);
 const debug = require('debug')(module.exports.name);
 const utils = require('./utils');
 const setupOptions = {};
-const routers = {};
 
 module.exports = (appVersion, projectName) => {
     return (options = {}) => {
-        const { metricsPath, defaultMetricsInterval = 10000, durationBuckets, requestSizeBuckets, responseSizeBuckets, useUniqueHistogramName, metricsPrefix, excludeRoutes } = options;
+        const { metricsPath, defaultMetricsInterval = 10000, durationBuckets, requestSizeBuckets, responseSizeBuckets, useUniqueHistogramName, metricsPrefix, excludeRoutes, includeQueryParams } = options;
         debug(`Init metrics middleware with options: ${JSON.stringify(options)}`);
         setupOptions.metricsRoute = metricsPath || '/metrics';
         setupOptions.excludeRoutes = excludeRoutes || [];
+        setupOptions.includeQueryParams = includeQueryParams;
 
         let metricNames = {
             http_request_duration_seconds: 'http_request_duration_seconds',
@@ -111,7 +111,7 @@ function _getRoute(req) {
         }
 
         if (route === '') {
-            route = req.originalUrl;
+            route = req.originalUrl.split('?')[0];
         } else {
             const splittedRoute = route.split('/');
             const splittedUrl = req.originalUrl.split('/');
@@ -119,6 +119,10 @@ function _getRoute(req) {
 
             const baseUrl = splittedUrl.slice(0, routeIndex).join('/');
             route = baseUrl + route;
+        }
+
+        if (setupOptions.includeQueryParams === true && Object.keys(req.query).length > 0) {
+            route = `${route}?${Object.keys(req.query).sort().map((queryParam) => `${queryParam}=<?>`).join('&')}`;
         }
     }
 

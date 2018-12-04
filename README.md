@@ -65,6 +65,7 @@ app.use(apiMetrics())
 - useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
 - metricsPrefix - A custom matrics names prefix, the package will add underscode between your prefix to the metric name.
 - excludeRoutes - Array of routes to exclude. Routes should be in your framework syntax.
+- includeQueryParams - A boolean that indicate if to include query params in route, the query parmas will be sorted in order to eliminate the number of unique labels.
 
 ### Access the metrics
 

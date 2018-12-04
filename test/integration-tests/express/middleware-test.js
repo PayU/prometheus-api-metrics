@@ -124,6 +124,22 @@ describe('when using express framework', () => {
                     });
             });
         });
+        describe('when calling a GET endpoint with query parmas', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/hello?test=test')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/hello",code="200"} 2');
+                    });
+            });
+        });
         describe('sub app', function () {
             describe('when calling a GET endpoint with path params', () => {
                 before(() => {
@@ -274,6 +290,22 @@ describe('when using express framework', () => {
                         });
                 });
             });
+            describe('when calling a GET endpoint with query parmas', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2?test=test')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/v2",code="500"} 2');
+                        });
+                });
+            });
         });
         describe('sub-sub app with error handler in the sub app', function () {
             describe('when calling a GET endpoint with path params and sub router', () => {
@@ -409,6 +441,22 @@ describe('when using express framework', () => {
                         });
                 });
             });
+            describe('when calling a GET endpoint with query parmas', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v3?test=test')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/v2/v3",code="500"} 2');
+                        });
+                });
+            });
         });
         describe('sub-sub app with error handler in the sub-sub app', function () {
             describe('when calling a GET endpoint with path params and sub router', () => {
@@ -541,6 +589,22 @@ describe('when using express framework', () => {
                         .expect(200)
                         .then((res) => {
                             expect(res.text).to.contain('method="GET",route="/v2/v4",code="500"');
+                        });
+                });
+            });
+            describe('when calling a GET endpoint with query parmas', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/v2/v4?test=test')
+                        .expect(500)
+                        .then((res) => {});
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/v2/v4",code="500"} 2');
                         });
                 });
             });
@@ -728,6 +792,95 @@ describe('when using express framework', () => {
                     .expect(200)
                     .then((res) => {
                         expect(res.text).to.not.contain('method="GET",route="/health/:id",code="200"');
+                    });
+            });
+        });
+    });
+    describe('when start up with include query params', () => {
+        let app;
+        before(() => {
+            config.useUniqueHistogramName = true;
+            delete require.cache[require.resolve('./server/express-server')];
+            delete require.cache[require.resolve('../../../src/metrics-middleware.js')];
+            app = require('./server/express-server-exclude-routes');
+        });
+        describe('when calling a GET endpoint with one query param', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/hello?test=test')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('method="GET",route="/hello?test=<?>",code="200"');
+                    });
+            });
+        });
+        describe('when calling a GET endpoint with two query params', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/hello?test1=test&test2=test2')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram and sort the query params', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('http_request_duration_seconds_count{method="GET",route="/hello?test1=<?>&test2=<?>",code="200"} 1');
+                    });
+            });
+        });
+        describe('when calling a GET endpoint with two query params in different order', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/hello?test2=test&test1=test2')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram and sort the query params', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('http_request_duration_seconds_count{method="GET",route="/hello?test1=<?>&test2=<?>",code="200"} 2');
+                    });
+            });
+        });
+        describe('when calling a GET endpoint with query param', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/health/1234?test=test')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.not.contain('method="GET",route="/health/:id?test=<?>",code="200"');
+                    });
+            });
+        });
+        describe('when calling a GET root endpoint with query param ', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/?test=test')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('http_request_size_bytes_count{method="GET",route="/?test=<?>",code="200"} 1');
                     });
             });
         });
