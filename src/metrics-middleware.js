@@ -102,10 +102,8 @@ function _handleResponse (req, res) {
 }
 
 function _getRoute(req) {
-    let route = req.baseUrl; // express
-    if (req.swagger) { // swagger
-        route = req.swagger.apiPath;
-    } else if (req.route) { // express
+    let route = req.baseUrl;
+    if (req.route) {
         if (req.route.path !== '/') {
             route = route + req.route.path;
         }
