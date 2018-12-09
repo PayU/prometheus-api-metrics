@@ -361,4 +361,45 @@ describe('metrics-middleware', () => {
             Prometheus.register.clear();
         });
     });
+    describe('when using middleware request baseUrl is undifined', function () {
+        let func, req, res, next, requestSizeObserve, responseTimeObserve, endTimerStub;
+        before(() => {
+            next = sinon.stub();
+            req = httpMocks.createRequest({
+                url: '/path',
+                method: 'GET',
+                body: {
+                    foo: 'bar'
+                },
+                headers: {
+                    'content-length': '25'
+                }
+            });
+            req.route = {
+                path: '/'
+            };
+            res = httpMocks.createResponse({
+                eventEmitter: EventEmitter
+            });
+            req.baseUrl = undefined;
+            res.statusCode = 200;
+            func = middleware();
+            endTimerStub = sinon.stub();
+            responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
+            func(req, res, next);
+            requestSizeObserve = sinon.spy(Prometheus.register.getSingleMetric('http_request_size_bytes'), 'observe');
+            res.emit('finish');
+        });
+        it('should update the histogram with the elapsed time and size', () => {
+            sinon.assert.calledWithExactly(requestSizeObserve, { method: 'GET', route: '/path', code: 200 }, 25);
+            sinon.assert.calledWith(responseTimeObserve, { method: 'GET' });
+            sinon.assert.calledWith(endTimerStub, { route: '/path', code: 200 });
+            sinon.assert.calledOnce(responseTimeObserve);
+            sinon.assert.calledOnce(endTimerStub);
+        });
+        after(() => {
+            requestSizeObserve.restore();
+            responseTimeObserve.restore();
+        });
+    });
 });
