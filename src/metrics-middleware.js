@@ -105,7 +105,7 @@ function _getRoute(req) {
     let route = req.baseUrl;
     if (req.route) {
         if (req.route.path !== '/') {
-            route = route + req.route.path;
+            route = route ? route + req.route.path : req.route.path;
         }
 
         if (!route || route === '') {
