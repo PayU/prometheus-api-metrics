@@ -185,9 +185,18 @@ describe('metrics-middleware', () => {
                 res.emit('finish');
             });
             it('should update the histogram with the elapsed time and size', () => {
-                sinon.assert.calledWithExactly(requestSizeObserve, { method: 'GET', route: '/path', code: 200 }, 25);
-                sinon.assert.calledWith(responseTimeObserve, { method: 'GET' });
-                sinon.assert.calledWith(endTimerStub, { route: '/path', code: 200 });
+                sinon.assert.calledWithExactly(requestSizeObserve, {
+                    method: 'GET',
+                    route: '/path',
+                    code: 200
+                }, 25);
+                sinon.assert.calledWith(responseTimeObserve, {
+                    method: 'GET'
+                });
+                sinon.assert.calledWith(endTimerStub, {
+                    route: '/path',
+                    code: 200
+                });
                 sinon.assert.calledOnce(responseTimeObserve);
                 sinon.assert.calledOnce(endTimerStub);
             });
@@ -233,9 +242,18 @@ describe('metrics-middleware', () => {
                 res.emit('finish');
             });
             it('should update the histogram with the elapsed time and size', () => {
-                sinon.assert.calledWithExactly(requestSizeObserve, { method: 'GET', route: '/path/:id', code: 200 }, 0);
-                sinon.assert.calledWith(responseTimeObserve, { method: 'GET' });
-                sinon.assert.calledWith(endTimerStub, { route: '/path/:id', code: 200 });
+                sinon.assert.calledWithExactly(requestSizeObserve, {
+                    method: 'GET',
+                    route: '/path/:id',
+                    code: 200
+                }, 0);
+                sinon.assert.calledWith(responseTimeObserve, {
+                    method: 'GET'
+                });
+                sinon.assert.calledWith(endTimerStub, {
+                    route: '/path/:id',
+                    code: 200
+                });
                 sinon.assert.calledOnce(endTimerStub);
                 sinon.assert.calledOnce(responseTimeObserve);
             });
@@ -275,9 +293,18 @@ describe('metrics-middleware', () => {
             res.emit('finish');
         });
         it('should update the histogram with the elapsed time and size', () => {
-            sinon.assert.calledWithExactly(responseSizeObserve, { method: 'GET', route: '/path', code: 200 }, 25);
-            sinon.assert.calledWith(responseTimeObserve, { method: 'GET' });
-            sinon.assert.calledWith(endTimerStub, { route: '/path', code: 200 });
+            sinon.assert.calledWithExactly(responseSizeObserve, {
+                method: 'GET',
+                route: '/path',
+                code: 200
+            }, 25);
+            sinon.assert.calledWith(responseTimeObserve, {
+                method: 'GET'
+            });
+            sinon.assert.calledWith(endTimerStub, {
+                route: '/path',
+                code: 200
+            });
             sinon.assert.calledOnce(responseTimeObserve);
             sinon.assert.calledOnce(endTimerStub);
         });
@@ -311,9 +338,18 @@ describe('metrics-middleware', () => {
             res.emit('finish');
         });
         it('should update the histogram with the elapsed time and size', () => {
-            sinon.assert.calledWithExactly(responseSizeObserve, { method: 'GET', route: '/path', code: 200 }, 0);
-            sinon.assert.calledWith(responseTimeObserve, { method: 'GET' });
-            sinon.assert.calledWith(endTimerStub, { route: '/path', code: 200 });
+            sinon.assert.calledWithExactly(responseSizeObserve, {
+                method: 'GET',
+                route: '/path',
+                code: 200
+            }, 0);
+            sinon.assert.calledWith(responseTimeObserve, {
+                method: 'GET'
+            });
+            sinon.assert.calledWith(endTimerStub, {
+                route: '/path',
+                code: 200
+            });
             sinon.assert.calledOnce(responseTimeObserve);
             sinon.assert.calledOnce(endTimerStub);
         });
@@ -333,7 +369,12 @@ describe('metrics-middleware', () => {
         it('should set the updated route', () => {
             const end = sinon.stub();
             const set = sinon.stub();
-            func({ url: '/v1/metrics' }, { end: end, set: set });
+            func({
+                url: '/v1/metrics'
+            }, {
+                end: end,
+                set: set
+            });
             sinon.assert.calledOnce(end);
             sinon.assert.calledWith(end, Prometheus.register.metrics());
             sinon.assert.calledWith(set, 'Content-Type', Prometheus.register.contentType);
@@ -396,9 +437,18 @@ describe('metrics-middleware', () => {
             res.emit('finish');
         });
         it('should update the histogram with the elapsed time and size', () => {
-            sinon.assert.calledWithExactly(requestSizeObserve, { method: 'GET', route: '/path', code: 200 }, 25);
-            sinon.assert.calledWith(responseTimeObserve, { method: 'GET' });
-            sinon.assert.calledWith(endTimerStub, { route: '/path', code: 200 });
+            sinon.assert.calledWithExactly(requestSizeObserve, {
+                method: 'GET',
+                route: '/path',
+                code: 200
+            }, 25);
+            sinon.assert.calledWith(responseTimeObserve, {
+                method: 'GET'
+            });
+            sinon.assert.calledWith(endTimerStub, {
+                route: '/path',
+                code: 200
+            });
             sinon.assert.calledOnce(responseTimeObserve);
             sinon.assert.calledOnce(endTimerStub);
         });
@@ -438,15 +488,78 @@ describe('metrics-middleware', () => {
             res.emit('finish');
         });
         it('should update the histogram with the elapsed time and size', () => {
-            sinon.assert.calledWithExactly(requestSizeObserve, { method: 'GET', route: '/path/:id', code: 200 }, 25);
-            sinon.assert.calledWith(responseTimeObserve, { method: 'GET' });
-            sinon.assert.calledWith(endTimerStub, { route: '/path/:id', code: 200 });
+            sinon.assert.calledWithExactly(requestSizeObserve, {
+                method: 'GET',
+                route: '/path/:id',
+                code: 200
+            }, 25);
+            sinon.assert.calledWith(responseTimeObserve, {
+                method: 'GET'
+            });
+            sinon.assert.calledWith(endTimerStub, {
+                route: '/path/:id',
+                code: 200
+            });
             sinon.assert.calledOnce(responseTimeObserve);
             sinon.assert.calledOnce(endTimerStub);
         });
         after(() => {
             requestSizeObserve.restore();
             responseTimeObserve.restore();
+        });
+    });
+    describe('when _getConnections called', function () {
+        let middleware, server;
+        before(function () {
+            middleware = rewire('../../src/metrics-middleware');
+            server = {
+                getConnections: sinon.stub()
+            };
+        });
+        describe('when there is no server', function () {
+            before(function () {
+                middleware.__get__('_getConnections')();
+            });
+            it('should not call getConenctions', function () {
+                sinon.assert.notCalled(server.getConnections);
+            });
+        });
+        describe('when there is server', function () {
+            describe('when getConnections return count', function () {
+                before(function () {
+                    const setupOptions = middleware.__get__('setupOptions');
+                    server.getConnections = sinon.stub().yields(null, 1);
+                    setupOptions.server = server;
+                    setupOptions.numberOfConnectionsGauge = {
+                        set: sinon.stub()
+                    };
+                    middleware.__set__('setupOptions', setupOptions);
+                    middleware.__get__('_getConnections')();
+                });
+                it('should call numberOfConnectionsGauge.set with count', function () {
+                    sinon.assert.calledOnce(server.getConnections);
+                    const setupOptions = middleware.__get__('setupOptions');
+                    sinon.assert.calledOnce(setupOptions.numberOfConnectionsGauge.set);
+                    sinon.assert.calledWith(setupOptions.numberOfConnectionsGauge.set, 1);
+                });
+            });
+            describe('when getConnections return count', function () {
+                before(function () {
+                    const setupOptions = middleware.__get__('setupOptions');
+                    server.getConnections = sinon.stub().yields(new Error('error'));
+                    setupOptions.server = server;
+                    setupOptions.numberOfConnectionsGauge = {
+                        set: sinon.stub()
+                    };
+                    middleware.__set__('setupOptions', setupOptions);
+                    middleware.__get__('_getConnections')();
+                });
+                it('should not call numberOfConnectionsGauge.set with count', function () {
+                    sinon.assert.calledOnce(server.getConnections);
+                    const setupOptions = middleware.__get__('setupOptions');
+                    sinon.assert.notCalled(setupOptions.numberOfConnectionsGauge.set);
+                });
+            });
         });
     });
 });

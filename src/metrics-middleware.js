@@ -154,7 +154,7 @@ function _collectDefaultServerMetrics(timeout) {
         help: 'Number of open connections to the server'
     });
     if (setupOptions.server) {
-        setupOptions.serverMetricsInterval = setInterval(_getConnections, timeout).unref();
+        setInterval(_getConnections, timeout).unref();
     }
 }
 
