@@ -72,6 +72,22 @@ describe('when using express framework', () => {
                     });
             });
         });
+        describe('when calling a GET endpoint', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/hello')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add number of open connections', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('expressjs_number_of_open_connections');
+                    });
+            });
+        });
         describe('when calling a GET endpoint with path params', () => {
             before(() => {
                 return supertest(app)
@@ -136,7 +152,7 @@ describe('when using express framework', () => {
                     .get('/metrics')
                     .expect(200)
                     .then((res) => {
-                        expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/hello",code="200"} 2');
+                        expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/hello",code="200"} 3');
                     });
             });
         });

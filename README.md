@@ -41,6 +41,7 @@ API and process monitoring with [Prometheus](https://prometheus.io) for Node.js 
    - Response size in bytes
    - Add prefix to metrics names - custom or project name
    - Exclude specifc routes from being collect
+   - Number of open connections to the server
 - Process Metrics as recommended by Prometheus [itself](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors)
 - Endpoint to retrive the matrics - used for Prometheus scraping
    - Prometheus format
