@@ -148,10 +148,10 @@ function _getRoute(req) {
 }
 
 function _collectDefaultServerMetrics(timeout) {
-    const NUMBER_OF_CONNECTIONS_METRICS_NAME = 'nodejs_number_of_open_connections';
+    const NUMBER_OF_CONNECTIONS_METRICS_NAME = 'expressjs_number_of_open_connections';
     setupOptions.numberOfConnectionsGauge = Prometheus.register.getSingleMetric(NUMBER_OF_CONNECTIONS_METRICS_NAME) || new Prometheus.Gauge({
         name: NUMBER_OF_CONNECTIONS_METRICS_NAME,
-        help: 'Number of open connections to the server'
+        help: 'Number of open connections to the Express.js server'
     });
     if (setupOptions.server) {
         setInterval(_getConnections, timeout).unref();

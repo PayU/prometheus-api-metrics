@@ -84,7 +84,7 @@ describe('when using express framework', () => {
                     .get('/metrics')
                     .expect(200)
                     .then((res) => {
-                        expect(res.text).to.contain('nodejs_number_of_open_connections');
+                        expect(res.text).to.contain('expressjs_number_of_open_connections');
                     });
             });
         });
