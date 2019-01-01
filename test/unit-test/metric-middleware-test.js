@@ -163,6 +163,7 @@ describe('metrics-middleware', () => {
             req.route = {
                 path: '/'
             };
+            req.socket = {};
             res = httpMocks.createResponse({
                 eventEmitter: EventEmitter
             });
@@ -210,6 +211,7 @@ describe('metrics-middleware', () => {
             req.route = {
                 path: '/:id'
             };
+            req.socket = {};
             res = httpMocks.createResponse({
                 eventEmitter: EventEmitter
             });
@@ -257,6 +259,7 @@ describe('metrics-middleware', () => {
             req.route = {
                 path: '/'
             };
+            req.socket = {};
             res = httpMocks.createResponse({
                 eventEmitter: EventEmitter
             });
@@ -295,6 +298,7 @@ describe('metrics-middleware', () => {
             req.route = {
                 path: '/'
             };
+            req.socket = {};
             res = httpMocks.createResponse({
                 eventEmitter: EventEmitter
             });
@@ -375,6 +379,7 @@ describe('metrics-middleware', () => {
                     'content-length': '25'
                 }
             });
+            req.socket = {};
             req.route = {
                 path: '/'
             };
@@ -416,6 +421,7 @@ describe('metrics-middleware', () => {
                     'content-length': '25'
                 }
             });
+            req.socket = {};
             req.route = {
                 path: '/:id'
             };

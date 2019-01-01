@@ -13,6 +13,7 @@ module.exports = (appVersion, projectName) => {
         setupOptions.metricsRoute = metricsPath || '/metrics';
         setupOptions.excludeRoutes = excludeRoutes || [];
         setupOptions.includeQueryParams = includeQueryParams;
+        setupOptions.defaultMetricsInterval = defaultMetricsInterval;
 
         let metricNames = {
             http_request_duration_seconds: 'http_request_duration_seconds',
@@ -63,6 +64,10 @@ module.exports = (appVersion, projectName) => {
 };
 
 function middleware (req, res, next) {
+    if (!setupOptions.server && req.socket) {
+        setupOptions.server = req.socket.server;
+        _collectDefaultServerMetrics(setupOptions.defaultMetricsInterval);
+    }
     if (req.url === setupOptions.metricsRoute) {
         debug('Request to /metrics endpoint');
         res.set('Content-Type', Prometheus.register.contentType);
@@ -140,4 +145,27 @@ function _getRoute(req) {
     }
 
     return route;
+}
+
+function _collectDefaultServerMetrics(timeout) {
+    const NUMBER_OF_CONNECTIONS_METRICS_NAME = 'nodejs_number_of_open_connections';
+    setupOptions.numberOfConnectionsGauge = Prometheus.register.getSingleMetric(NUMBER_OF_CONNECTIONS_METRICS_NAME) || new Prometheus.Gauge({
+        name: NUMBER_OF_CONNECTIONS_METRICS_NAME,
+        help: 'Number of open connections to the server'
+    });
+    if (setupOptions.server) {
+        setupOptions.serverMetricsInterval = setInterval(_getConnections, timeout).unref();
+    }
+}
+
+function _getConnections() {
+    if (setupOptions.server) {
+        setupOptions.server.getConnections((error, count) => {
+            if (error) {
+                debug('Error while collection number of open connections', error);
+            } else {
+                setupOptions.numberOfConnectionsGauge.set(count);
+            }
+        });
+    }
 }
