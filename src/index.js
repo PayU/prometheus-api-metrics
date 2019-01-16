@@ -8,3 +8,5 @@ const projectName = metricsMiddleware.exports.name.replace(/-/g, '_');
 
 module.exports = require('./metrics-middleware')(appVersion, projectName);
 module.exports.HttpMetricsCollector = require('./request-response-collector')(projectName);
+module.exports.KoaMiddleware = require('./metrics-middleware')(appVersion, projectName, 'koa');
+module.exports.expressMiddleware = require('./metrics-middleware')(appVersion, projectName, 'express');
