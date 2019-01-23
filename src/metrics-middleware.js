@@ -4,7 +4,8 @@ const Prometheus = require('prom-client');
 require('pkginfo')(module, ['name']);
 const debug = require('debug')(module.exports.name);
 const utils = require('./utils');
-const ExpressMiddleware = require('./express-middelware');
+const ExpressMiddleware = require('./express-middleware');
+const KoaMiddleware = require('./koa-middleware');
 const setupOptions = {};
 
 module.exports = (appVersion, projectName, framework = 'express') => {
@@ -60,17 +61,18 @@ module.exports = (appVersion, projectName, framework = 'express') => {
             buckets: responseSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000] // buckets for response time from 5 bytes to 10000 bytes
         });
 
-        return frameworkMiddeware(framework);
+        return frameworkMiddleware(framework);
     };
 };
 
-function frameworkMiddeware (framework) {
+function frameworkMiddleware (framework) {
     switch (framework) {
-        case 'koa':
-            return require('./koa-middleware')(setupOptions);
-        default: {
-                const m = new ExpressMiddleware(setupOptions);
-                return m.middleware.bind(m);
-            }
+    case 'koa':
+        const middleware = new KoaMiddleware(setupOptions);
+        return middleware.middleware.bind(middleware);
+    default: {
+        const middleware = new ExpressMiddleware(setupOptions);
+        return middleware.middleware.bind(middleware);
+    }
     }
 }

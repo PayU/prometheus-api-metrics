@@ -3,7 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const middleware = require('../../../../src/index.js');
+const middleware = require('../../../../src/index.js').expressMiddleware;
 
 app.use(middleware({ excludeRoutes: ['/health', '/health/:id'], includeQueryParams: true }));
 app.use(bodyParser.json());
