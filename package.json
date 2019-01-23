@@ -5,9 +5,9 @@
   "author": "Idan Tovi",
   "scripts": {
     "unit-tests": "nyc mocha ./test/unit-test/*-test.js",
+    "no-koa-test": "nyc mocha ./test/unit-test/*-test.js ./test/integration-tests/express/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
     "test": "nyc mocha ./test/unit-test/*-test.js ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
-    "integration-tests-express": "mocha ./test/integration-tests/express/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
-    "integration-tests-koa": "mocha ./test/integration-tests/koa/*-test.js --require ts-node/register test/integration-tests/koa/nest-js/*.spec.ts",
+    "integration-tests": "nyc mocha ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
   "main": "src/index.js",
