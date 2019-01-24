@@ -4,9 +4,11 @@ const Prometheus = require('prom-client');
 require('pkginfo')(module, ['name']);
 const debug = require('debug')(module.exports.name);
 const utils = require('./utils');
+const ExpressMiddleware = require('./express-middleware');
+const KoaMiddleware = require('./koa-middleware');
 const setupOptions = {};
 
-module.exports = (appVersion, projectName) => {
+module.exports = (appVersion, projectName, framework = 'express') => {
     return (options = {}) => {
         const { metricsPath, defaultMetricsInterval = 10000, durationBuckets, requestSizeBuckets, responseSizeBuckets, useUniqueHistogramName, metricsPrefix, excludeRoutes, includeQueryParams } = options;
         debug(`Init metrics middleware with options: ${JSON.stringify(options)}`);
@@ -59,113 +61,18 @@ module.exports = (appVersion, projectName) => {
             buckets: responseSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000] // buckets for response time from 5 bytes to 10000 bytes
         });
 
-        return middleware;
+        return frameworkMiddleware(framework);
     };
 };
 
-function middleware (req, res, next) {
-    if (!setupOptions.server && req.socket) {
-        setupOptions.server = req.socket.server;
-        _collectDefaultServerMetrics(setupOptions.defaultMetricsInterval);
+function frameworkMiddleware (framework) {
+    switch (framework) {
+    case 'koa':
+        const middleware = new KoaMiddleware(setupOptions);
+        return middleware.middleware.bind(middleware);
+    default: {
+        const middleware = new ExpressMiddleware(setupOptions);
+        return middleware.middleware.bind(middleware);
     }
-    if (req.url === setupOptions.metricsRoute) {
-        debug('Request to /metrics endpoint');
-        res.set('Content-Type', Prometheus.register.contentType);
-        return res.end(Prometheus.register.metrics());
-    }
-    if (req.url === `${setupOptions.metricsRoute}.json`) {
-        debug('Request to /metrics endpoint');
-        return res.json(Prometheus.register.getMetricsAsJSON());
-    }
-
-    req.metrics = {
-        timer: setupOptions.responseTimeHistogram.startTimer({method: req.method}),
-        contentLength: parseInt(req.get('content-length')) || 0
-    };
-
-    debug(`Set start time and content length for request. url: ${req.url}, method: ${req.method}`);
-
-    res.once('finish', () => {
-        debug('on finish.');
-        _handleResponse(req, res);
-    });
-
-    return next();
-}
-
-function _handleResponse (req, res) {
-    const responseLength = parseInt(res.get('Content-Length')) || 0;
-
-    const route = _getRoute(req);
-
-    if (route && utils.shouldLogMetrics(setupOptions.excludeRoutes, route)) {
-        setupOptions.requestSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, req.metrics.contentLength);
-        req.metrics.timer({ route: route, code: res.statusCode });
-        setupOptions.responseSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseLength);
-        debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}`);
-    }
-}
-
-function _getRoute(req) {
-    let route = req.baseUrl;
-    if (req.route) {
-        if (req.route.path !== '/') {
-            route = route ? route + req.route.path : req.route.path;
-        }
-
-        if (!route || route === '') {
-            route = req.originalUrl.split('?')[0];
-        } else {
-            const splittedRoute = route.split('/');
-            const splittedUrl = req.originalUrl.split('/');
-            const routeIndex = splittedUrl.length - splittedRoute.length + 1;
-
-            const baseUrl = splittedUrl.slice(0, routeIndex).join('/');
-            route = baseUrl + route;
-        }
-
-        if (setupOptions.includeQueryParams === true && Object.keys(req.query).length > 0) {
-            route = `${route}?${Object.keys(req.query).sort().map((queryParam) => `${queryParam}=<?>`).join('&')}`;
-        }
-    }
-
-    // nest.js - build request url pattern if exists
-    if (typeof req.params === 'object') {
-        Object.keys(req.params).forEach((paramName) => {
-            route = route.replace(req.params[paramName], ':' + paramName);
-        });
-    }
-
-    // this condition will evaluate to true only in
-    // express framework and no route was found for the request. if we log this metrics
-    // we'll risk in a memory leak since the route is not a pattern but a hardcoded string.
-    if (!route || route === '') {
-    // if (!req.route && res && res.statusCode === 404) {
-        route = 'N/A';
-    }
-
-    return route;
-}
-
-function _collectDefaultServerMetrics(timeout) {
-    const NUMBER_OF_CONNECTIONS_METRICS_NAME = 'expressjs_number_of_open_connections';
-    setupOptions.numberOfConnectionsGauge = Prometheus.register.getSingleMetric(NUMBER_OF_CONNECTIONS_METRICS_NAME) || new Prometheus.Gauge({
-        name: NUMBER_OF_CONNECTIONS_METRICS_NAME,
-        help: 'Number of open connections to the Express.js server'
-    });
-    if (setupOptions.server) {
-        setInterval(_getConnections, timeout).unref();
-    }
-}
-
-function _getConnections() {
-    if (setupOptions.server) {
-        setupOptions.server.getConnections((error, count) => {
-            if (error) {
-                debug('Error while collection number of open connections', error);
-            } else {
-                setupOptions.numberOfConnectionsGauge.set(count);
-            }
-        });
     }
 }

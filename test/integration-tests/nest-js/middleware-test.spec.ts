@@ -24,6 +24,9 @@ describe('when using nest-js framework', () => {
     });
     after(() => {
         Prometheus.register.clear();
+
+        delete require.cache[require.resolve('../../../src/index.js')];
+        delete require.cache[require.resolve('../../../src/metrics-middleware.js')];
     });
     describe('when calling a POST user/:user_id endpoint with user_id as pattern', () => {
         before(() => {

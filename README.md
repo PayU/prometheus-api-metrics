@@ -21,8 +21,8 @@
   - [Usage](#usage-1)
     - [request](#request)
     - [request-promise-native](#request-promise-native)
-  - [Configuration](#configuration)
 - [Test](#test)
+- [Usage in koa](#usage-in-koa)
 - [Prometheus Examples Queries](#prometheus-examples-queries)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -31,7 +31,7 @@
 
 API and process monitoring with [Prometheus](https://prometheus.io) for Node.js micro-service
 
-**Note: Prometheus (`prom-client`) is a peer defendecy since 1.x version**
+**Note: Prometheus (`prom-client`) is a peer dependency since 1.x version**
 
 ## Features
 
@@ -40,10 +40,10 @@ API and process monitoring with [Prometheus](https://prometheus.io) for Node.js 
    - Request size in bytes
    - Response size in bytes
    - Add prefix to metrics names - custom or project name
-   - Exclude specifc routes from being collect
+   - Exclude specific routes from being collect
    - Number of open connections to the server
 - Process Metrics as recommended by Prometheus [itself](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors)
-- Endpoint to retrive the matrics - used for Prometheus scraping
+- Endpoint to retrieve the metrics - used for Prometheus scraping
    - Prometheus format
    - JSON format (`${path}.json`)
 - Support custom metrics
@@ -59,14 +59,14 @@ app.use(apiMetrics())
 ### Options
 
 - metricsPath - Path to access the metrics. `default: /metrics`
-- defaultMetricsInterval - the inverval to collect the process metrics in milliseconds. `default: 10000`
+- defaultMetricsInterval - the interval to collect the process metrics in milliseconds. `default: 10000`
 - durationBuckets - Buckets for response time in seconds. `default: [0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]`
 - requestSizeBuckets - Buckets for request size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
 - responseSizeBuckets - Buckets for response size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
 - useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
-- metricsPrefix - A custom matrics names prefix, the package will add underscode between your prefix to the metric name.
+- metricsPrefix - A custom metrics names prefix, the package will add underscore between your prefix to the metric name.
 - excludeRoutes - Array of routes to exclude. Routes should be in your framework syntax.
-- includeQueryParams - A boolean that indicate if to include query params in route, the query parmas will be sorted in order to eliminate the number of unique labels.
+- includeQueryParams - A boolean that indicate if to include query params in route, the query parameters will be sorted in order to eliminate the number of unique labels.
 
 ### Access the metrics
 
@@ -121,11 +121,11 @@ For more info about the Node.js Prometheus client you can read [here](https://gi
 This will work only if you use the default Prometheus registry - do not use `new Prometheus.Registry()`
 
 ## Request.js HTTP request duration collector
-This feature enbales you to easily process the result of Request.js timings feature.
+This feature enables you to easily process the result of Request.js timings feature.
 
 ### Usage
 ####Initialize
-You can choose to initialozed this functionality as a Class or not
+You can choose to initialized this functionality as a Class or not
 
 **Class:**
 ```js
@@ -144,7 +144,7 @@ HttpMetricsCollector.init();
 - durationBuckets - the histogram buckets for request duration.
 - countClientErrors - Boolean that indicates whether to collect client errors as Counter, this counter will have target and error code labels.
 - useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
-- prefix - A custom matrics names prefix, the package will add underscode between your prefix to the metric name.
+- prefix - A custom metrics names prefix, the package will add underscore between your prefix to the metric name.
 
 
 For Example:
@@ -173,6 +173,9 @@ return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f0
 request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { target: 'www.google.com', route: 'v2/:id' }, time: true }, (err, response) => {...};
 });
 ```
+
+## Usage in koa
+This package supports koa server that uses [`koa-router`](https://www.npmjs.com/package/koa-router) and [`koa-bodyparser`](https://www.npmjs.com/package/koa-bodyparser)
 
 
 ## Test

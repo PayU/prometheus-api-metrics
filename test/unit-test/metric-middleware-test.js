@@ -9,6 +9,9 @@ const httpMocks = require('node-mocks-http');
 const EventEmitter = require('events').EventEmitter;
 
 describe('metrics-middleware', () => {
+    after(() => {
+        Prometheus.register.clear();
+    });
     describe('when calling the function with options', () => {
         before(() => {
             middleware({
@@ -390,8 +393,8 @@ describe('metrics-middleware', () => {
             firstFunction = middleware();
             secondFunction = middleware();
         });
-        it('should return the same middleware fundtion', () => {
-            expect(firstFunction).to.equal(secondFunction);
+        it('should not return the same middleware fundtion', () => {
+            expect(firstFunction).to.not.equal(secondFunction);
         });
         it('should have http_request_size_bytes with the right labels', () => {
             expect(Prometheus.register.getSingleMetric('http_request_size_bytes').labelNames).to.have.members(['method', 'route', 'code']);
@@ -509,55 +512,50 @@ describe('metrics-middleware', () => {
         });
     });
     describe('when _getConnections called', function () {
-        let middleware, server;
+        let Middleware, server, numberOfConnectionsGauge;
         before(function () {
-            middleware = rewire('../../src/metrics-middleware');
+            Middleware = require('../../src/express-middleware');
             server = {
                 getConnections: sinon.stub()
             };
         });
         describe('when there is no server', function () {
             before(function () {
-                middleware.__get__('_getConnections')();
+                let expressMiddleware = new Middleware({});
+                expressMiddleware._getConnections();
             });
-            it('should not call getConenctions', function () {
+            it('should not call getConnections', function () {
                 sinon.assert.notCalled(server.getConnections);
             });
         });
         describe('when there is server', function () {
             describe('when getConnections return count', function () {
                 before(function () {
-                    const setupOptions = middleware.__get__('setupOptions');
-                    server.getConnections = sinon.stub().yields(null, 1);
-                    setupOptions.server = server;
-                    setupOptions.numberOfConnectionsGauge = {
+                    numberOfConnectionsGauge = {
                         set: sinon.stub()
                     };
-                    middleware.__set__('setupOptions', setupOptions);
-                    middleware.__get__('_getConnections')();
+                    server.getConnections = sinon.stub().yields(null, 1);
+                    let koaMiddleware = new Middleware({server: server, numberOfConnectionsGauge: numberOfConnectionsGauge});
+                    koaMiddleware._getConnections();
                 });
                 it('should call numberOfConnectionsGauge.set with count', function () {
                     sinon.assert.calledOnce(server.getConnections);
-                    const setupOptions = middleware.__get__('setupOptions');
-                    sinon.assert.calledOnce(setupOptions.numberOfConnectionsGauge.set);
-                    sinon.assert.calledWith(setupOptions.numberOfConnectionsGauge.set, 1);
+                    sinon.assert.calledOnce(numberOfConnectionsGauge.set);
+                    sinon.assert.calledWith(numberOfConnectionsGauge.set, 1);
                 });
             });
             describe('when getConnections return count', function () {
                 before(function () {
-                    const setupOptions = middleware.__get__('setupOptions');
-                    server.getConnections = sinon.stub().yields(new Error('error'));
-                    setupOptions.server = server;
-                    setupOptions.numberOfConnectionsGauge = {
+                    numberOfConnectionsGauge = {
                         set: sinon.stub()
                     };
-                    middleware.__set__('setupOptions', setupOptions);
-                    middleware.__get__('_getConnections')();
+                    server.getConnections = sinon.stub().yields(new Error('error'));
+                    let koaMiddleware = new Middleware({server: server, numberOfConnectionsGauge: numberOfConnectionsGauge});
+                    koaMiddleware._getConnections();
                 });
                 it('should not call numberOfConnectionsGauge.set with count', function () {
                     sinon.assert.calledOnce(server.getConnections);
-                    const setupOptions = middleware.__get__('setupOptions');
-                    sinon.assert.notCalled(setupOptions.numberOfConnectionsGauge.set);
+                    sinon.assert.notCalled(numberOfConnectionsGauge.set);
                 });
             });
         });

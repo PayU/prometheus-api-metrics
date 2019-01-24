@@ -4,14 +4,17 @@ const expect = require('chai').expect;
 const supertest = require('supertest');
 let app, config;
 
-describe('when using express framework', () => {
+describe('when using koa framework', () => {
     before(() => {
-        app = require('./server/express-server');
+        app = require('./server/koa-server');
+        app = app.listen(3000);
         config = require('./server/config');
     });
     after(() => {
+        app.close();
         Prometheus.register.clear();
-        delete require.cache[require.resolve('./server/express-server')];
+
+        delete require.cache[require.resolve('./server/koa-server')];
         delete require.cache[require.resolve('../../../src/index.js')];
         delete require.cache[require.resolve('../../../src/metrics-middleware.js')];
     });
@@ -85,7 +88,7 @@ describe('when using express framework', () => {
                     .get('/metrics')
                     .expect(200)
                     .then((res) => {
-                        expect(res.text).to.contain('expressjs_number_of_open_connections');
+                        expect(res.text).to.contain('koajs_number_of_open_connections');
                     });
             });
         });
@@ -328,7 +331,7 @@ describe('when using express framework', () => {
             describe('when calling a GET endpoint with path params and sub router', () => {
                 before(() => {
                     return supertest(app)
-                        .get('/v2/v3/hello/200')
+                        .get('/v2/v3/hello/200/')
                         .expect(200)
                         .then((res) => {});
                 });
@@ -684,58 +687,58 @@ describe('when using express framework', () => {
                     JSON.parse(res.text);
                 });
         });
-        after(() => {
-            const Prometheus = require('prom-client');
-            Prometheus.register.clear();
-        });
     });
     describe('when start up with unique metric names', () => {
-        let app;
         before(() => {
+            app.close();
             config.useUniqueHistogramName = true;
-            delete require.cache[require.resolve('./server/express-server')];
+            delete require.cache[require.resolve('./server/koa-server')];
             delete require.cache[require.resolve('../../../src/metrics-middleware.js')];
-            app = require('./server/express-server');
+            app = require('./server/koa-server');
+            app = app.listen(3000);
         });
+        // after(() => {
+        //     app.close();
+        // });
         it('should populate default metrics', () => {
             return supertest(app)
                 .get('/metrics')
                 .expect(200)
                 .then((res) => {
-                    expect(res.text).to.contain('express_test_process_cpu_user_seconds_total');
-                    expect(res.text).to.contain('express_test_process_cpu_system_seconds_total');
-                    expect(res.text).to.contain('express_test_process_cpu_seconds_total');
-                    expect(res.text).to.contain('express_test_process_start_time_seconds');
-                    expect(res.text).to.contain('express_test_process_resident_memory_bytes');
-                    expect(res.text).to.contain('express_test_nodejs_eventloop_lag_seconds');
+                    expect(res.text).to.contain('koa_test_process_cpu_user_seconds_total');
+                    expect(res.text).to.contain('koa_test_process_cpu_system_seconds_total');
+                    expect(res.text).to.contain('koa_test_process_cpu_seconds_total');
+                    expect(res.text).to.contain('koa_test_process_start_time_seconds');
+                    expect(res.text).to.contain('koa_test_process_resident_memory_bytes');
+                    expect(res.text).to.contain('koa_test_nodejs_eventloop_lag_seconds');
 
-                    expect(res.text).to.contain('express_test_nodejs_active_handles_total');
-                    expect(res.text).to.contain('express_test_nodejs_active_requests_total');
+                    expect(res.text).to.contain('koa_test_nodejs_active_handles_total');
+                    expect(res.text).to.contain('koa_test_nodejs_active_requests_total');
 
-                    expect(res.text).to.contain('express_test_nodejs_heap_size_total_bytes');
-                    expect(res.text).to.contain('express_test_nodejs_heap_size_used_bytes');
-                    expect(res.text).to.contain('express_test_nodejs_external_memory_bytes');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_size_total_bytes');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_size_used_bytes');
+                    expect(res.text).to.contain('koa_test_nodejs_external_memory_bytes');
 
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="new"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="old"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="code"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="map"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="large_object"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_total_bytes{space="new"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_total_bytes{space="old"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_total_bytes{space="code"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_total_bytes{space="map"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_total_bytes{space="large_object"}');
 
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="new"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="old"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="code"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="map"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="large_object"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_used_bytes{space="new"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_used_bytes{space="old"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_used_bytes{space="code"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_used_bytes{space="map"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_used_bytes{space="large_object"}');
 
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="new"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="old"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="code"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="map"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="large_object"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_available_bytes{space="new"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_available_bytes{space="old"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_available_bytes{space="code"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_available_bytes{space="map"}');
+                    expect(res.text).to.contain('koa_test_nodejs_heap_space_size_available_bytes{space="large_object"}');
 
-                    expect(res.text).to.contain('express_test_nodejs_version_info');
-                    expect(res.text).to.contain('express_test_app_version{version="1.0.0",major="1",minor="0",patch="0"}');
+                    expect(res.text).to.contain('koa_test_nodejs_version_info');
+                    expect(res.text).to.contain('koa_test_app_version{version="1.0.0",major="1",minor="0",patch="0"}');
                 });
         });
         describe('when calling a GET endpoint', () => {
@@ -751,21 +754,22 @@ describe('when using express framework', () => {
                     .expect(200)
                     .then((res) => {
                         expect(res.text).to.contain('method="GET",route="/hello",code="200"');
-                        expect(res.text).to.contain('express_test');
+                        expect(res.text).to.contain('koa_test');
                     });
             });
         });
     });
     describe('when start up with exclude route', () => {
-        let app;
         before(() => {
+            app.close();
             config.useUniqueHistogramName = true;
-            delete require.cache[require.resolve('./server/express-server')];
+            delete require.cache[require.resolve('./server/koa-server')];
             delete require.cache[require.resolve('../../../src/metrics-middleware.js')];
+            app = require('./server/koa-server-exclude-routes');
+            app = app.listen(3000);
         });
         describe('when calling a GET endpoint', () => {
             before(() => {
-                app = require('./server/express-server-exclude-routes');
                 return supertest(app)
                     .get('/hello')
                     .expect(200)
@@ -814,12 +818,13 @@ describe('when using express framework', () => {
         });
     });
     describe('when start up with include query params', () => {
-        let app;
         before(() => {
+            app.close();
             config.useUniqueHistogramName = true;
-            delete require.cache[require.resolve('./server/express-server')];
+            delete require.cache[require.resolve('./server/koa-server')];
             delete require.cache[require.resolve('../../../src/metrics-middleware.js')];
-            app = require('./server/express-server-exclude-routes');
+            app = require('./server/koa-server-exclude-routes');
+            app = app.listen(3000);
         });
         describe('when calling a GET endpoint with one query param', () => {
             before(() => {
