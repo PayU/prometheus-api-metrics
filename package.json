@@ -93,6 +93,7 @@
     "prometheus",
     "api",
     "express",
+    "koa",
     "metrics"
   ],
   "license": "Apache-2.0",
