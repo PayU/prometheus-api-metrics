@@ -16,7 +16,7 @@ class KoaMiddleware {
             help: 'Number of open connections to the Koa.js server'
         });
         if (this.setupOptions.server) {
-            setInterval(this._getConnections, timeout).unref();
+            setInterval(this._getConnections.bind(this), timeout).unref();
         }
     }
     _getConnections() {
