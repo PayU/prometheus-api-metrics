@@ -512,7 +512,7 @@ describe('metrics-middleware', () => {
         });
     });
     describe('when _getConnections called', function () {
-        let Middleware, server, numberOfConnectionsGauge;
+        let Middleware, server, numberOfConnectionsGauge, expressMiddleware, promethusStub;
         before(function () {
             Middleware = require('../../src/express-middleware');
             server = {
@@ -529,33 +529,45 @@ describe('metrics-middleware', () => {
             });
         });
         describe('when there is server', function () {
+            after(function () {
+                promethusStub.restore();
+            });
+            afterEach(function () {
+                numberOfConnectionsGauge.set.resetHistory();
+            });
+            before(function () {
+                numberOfConnectionsGauge = {
+                    set: sinon.stub()
+                };
+                promethusStub = sinon.stub(Prometheus.register, 'getSingleMetric').returns(numberOfConnectionsGauge);
+            });
             describe('when getConnections return count', function () {
                 before(function () {
-                    numberOfConnectionsGauge = {
-                        set: sinon.stub()
-                    };
                     server.getConnections = sinon.stub().yields(null, 1);
-                    let koaMiddleware = new Middleware({server: server, numberOfConnectionsGauge: numberOfConnectionsGauge});
-                    koaMiddleware._getConnections();
+                    expressMiddleware = new Middleware({server: server, numberOfConnectionsGauge: numberOfConnectionsGauge});
+                    expressMiddleware._collectDefaultServerMetrics(1000);
                 });
-                it('should call numberOfConnectionsGauge.set with count', function () {
-                    sinon.assert.calledOnce(server.getConnections);
-                    sinon.assert.calledOnce(numberOfConnectionsGauge.set);
-                    sinon.assert.calledWith(numberOfConnectionsGauge.set, 1);
+                it('should call numberOfConnectionsGauge.set with count', function (done) {
+                    setTimeout(() => {
+                        sinon.assert.calledOnce(server.getConnections);
+                        sinon.assert.calledOnce(numberOfConnectionsGauge.set);
+                        sinon.assert.calledWith(numberOfConnectionsGauge.set, 1);
+                        done();
+                    }, 1100);
                 });
             });
             describe('when getConnections return count', function () {
                 before(function () {
-                    numberOfConnectionsGauge = {
-                        set: sinon.stub()
-                    };
                     server.getConnections = sinon.stub().yields(new Error('error'));
-                    let koaMiddleware = new Middleware({server: server, numberOfConnectionsGauge: numberOfConnectionsGauge});
-                    koaMiddleware._getConnections();
+                    expressMiddleware = new Middleware({server: server, numberOfConnectionsGauge: numberOfConnectionsGauge});
+                    expressMiddleware._collectDefaultServerMetrics(500);
                 });
-                it('should not call numberOfConnectionsGauge.set with count', function () {
-                    sinon.assert.calledOnce(server.getConnections);
-                    sinon.assert.notCalled(numberOfConnectionsGauge.set);
+                it('should not call numberOfConnectionsGauge.set with count', function (done) {
+                    setTimeout(() => {
+                        sinon.assert.calledOnce(server.getConnections);
+                        sinon.assert.notCalled(numberOfConnectionsGauge.set);
+                        done();
+                    }, 510);
                 });
             });
         });
