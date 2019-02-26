@@ -4,6 +4,7 @@ const Prometheus = require('prom-client');
 const expect = require('chai').expect;
 const request = require('request');
 const requestPromise = require('request-promise-native');
+const nock = require('nock');
 const Collector = require('../../src/request-response-collector')('prometheus_api_metrics');
 
 describe('request.js response time collector', () => {
@@ -19,6 +20,7 @@ describe('request.js response time collector', () => {
                 Prometheus.register.clear();
             });
             it('should collect metrics with path and method for valid request', (done) => {
+                nock('http://www.google.com').get('/').reply(200);
                 request({ url: 'http://www.google.com', time: true }, (err, response) => {
                     if (err) {
                         return done(err);
@@ -32,6 +34,7 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should collect metrics with path and method for valid request (500)', (done) => {
+                nock('http://www.mocky.io').get('/v2/5bd57525310000680041daf2').reply(500);
                 request({ url: 'http://www.mocky.io/v2/5bd57525310000680041daf2', time: true }, (err, response) => {
                     if (err) {
                         return done(err);
@@ -45,6 +48,7 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should collect metrics with path and method for valid request (POST)', (done) => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
                 request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', time: true }, (err, response) => {
                     if (err) {
                         return done(err);
@@ -58,6 +62,7 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should collect metrics with path and method for valid request override route field on the request', (done) => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
                 request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { route: '/v2/:id' }, time: true }, (err, response) => {
                     if (err) {
                         return done(err);
@@ -71,6 +76,7 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should collect metrics with path and method for valid request override target field on the request', (done) => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
                 request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { target: 'www.google.com' }, time: true }, (err, response) => {
                     if (err) {
                         return done(err);
@@ -84,6 +90,7 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should collect metrics with path and method for valid request override target and route field on the request', (done) => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
                 request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { target: 'www.google.com', route: '/v2/:id' }, time: true }, (err, response) => {
                     if (err) {
                         return done(err);
@@ -97,6 +104,7 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should not collect metrics when time = true in the request is missing', (done) => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
                 request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { route: 'v2/:id' } }, (err, response) => {
                     if (err) {
                         return done(err);
@@ -110,10 +118,10 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should count client error in counter', (done) => {
-                request({ url: 'http://www.google1234.com', time: true, metrics: { route: 'route' } }, (err, response) => {
+                request({ url: 'http://www.mocky1.io/v2/12345', time: true, metrics: { route: 'route' } }, (err, response) => {
                     if (err) {
                         Collector.collect(err);
-                        expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
+                        expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
                         return done();
                     }
                     done(new Error('Expect to get error from the http request'));
@@ -128,10 +136,10 @@ describe('request.js response time collector', () => {
                 Prometheus.register.clear();
             });
             it('should count client error in counter', (done) => {
-                request({ url: 'http://www.google1234.com', time: true, metrics: { route: 'route' } }, (err, response) => {
+                request({ url: 'http://www.mocky1.io/v2/12345', time: true, metrics: { route: 'route' } }, (err, response) => {
                     if (err) {
                         Collector.collect(err);
-                        expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
+                        expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
                         return done();
                     }
                     done(new Error('Expect to get error from the http request'));
@@ -146,10 +154,10 @@ describe('request.js response time collector', () => {
                 Prometheus.register.clear();
             });
             it('shouldn\'t count client error in counter', (done) => {
-                request({ url: 'http://www.google1234.com', time: true, metrics: { route: 'route' } }, (err, response) => {
+                request({ url: 'http://www.mocky1.io/v2/12345', time: true, metrics: { route: 'route' } }, (err, response) => {
                     if (err) {
                         Collector.collect(err);
-                        expect(Prometheus.register.metrics()).to.not.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
+                        expect(Prometheus.register.metrics()).to.not.include('southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
                         return done();
                     }
                     done(new Error('Expect to get error from the http request'));
@@ -169,6 +177,7 @@ describe('request.js response time collector', () => {
                 Prometheus.register.clear();
             });
             it('should collect metrics with path and method for valid request', () => {
+                nock('http://www.google.com').get('/').reply(200);
                 return requestPromise({ url: 'http://www.google.com', time: true, resolveWithFullResponse: true }).then((response) => {
                     Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="GET",route="/",status_code="200",type="total"} 1');
@@ -178,6 +187,7 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should collect metrics with path and method for valid request (500)', () => {
+                nock('http://www.mocky.io').get('/v2/5bd57525310000680041daf2').reply(500);
                 return requestPromise({ url: 'http://www.mocky.io/v2/5bd57525310000680041daf2', time: true, resolveWithFullResponse: true }).then((response) => {
                     Promise.reject(new Error('Expect to get 500 from the request'));
                 }).catch((error) => {
@@ -189,6 +199,7 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should collect metrics with path and method for valid request (POST)', () => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
                 return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', time: true, resolveWithFullResponse: true }).then((response) => {
                     Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="/v2/5bd9984b2f00006d0006d1fd",status_code="201",type="total"} 1');
@@ -198,6 +209,7 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should collect metrics with path and method for valid request override route field on the request', () => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
                 return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { route: '/v2/:id' }, time: true, resolveWithFullResponse: true }).then((response) => {
                     Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="/v2/:id",status_code="201",type="total"} 1');
@@ -207,6 +219,7 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should collect metrics with path and method for valid request override target field on the request', () => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
                 return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { target: 'www.google.com' }, time: true, resolveWithFullResponse: true }).then((response) => {
                     Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="POST",route="/v2/5bd9984b2f00006d0006d1fd",status_code="201",type="total"} 1');
@@ -216,6 +229,7 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should collect metrics with path and method for valid request override target and route field on the request', () => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
                 return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { target: 'www.google.com', route: '/v2/:id' }, time: true, resolveWithFullResponse: true }).then((response) => {
                     Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="POST",route="/v2/:id",status_code="201",type="total"} 1');
@@ -225,6 +239,7 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should not collect metrics when time = true in the request is missing', () => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
                 return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { route: 'v2/:id' }, resolveWithFullResponse: true }).then((response) => {
                     Collector.collect(response);
                     expect(Prometheus.register.metrics()).to.not.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.mocky.io",method="POST",route="v2/:id",status_code="201",type="total"} 1');
@@ -234,9 +249,9 @@ describe('request.js response time collector', () => {
                 });
             });
             it('should count client error in counter by default', () => {
-                return requestPromise({ method: 'POST', url: 'http://www.google1234.com', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
+                return requestPromise({ method: 'POST', url: 'http://www.mocky1.io/v2/12345', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
                     Collector.collect(error);
-                    expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
+                    expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
                 });
             });
         });
@@ -251,9 +266,9 @@ describe('request.js response time collector', () => {
                 Prometheus.register.clear();
             });
             it('should count client error in counter', () => {
-                return requestPromise({ method: 'POST', url: 'http://www.google1234.com', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
+                return requestPromise({ method: 'POST', url: 'http://www.mocky1.io/v2/12345', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
                     Collector.collect(error);
-                    expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
+                    expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
                 });
             });
         });
@@ -268,9 +283,9 @@ describe('request.js response time collector', () => {
                 Prometheus.register.clear();
             });
             it('shouldn\'t count client error in counter', () => {
-                return requestPromise({ method: 'POST', url: 'http://www.google1234.com', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
+                return requestPromise({ method: 'POST', url: 'http://www.mocky1.io/v2/12345', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
                     Collector.collect(error);
-                    expect(Prometheus.register.metrics()).to.not.include('southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
+                    expect(Prometheus.register.metrics()).to.not.include('southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
                 });
             });
         });
@@ -286,6 +301,7 @@ describe('request.js response time collector', () => {
             Prometheus.register.clear();
         });
         it('should collect metrics with path and method for valid request with project name', (done) => {
+            nock('http://www.google.com').get('/').reply(200);
             request({ url: 'http://www.google.com', time: true }, (err, response) => {
                 if (err) {
                     return done(err);
@@ -296,9 +312,9 @@ describe('request.js response time collector', () => {
             });
         });
         it('should count client error in counter with project name', () => {
-            return requestPromise({ method: 'POST', url: 'http://www.google1234.com', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
+            return requestPromise({ method: 'POST', url: 'http://www.mocky1.io/v2/12345', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
                 Collector.collect(error);
-                expect(Prometheus.register.metrics()).to.include('prometheus_api_metrics_southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
+                expect(Prometheus.register.metrics()).to.include('prometheus_api_metrics_southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
             });
         });
     });
@@ -313,6 +329,7 @@ describe('request.js response time collector', () => {
             Prometheus.register.clear();
         });
         it('should collect metrics with path and method for valid request with prefix', (done) => {
+            nock('http://www.google.com').get('/').reply(200);
             request({ url: 'http://www.google.com', time: true }, (err, response) => {
                 if (err) {
                     return done(err);
@@ -323,7 +340,7 @@ describe('request.js response time collector', () => {
             });
         });
         it('should count client error in counter with prefix', () => {
-            return requestPromise({ method: 'POST', url: 'http://www.google1234.com', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
+            return requestPromise({ method: 'POST', url: 'http://www.mocky1.io/v2/12345', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
                 Collector.collect(error);
                 expect(Prometheus.register.metrics()).to.include('prefix_southbound_client_errors_count');
             });
@@ -340,6 +357,7 @@ describe('request.js response time collector', () => {
             Prometheus.register.clear();
         });
         it('should collect metrics with path and method for valid request', (done) => {
+            nock('http://www.google.com').get('/').reply(200);
             request({ url: 'http://www.google.com', time: true }, (err, response) => {
                 if (err) {
                     return done(err);
@@ -369,10 +387,10 @@ describe('request.js response time collector', () => {
             Prometheus.register.clear();
         });
         it('shouldn\'t count client error in counter with project name', () => {
-            return requestPromise({ method: 'POST', url: 'http://www.google1234.com', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
+            return requestPromise({ method: 'POST', url: 'http://www.mocky1.io/v2/12345', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
                 Collector.collect(error);
-                expect(Prometheus.register.metrics()).to.include('prometheus_api_metrics_southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
-                expect(Prometheus.register.metrics()).to.not.include('prefix_southbound_client_errors_count{target="www.google1234.com",error="ENOTFOUND"} 1');
+                expect(Prometheus.register.metrics()).to.include('prometheus_api_metrics_southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
+                expect(Prometheus.register.metrics()).to.not.include('prefix_southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
             });
         });
     });
@@ -388,6 +406,7 @@ describe('request.js response time collector', () => {
             Prometheus.register.clear();
         });
         it('should collect metrics with path and method for valid request', (done) => {
+            nock('http://www.google.com').get('/').reply(200);
             request({ url: 'http://www.google.com', time: true }, (err, response) => {
                 if (err) {
                     return done(err);
