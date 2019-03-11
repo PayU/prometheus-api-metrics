@@ -4,6 +4,7 @@
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Build Status][travis-image]][travis-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
+[![Known Vulnerabilities][snyk-image]][snyk-url]
 [![Apache 2.0 License][license-image]][license-url]
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -232,3 +233,5 @@ avg(nodejs_eventloop_lag_seconds) by (<SERVICE_LABLE_FIELD)
 [downloads-url]: https://npmjs.org/package/prometheus-api-metrics
 [license-image]: https://img.shields.io/badge/license-Apache_2.0-green.svg?style=flat
 [license-url]: LICENSE
+[snyk-image]: https://snyk.io/test/npm/prometheus-api-metrics/badge.svg
+[snyk-url]: https://snyk.io/test/npm/prometheus-api-metrics
