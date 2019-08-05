@@ -307,7 +307,7 @@ describe('when using express framework', () => {
                         });
                 });
             });
-            describe('when calling a GET endpoint with query parmas', () => {
+            describe('when calling a GET endpoint with query params', () => {
                 before(() => {
                     return supertest(app)
                         .get('/v2?test=test')
@@ -323,6 +323,23 @@ describe('when using express framework', () => {
                         });
                 });
             });
+            describe('when calling a GET endpoint with query params with special character /', () => {
+                before(() => {
+                    return supertest(app)
+                        .get('/checkout?test=test/test1')
+                        .expect(200)
+                        .then((res) => { });
+                });
+                it('should add it to the histogram', () => {
+                    return supertest(app)
+                        .get('/metrics')
+                        .expect(200)
+                        .then((res) => {
+                            expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/checkout",code="200"} 1');
+                        });
+                });
+            });
+        });            
         });
         describe('sub-sub app with error handler in the sub app', function () {
             describe('when calling a GET endpoint with path params and sub router', () => {

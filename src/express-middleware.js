@@ -51,7 +51,7 @@ class ExpressMiddleware {
                 route = req.originalUrl.split('?')[0];
             } else {
                 const splittedRoute = route.split('/');
-                const splittedUrl = req.originalUrl.split('/');
+                const splittedUrl = req.originalUrl.split('?')[0].split('/');
                 const routeIndex = splittedUrl.length - splittedRoute.length + 1;
 
                 const baseUrl = splittedUrl.slice(0, routeIndex).join('/');
@@ -69,12 +69,12 @@ class ExpressMiddleware {
                 route = route.replace(req.params[paramName], ':' + paramName);
             });
         }
-
+        
         // this condition will evaluate to true only in
         // express framework and no route was found for the request. if we log this metrics
         // we'll risk in a memory leak since the route is not a pattern but a hardcoded string.
         if (!route || route === '') {
-        // if (!req.route && res && res.statusCode === 404) {
+            // if (!req.route && res && res.statusCode === 404) {
             route = 'N/A';
         }
 
