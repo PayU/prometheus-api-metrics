@@ -1,25 +1,31 @@
 {
   "compilerOptions": {
+    "rootDir": ".",
     "module": "commonjs",
-    "declaration": false,
-    "noImplicitAny": false,
-    "removeComments": true,
-    "noLib": false,
-    "allowSyntheticDefaultImports": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "target": "es6",
+    "lib": [
+      "es2017"
+    ],
+    "target": "es2017",
+    "esModuleInterop": true,
+    "allowJs": false,
     "sourceMap": true,
-    "allowJs": true,
-    "outDir": "./dist",
-    "baseUrl": "./src",
-    "lib": [ "es2017" ]
+    "outDir": "build",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
+    "baseUrl": ".",
+    "strictNullChecks": false,
+    "noUnusedLocals": true
   },
   "include": [
-    "src/**/*"
+    "src/*.ts",
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "**/*.spec.ts"
+    "docs",
+    "coverage",
+    ".nyc_output",
+    "test"
   ]
 }
