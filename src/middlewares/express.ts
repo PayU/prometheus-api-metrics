@@ -1,38 +1,40 @@
 import Prometheus from 'prom-client'
 
 import { debug, shouldLogMetrics } from '../utils'
+import { Options } from './metrics'
 
-export type ExpressMiddlewareOptions = {
+export type ExpressMiddlewareOptions = Options & {
   numberOfConnectionsGauge
   server
   requestSizeHistogram
   excludeRoutes
   includeQueryParams
   defaultMetricsInterval
-  metricsRoute
   responseTimeHistogram
   responseSizeHistogram
 }
 
-export default class ExpressMiddleware {
-  private setupOptions: ExpressMiddlewareOptions
+const NUMBER_OF_CONNECTIONS_METRICS_NAME = 'expressjs_number_of_open_connections'
 
-  constructor(setupOptions) {
-    this.setupOptions = setupOptions || {}
+export default class Express {
+  private setupOptions: Partial<ExpressMiddlewareOptions>
+
+  defaultOptions = {}
+  constructor(setupOptions = {}) {
+    this.setupOptions = { ...this.defaultOptions, ...setupOptions }
   }
 
-  _collectDefaultServerMetrics(timeout) {
-    const NUMBER_OF_CONNECTIONS_METRICS_NAME = 'expressjs_number_of_open_connections'
+  collectDefaultServerMetrics(timeout) {
     this.setupOptions.numberOfConnectionsGauge = Prometheus.register.getSingleMetric(NUMBER_OF_CONNECTIONS_METRICS_NAME) || new Prometheus.Gauge({
       name: NUMBER_OF_CONNECTIONS_METRICS_NAME,
       help: 'Number of open connections to the Express.js server'
     })
     if (this.setupOptions.server) {
-      setInterval(this._getConnections.bind(this), timeout).unref()
+      setInterval(this.getConnections.bind(this), timeout).unref()
     }
   }
 
-  _getConnections() {
+  getConnections() {
     if (this.setupOptions && this.setupOptions.server) {
       this.setupOptions.server.getConnections((error, count) => {
         if (error) {
@@ -44,10 +46,10 @@ export default class ExpressMiddleware {
     }
   }
 
-  _handleResponse(req, res) {
+  handleResponse(req, res) {
     const responseLength = parseInt(res.get('Content-Length')) || 0
 
-    const route = this._getRoute(req)
+    const route = this.getRoute(req)
 
     if (route && shouldLogMetrics(this.setupOptions.excludeRoutes, route)) {
       this.setupOptions.requestSizeHistogram.observe({
@@ -65,7 +67,7 @@ export default class ExpressMiddleware {
     }
   }
 
-  _getRoute(req) {
+  getRoute(req) {
     let route = req.baseUrl
     if (req.route) {
       if (req.route.path !== '/') {
@@ -109,14 +111,14 @@ export default class ExpressMiddleware {
   middleware(req, res, next) {
     if (!this.setupOptions.server && req.socket) {
       this.setupOptions.server = req.socket.server
-      this._collectDefaultServerMetrics(this.setupOptions.defaultMetricsInterval)
+      this.collectDefaultServerMetrics(this.setupOptions.defaultMetricsInterval)
     }
-    if (req.url === this.setupOptions.metricsRoute) {
+    if (req.url === this.setupOptions.path) {
       debug('Request to /metrics endpoint')
       res.set('Content-Type', Prometheus.register.contentType)
       return res.end(Prometheus.register.metrics())
     }
-    if (req.url === `${this.setupOptions.metricsRoute}.json`) {
+    if (req.url === `${this.setupOptions.path}.json`) {
       debug('Request to /metrics endpoint')
       return res.json(Prometheus.register.getMetricsAsJSON())
     }
@@ -132,7 +134,7 @@ export default class ExpressMiddleware {
 
     res.once('finish', () => {
       debug('on finish.')
-      this._handleResponse(req, res)
+      this.handleResponse(req, res)
     })
 
     return next()

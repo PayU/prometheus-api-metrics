@@ -1,19 +1,19 @@
-'use strict'
 const Prometheus = require('prom-client')
-const expect = require('chai').expect
-const supertest = require('supertest')
-let app, config
+import { expect } from 'chai'
 
-describe('when using express framework', () => {
+const supertest = require('supertest')
+const config = { useUniqueHistogramName: false }
+let app
+
+describe('Express Middleware', () => {
   before(() => {
-    app = require('./server')
-    config = require('./server/config')
+    app = require('./server')(config)
   })
   after(() => {
     Prometheus.register.clear()
     delete require.cache[require.resolve('./server/express-server')]
-    delete require.cache[require.resolve('../../../src/index.ts')]
-    delete require.cache[require.resolve('../../../src/metrics-middleware.ts')]
+    delete require.cache[require.resolve('../../src/index.ts')]
+    delete require.cache[require.resolve('../../src/middlewares/metrics.ts')]
   })
   describe('when start up', () => {
     it('should populate default metrics', () => {
@@ -58,31 +58,28 @@ describe('when using express framework', () => {
         })
     })
     describe('when calling a GET endpoint', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/hello')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
           .then((res) => {
+            console.log(res.text)
             expect(res.text).to.contain('method="GET",route="/hello",code="200"')
           })
       })
     })
     describe('when calling a GET endpoint', () => {
-      before(() => {
-        return supertest(app)
+      it('should add number of open connections', async () => {
+        await supertest(app)
           .get('/hello')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add number of open connections', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -92,14 +89,12 @@ describe('when using express framework', () => {
       })
     })
     describe('when calling a GET endpoint with path params', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/hello/200')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -111,16 +106,14 @@ describe('when using express framework', () => {
       })
     })
     describe('when calling a POST endpoint', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .post('/test')
           .send({ name: 'john' })
           .set('Accept', 'application/json')
           .expect(201)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -130,14 +123,12 @@ describe('when using express framework', () => {
       })
     })
     describe('when calling endpoint and getting an error', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/bad')
           .expect(500)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -147,14 +138,12 @@ describe('when using express framework', () => {
       })
     })
     describe('when calling a GET endpoint with query parmas', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/hello?test=test')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -165,14 +154,12 @@ describe('when using express framework', () => {
     })
     describe('sub app', function () {
       describe('when calling a GET endpoint with path params', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/hello/200')
             .expect(200)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -184,16 +171,14 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling a POST endpoint', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .post('/v2/test')
             .send({ name: 'john' })
             .set('Accept', 'application/json')
             .expect(201)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -203,14 +188,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error only variables', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .patch('/v2/500')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -220,14 +203,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with 1 variable', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/bad/500')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -237,14 +218,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with two variables', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/bad/500/400')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -254,14 +233,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with no variables', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/bad')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -271,14 +248,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error (root)', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -288,14 +263,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error (error handler in the sub app)', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/error/500')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -305,15 +278,13 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error from a middleware before sub route', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/hello')
             .set('error', 'error')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -323,14 +294,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling a GET endpoint with query params', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2?test=test')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -340,14 +309,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling a GET endpoint with query params with special character /', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/checkout?test=test/test1')
             .expect(200)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -359,14 +326,12 @@ describe('when using express framework', () => {
     })
     describe('sub-sub app with error handler in the sub app', function () {
       describe('when calling a GET endpoint with path params and sub router', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v3/hello/200')
             .expect(200)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -378,16 +343,14 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling a POST endpoint with sub router', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .post('/v2/v3/test')
             .send({ name: 'john' })
             .set('Accept', 'application/json')
             .expect(201)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -397,14 +360,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with sub router only variables', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .patch('/v2/v3/500')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -414,14 +375,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with sub router with 1 variable', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v3/bad/500')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -431,14 +390,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with sub router with two variables', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v3/bad/500/400')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -448,14 +405,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with sub router with no variables', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v3/bad')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -465,14 +420,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with sub router (root)', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v3')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -482,15 +435,13 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error from a middleware before sub route', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v3/hello')
             .set('error', 'error')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -500,14 +451,10 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling a GET endpoint with query parmas', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v3?test=test')
             .expect(500)
-            .then((res) => {
-            })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -519,14 +466,12 @@ describe('when using express framework', () => {
     })
     describe('sub-sub app with error handler in the sub-sub app', function () {
       describe('when calling a GET endpoint with path params and sub router', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v4/hello/200')
             .expect(200)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -538,16 +483,14 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling a POST endpoint with sub router', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .post('/v2/v4/test')
             .send({ name: 'john' })
             .set('Accept', 'application/json')
             .expect(201)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -557,14 +500,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with sub router only variables', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .patch('/v2/v4/500')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -574,14 +515,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with sub router with 1 variable', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v4/bad/500')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -591,14 +530,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with sub router with two variables', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v4/bad/500/400')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -608,14 +545,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with sub router with no variables', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v4/bad')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -625,14 +560,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error with sub router (root)', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v4')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -642,15 +575,13 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling endpoint and getting an error from a middleware before sub route', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v4/hello')
             .set('error', 'error')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -660,14 +591,12 @@ describe('when using express framework', () => {
         })
       })
       describe('when calling a GET endpoint with query parmas', () => {
-        before(() => {
-          return supertest(app)
+        it('should add it to the histogram', async () => {
+          await supertest(app)
             .get('/v2/v4?test=test')
             .expect(500)
             .then((res) => {
             })
-        })
-        it('should add it to the histogram', () => {
           return supertest(app)
             .get('/metrics')
             .expect(200)
@@ -678,15 +607,13 @@ describe('when using express framework', () => {
       })
     })
     describe('when calling endpoint and getting an error from a middleware before route', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/hello')
           .set('error', 'error')
           .expect(500)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -696,14 +623,12 @@ describe('when using express framework', () => {
       })
     })
     describe('when using custom metrics', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/checkout')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -713,15 +638,12 @@ describe('when using express framework', () => {
       })
     })
     describe('when calling not existing endpoint', function () {
-      before(() => {
+      it('should add it to the histogram', async () => {
         let notExistingPath = '/notExistingPath' + Math.floor(Math.random() * 10)
-        return supertest(app)
+        await supertest(app)
           .get(notExistingPath)
           .expect(404)
-          .then((res) => {
-          })
-      })
-      it('should add it to the histogram', () => {
+
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -746,61 +668,60 @@ describe('when using express framework', () => {
   describe('when start up with unique metric names', () => {
     let app
     before(() => {
-      config.useUniqueHistogramName = true
       delete require.cache[require.resolve('./server/express-server')]
-      delete require.cache[require.resolve('../../../src/metrics-middleware.ts')]
-      app = require('./server')
+      delete require.cache[require.resolve('../../src/middlewares/metrics.ts')]
+      app = require('./server')({ ...config, useUniqueHistogramName: true })
     })
     it('should populate default metrics', () => {
       return supertest(app)
         .get('/metrics')
         .expect(200)
         .then((res) => {
-          expect(res.text).to.contain('express_test_process_cpu_user_seconds_total')
-          expect(res.text).to.contain('express_test_process_cpu_system_seconds_total')
-          expect(res.text).to.contain('express_test_process_cpu_seconds_total')
-          expect(res.text).to.contain('express_test_process_start_time_seconds')
-          expect(res.text).to.contain('express_test_process_resident_memory_bytes')
-          expect(res.text).to.contain('express_test_nodejs_eventloop_lag_seconds')
+          const text = res.text
+          console.log(text)
+          expect(text).to.contain('express_test_process_cpu_user_seconds_total')
+          expect(text).to.contain('express_test_process_cpu_system_seconds_total')
+          expect(text).to.contain('express_test_process_cpu_seconds_total')
+          expect(text).to.contain('express_test_process_start_time_seconds')
+          expect(text).to.contain('express_test_process_resident_memory_bytes')
+          expect(text).to.contain('express_test_nodejs_eventloop_lag_seconds')
 
-          expect(res.text).to.contain('express_test_nodejs_active_handles_total')
-          expect(res.text).to.contain('express_test_nodejs_active_requests_total')
+          expect(text).to.contain('express_test_nodejs_active_handles_total')
+          expect(text).to.contain('express_test_nodejs_active_requests_total')
 
-          expect(res.text).to.contain('express_test_nodejs_heap_size_total_bytes')
-          expect(res.text).to.contain('express_test_nodejs_heap_size_used_bytes')
-          expect(res.text).to.contain('express_test_nodejs_external_memory_bytes')
+          expect(text).to.contain('express_test_nodejs_heap_size_total_bytes')
+          expect(text).to.contain('express_test_nodejs_heap_size_used_bytes')
+          expect(text).to.contain('express_test_nodejs_external_memory_bytes')
 
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="new"}')
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="old"}')
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="code"}')
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="map"}')
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="large_object"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="new"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="old"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="code"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="map"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="large_object"}')
 
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="new"}')
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="old"}')
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="code"}')
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="map"}')
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="large_object"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="new"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="old"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="code"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="map"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="large_object"}')
 
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="new"}')
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="old"}')
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="code"}')
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="map"}')
-          expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="large_object"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="new"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="old"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="code"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="map"}')
+          expect(text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="large_object"}')
 
-          expect(res.text).to.contain('express_test_nodejs_version_info')
-          expect(res.text).to.contain('express_test_app_version{version="1.0.0",major="1",minor="0",patch="0"}')
+          expect(text).to.contain('express_test_nodejs_version_info')
+          expect(text).to.contain('express_test_app_version{version="1.0.0",major="1",minor="0",patch="0"}')
         })
     })
     describe('when calling a GET endpoint', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/hello')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -814,37 +735,31 @@ describe('when using express framework', () => {
   describe('when start up with exclude route', () => {
     let app
     before(() => {
-      config.useUniqueHistogramName = true
-      delete require.cache[require.resolve('./server/express-server')]
-      delete require.cache[require.resolve('../../../src/metrics-middleware.ts')]
+      app = require('./server/express-server-exclude-routes')({})
     })
     describe('when calling a GET endpoint', () => {
-      before(() => {
-        app = require('./server/express-server-exclude-routes')
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/hello')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
           .then((res) => {
+            console.log(res.text)
             expect(res.text).to.contain('method="GET",route="/hello",code="200"')
           })
       })
     })
     describe('when calling a GET endpoint of excluded path', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/health')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -855,13 +770,14 @@ describe('when using express framework', () => {
     })
     describe('when calling a GET endpoint of excluded path with variables', () => {
       before(() => {
-        return supertest(app)
+
+      })
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/health/1234')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -874,37 +790,33 @@ describe('when using express framework', () => {
   describe('when start up with include query params', () => {
     let app
     before(() => {
-      config.useUniqueHistogramName = true
       delete require.cache[require.resolve('./server/express-server')]
-      delete require.cache[require.resolve('../../../src/metrics-middleware.ts')]
-      app = require('./server/express-server-exclude-routes')
+      delete require.cache[require.resolve('../../src/middlewares/metrics.ts')]
+      app = require('./server/express-server-exclude-routes')({ useUniqueHistogramName: true })
     })
     describe('when calling a GET endpoint with one query param', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/hello?test=test')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
           .then((res) => {
+            console.log(res.text)
             expect(res.text).to.contain('method="GET",route="/hello?test=<?>",code="200"')
           })
       })
     })
     describe('when calling a GET endpoint with two query params', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram and sort the query params', async () => {
+        await supertest(app)
           .get('/hello?test1=test&test2=test2')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram and sort the query params', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -914,14 +826,12 @@ describe('when using express framework', () => {
       })
     })
     describe('when calling a GET endpoint with two query params in different order', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram and sort the query params', async () => {
+        await supertest(app)
           .get('/hello?test2=test&test1=test2')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram and sort the query params', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -931,14 +841,12 @@ describe('when using express framework', () => {
       })
     })
     describe('when calling a GET endpoint with query param', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/health/1234?test=test')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)
@@ -948,14 +856,12 @@ describe('when using express framework', () => {
       })
     })
     describe('when calling a GET root endpoint with query param ', () => {
-      before(() => {
-        return supertest(app)
+      it('should add it to the histogram', async () => {
+        await supertest(app)
           .get('/?test=test')
           .expect(200)
           .then((res) => {
           })
-      })
-      it('should add it to the histogram', () => {
         return supertest(app)
           .get('/metrics')
           .expect(200)

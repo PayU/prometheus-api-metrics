@@ -1,0 +1,6 @@
+--bail
+--require ts-node/register
+--recursive test/**/*.ts
+--check-leaks
+--globals express,__coverage__,__core*,regeneratorRuntime,lr
+-t 30000

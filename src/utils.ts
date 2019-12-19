@@ -6,7 +6,6 @@ export function getMetricNames(metricNames, useUniqueHistogramName, metricsPrefi
       metricNames[key] = `${prefix}_${metricNames[key]}`
     })
   }
-
   return metricNames
 }
 
@@ -18,4 +17,8 @@ export function shouldLogMetrics(excludeRoutes, route) {
 
 export function debug(a, b?) {
   console.log(a, b)
+}
+
+export function normalizeProjectName(name) {
+  return name.replace(/-/g, '_')
 }

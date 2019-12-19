@@ -1,5 +1,4 @@
-'use strict'
-var express = require('express')
+import express from 'express'
 var router = express.Router()
 const subRouter = require('./sub-router')
 router.use((req, res, next) => {
@@ -15,12 +14,12 @@ router.route('/').get(bad)
 router.route('/bad').get(bad)
 router.route('/bad/:time').get(bad)
 router.route('/bad/:var1/:var2').get(bad)
-router.route('/test').post(test)
+router.route('/test').post(eTest)
 router.route('/:time').patch(bad)
 router.route('/hello/:time').get(helloTime)
 router.route('/error/:var1').get(bad, errorHandler)
 
-function test(req, res, next) {
+function eTest(req, res, next) {
   setTimeout(() => {
     res.status(201)
     res.json({ message: 'Hello World!' })
