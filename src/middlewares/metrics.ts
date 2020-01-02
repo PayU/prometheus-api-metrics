@@ -28,7 +28,7 @@ export default (projectName, appVersion) => {
       includeQueryParams: undefined,
       defaultMetricsInterval: 10000
     }
-    const options: Options = {...defaultOptions, ...setup}
+    const options: Options = { ...defaultOptions, ...setup }
     debug(`Init metrics middleware with options: ${JSON.stringify(options)}`)
 
     const defaultMetricNames = {

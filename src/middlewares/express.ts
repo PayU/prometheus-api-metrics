@@ -18,9 +18,9 @@ export type ExpressMiddlewareOptions = Options & {
 const NUMBER_OF_CONNECTIONS_METRICS_NAME = 'expressjs_number_of_open_connections'
 
 export default class Express {
-  private setupOptions: Partial<ExpressMiddlewareOptions>
 
   defaultOptions = {}
+  private readonly setupOptions: Partial<ExpressMiddlewareOptions>
   constructor(setupOptions = {}) {
     this.setupOptions = { ...this.defaultOptions, ...setupOptions }
   }
@@ -76,7 +76,7 @@ export default class Express {
         route = route ? route + req.route.path : req.route.path
       }
       if (!route || route === '') {
-        if(!req.originalUrl) {
+        if (!req.originalUrl) {
           return INVALID_ROUTE
         }
         route = req.originalUrl.split('?')[0]

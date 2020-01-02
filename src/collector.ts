@@ -1,12 +1,12 @@
 import Prometheus from 'prom-client'
 
-const {getMetricNames} = require('./utils')
+import { getMetricNames } from './utils'
 
 export class HttpMetricsCollector {
-  private southboundResponseTimeHistogram
-  private southboundClientErrors
+  private readonly southboundResponseTimeHistogram
+  private readonly southboundClientErrors
 
-  constructor(private projectName, options = {} as any) {
+  constructor(private readonly projectName, options = {} as any) {
     let metricNames = {
       southbound_request_duration_seconds: 'southbound_request_duration_seconds',
       southbound_client_errors_count: 'southbound_client_errors_count'
@@ -35,10 +35,10 @@ export class HttpMetricsCollector {
   collect(res: any) {
     if (res instanceof Error && !(res as any).response && this.southboundClientErrors) {
       console.log(res)
-      let error = res['error'] || res
+      const error = res['error'] || res
       this.southboundClientErrors.inc({ target: error.hostname, error: error.code })
     } else {
-      let response = res.response || res
+      const response = res.response || res
       if (response.timings) {
         response.request.metrics = response.request.metrics || {}
 

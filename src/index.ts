@@ -1,7 +1,7 @@
 import metricsMiddleware from './middlewares/metrics'
 import { HttpMetricsCollector } from './collector'
 import { normalizeProjectName } from './utils'
-let metricsCollector = []
+const metricsCollector = []
 export const HttpMetricsCollectorFactory = (projectName: string) => {
   const name = normalizeProjectName(projectName)
   return metricsCollector[name] || new HttpMetricsCollector(name)

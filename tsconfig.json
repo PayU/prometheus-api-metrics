@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "rootDir": ".",
     "module": "commonjs",
     "lib": [
       "es2017"
@@ -9,13 +8,14 @@
     "esModuleInterop": true,
     "allowJs": false,
     "sourceMap": true,
-    "outDir": "build",
+    "outDir": "dist",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
     "baseUrl": ".",
     "strictNullChecks": false,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "declaration": true
   },
   "include": [
     "src/*.ts",

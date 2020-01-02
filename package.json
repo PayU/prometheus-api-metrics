@@ -4,12 +4,13 @@
   "description": "Express routes and process metric collection for Prometheus",
   "author": "Idan Tovi",
   "scripts": {
-    "unit-tests": "nyc mocha test/unit/*-test.js",
-    "no-koa-test": "nyc mocha test/unit/*-test.js test/integration/express/*-test.js --require ts-node/register test/integration/nest-js/*.spec.ts",
     "test": "mocha --opts test/mocha.opts",
+    "lint": "tslint -c tslint.json --project tsconfig.json 'src/**/*.ts' 'test/**/*.ts'",
+    "lint:fix": "tslint --fix -c tslint.json --project tsconfig.json 'src/**/*.ts' 'test/**/*.ts'",
     "coverage": "nyc npm run test",
-    "integration-tests": "nyc mocha ./test/**/**/*-test.js --require ts-node/register test/integration/nest-js/*.spec.ts",
-    "depcheck": "depcheck"
+    "depcheck": "depcheck",
+    "build": "rm -rf ./dist && tsc",
+    "pretest": "npm run lint"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -33,33 +34,30 @@
     "all": true
   },
   "dependencies": {
+    "pre-commit": "^1.2.2",
     "prom-client": "11.x",
     "request": "^2.88.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.2",
     "@types/mocha": "^5.2.6",
-    "@types/node": "^12.12.18",
+    "@types/node": "^13.1.2",
     "@types/supertest": "^2.0.7",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
     "depcheck": "^0.9.1",
-    "doctoc": "^1.4.0",
     "express": "^4.16.4",
-    "koa": "^2.7.0",
-    "koa-bodyparser": "^4.2.1",
-    "koa-router": "^7.4.0",
     "lodash.clonedeep": "^4.5.0",
     "mocha": "^6.2.2",
     "nock": "^11.7.0",
     "node-fetch": "^2.6.0",
     "node-mocks-http": "^1.8.1",
-    "nyc": "^14.1.1",
+    "nyc": "^15.0.0",
     "prom-client": "^11.2.1",
     "reflect-metadata": "^0.1.13",
     "request-promise-native": "^1.0.8",
     "rewire": "^4.0.1",
-    "sinon": "^7.5.0",
+    "sinon": "^8.0.2",
     "sleep": "^6.1.0",
     "supertest": "^4.0.2",
     "ts-node": "^8.5.4",
@@ -76,14 +74,15 @@
     "nodejs",
     "node",
     "prometheus",
-    "api",
     "express",
-    "koa",
     "metrics"
   ],
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/Zooz/prometheus-api-metrics/issues"
   },
-  "homepage": "https://github.com/Zooz/prometheus-api-metrics#readme"
+  "homepage": "https://github.com/Zooz/prometheus-api-metrics#readme",
+  "pre-commit": [
+    "test"
+  ]
 }

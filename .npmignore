@@ -5,7 +5,6 @@ node_modules
 coverage/
 .nyc_output/
 .idea/*
-.stryker-tmp/*
 tsconfig.json
 .travis.yml
 .eslintrc.json
