@@ -12,6 +12,7 @@ export type ExpressMiddlewareOptions = Options & {
   defaultMetricsInterval
   responseTimeHistogram
   responseSizeHistogram
+  groupParametrizedQuery
 }
 
 const NUMBER_OF_CONNECTIONS_METRICS_NAME = 'expressjs_number_of_open_connections'
@@ -68,13 +69,22 @@ export default class Express {
   }
 
   getRoute(req) {
+    const INVALID_ROUTE = 'N/A'
     let route = req.baseUrl
     if (req.route) {
       if (req.route.path !== '/') {
         route = route ? route + req.route.path : req.route.path
       }
-
       if (!route || route === '') {
+        if(!req.originalUrl) {
+          return INVALID_ROUTE
+        }
+        route = req.originalUrl.split('?')[0]
+      } else if (route.indexOf('*') > 0) {
+        // wildcard urls, expected for static content, reported groupped
+        return route
+      } else if (this.setupOptions.groupParametrizedQuery && route.indexOf(':') > 0) {
+        // parametrized urls, expected for dynamic content based on param value, reported separately
         route = req.originalUrl.split('?')[0]
       } else {
         const splittedRoute = route.split('/')
@@ -83,8 +93,8 @@ export default class Express {
 
         const baseUrl = splittedUrl.slice(0, routeIndex).join('/')
         route = baseUrl + route
+        console.log('c', route, splittedRoute, splittedUrl, routeIndex, baseUrl)
       }
-
       if (this.setupOptions.includeQueryParams === true && Object.keys(req.query).length > 0) {
         route = `${route}?${Object.keys(req.query).sort().map((queryParam) => `${queryParam}=<?>`).join('&')}`
       }
@@ -102,7 +112,7 @@ export default class Express {
     // we'll risk in a memory leak since the route is not a pattern but a hardcoded string.
     if (!route || route === '') {
       // if (!req.route && res && res.statusCode === 404) {
-      route = 'N/A'
+      return INVALID_ROUTE
     }
 
     return route

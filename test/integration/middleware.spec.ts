@@ -137,7 +137,7 @@ describe('Express Middleware', () => {
           })
       })
     })
-    describe('when calling a GET endpoint with query parmas', () => {
+    describe('when calling a GET endpoint with query params', () => {
       it('should add it to the histogram', async () => {
         await supertest(app)
           .get('/hello?test=test')
@@ -149,6 +149,37 @@ describe('Express Middleware', () => {
           .expect(200)
           .then((res) => {
             expect(res.text).to.contain('http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/hello",code="200"} 3')
+          })
+      })
+    })
+    describe('when calling a GET wildcard endpoint', () => {
+      it('should add it to the histogram', async () => {
+        await supertest(app)
+          .get('/_next/static/test.js')
+          .expect(200)
+          .then((res) => {
+          })
+        return supertest(app)
+          .get('/metrics')
+          .expect(200)
+          .then((res) => {
+            expect(res.text).to.contain('http_request_size_bytes_count{method="GET",route="/_next/*",code="200"} 1')
+          })
+      })
+    })
+    describe('when calling a GET parametrized endpoint', () => {
+      it('should add it to the histogram', async () => {
+        await supertest(app)
+          .get('/parameter/joe')
+          .expect(200)
+          .then((res) => {
+          })
+        return supertest(app)
+          .get('/metrics')
+          .expect(200)
+          .then((res) => {
+            console.log(res.text)
+            expect(res.text).to.contain('http_request_size_bytes_count{method="GET",route="/parameter/:params",code="200"} 1')
           })
       })
     })
