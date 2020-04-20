@@ -86,7 +86,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Zooz/prometheus-api-metrics.git"
+    "url": "git+https://github.com/PayU/prometheus-api-metrics.git"
   },
   "keywords": [
     "monitoring",
@@ -100,7 +100,7 @@
   ],
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/Zooz/prometheus-api-metrics/issues"
+    "url": "https://github.com/PayU/prometheus-api-metrics/issues"
   },
-  "homepage": "https://github.com/Zooz/prometheus-api-metrics#readme"
+  "homepage": "https://github.com/PayU/prometheus-api-metrics#readme"
 }
