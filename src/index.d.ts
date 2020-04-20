@@ -25,8 +25,8 @@ export interface ApiMetricsOpts {
 }
 
 export interface CollectorOpts {
-  durationBuckets: number[];
-  countClientErrors: boolean;
-  useUniqueHistogramName: boolean
-  prefix: string;
+  durationBuckets?: number[];
+  countClientErrors?: boolean;
+  useUniqueHistogramName?: boolean
+  prefix?: string;
 }
