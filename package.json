@@ -5,7 +5,7 @@
   "author": "Idan Tovi",
   "scripts": {
     "unit-tests": "nyc mocha ./test/unit-test/*-test.js",
-    "no-koa-test": "nyc mocha ./test/unit-test/*-test.js ./test/integration-tests/express/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
+    "no-koa-test": "mocha ./test/unit-test/*-test.js ./test/integration-tests/express/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
     "types-check": "tsc -p .",
     "test": "nyc mocha ./test/unit-test/*-test.js ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
     "integration-tests": "nyc mocha ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
