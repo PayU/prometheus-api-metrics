@@ -14,6 +14,8 @@ jobs:
       script: "npm run no-koa-test"
     - language: node_js
       node_js: node
+      script:
+        - nyc npm run test
       after_success: "npm run coveralls"
     - language: node_js
       name: types-check
