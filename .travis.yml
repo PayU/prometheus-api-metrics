@@ -2,16 +2,22 @@ language: node_js
 node_js:
   - "6"
   - "8"
+  - "10"
+  - "12"
   - "node"
-script: >
-  node_version=$(node -v);
-    if  [ ${node_version:1:1} -ne 6 ]; then
-       npm test
-    else
-       npm run no-koa-test
-    fi
-after_success: >
-  node_version=$(node -v);
-  if  [ ${node_version:1:1} -ne 6 ]; then
-     npm run coveralls
-  fi
+
+jobs:
+  include:
+    - language: node_js
+      node_js: 6
+      script: "npm run no-koa-test"
+    - language: node_js
+      script:
+        - "npm run test"
+    - language: node_js
+      node_js: node
+      script:
+        - "npm run types-check"
+    - language: node_js
+      node_js: node
+      after_success: "npm run coveralls"

@@ -1,14 +1,13 @@
 import { RequestHandler, Response } from 'express';
-import { Middleware } from "koa";
+import { Middleware } from 'koa';
+
 
 export default function middleware(options?: ApiMetricsOpts) : RequestHandler;
-
 export function koaMiddleware(options?: ApiMetricsOpts) : Middleware;
-
 export function expressMiddleware(options?: ApiMetricsOpts) : RequestHandler;
-
 export class HttpMetricsCollector {
   constructor(options?: CollectorOpts)
+  init(options?: CollectorOpts): void
   collect(res: Response): void
 }
 
