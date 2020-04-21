@@ -1,6 +1,5 @@
 language: node_js
 node_js:
-  - "6"
   - "8"
   - "10"
   - "12"
@@ -15,6 +14,7 @@ jobs:
       script:
         - "npm run test"
     - language: node_js
+      name: types-check
       node_js: node
       script:
         - "npm run types-check"
