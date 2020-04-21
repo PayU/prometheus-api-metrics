@@ -3,7 +3,9 @@ node_js:
   - "8"
   - "10"
   - "12"
-  - "node"
+
+script:
+  - "npm run test"
 
 jobs:
   include:
@@ -11,13 +13,10 @@ jobs:
       node_js: 6
       script: "npm run no-koa-test"
     - language: node_js
-      script:
-        - "npm run test"
+      node_js: node
+      after_success: "npm run coveralls"
     - language: node_js
       name: types-check
       node_js: node
       script:
         - "npm run types-check"
-    - language: node_js
-      node_js: node
-      after_success: "npm run coveralls"
