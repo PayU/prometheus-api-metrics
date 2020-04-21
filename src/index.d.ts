@@ -7,7 +7,7 @@ export function expressMiddleware(options?: ApiMetricsOpts) : RequestHandler;
 export class HttpMetricsCollector {
   constructor(options?: CollectorOpts)
   init(options?: CollectorOpts): void
-  collect(res: Response): void
+  collect(res: Response | any): void
 }
 
 export interface ApiMetricsOpts {
