@@ -4,9 +4,10 @@
   "description": "API and process monitoring with Prometheus for Node.js micro-service",
   "author": "Idan Tovi",
   "scripts": {
-    "unit-tests": "nyc mocha ./test/unit-test/*-test.js",
-    "no-koa-test": "nyc mocha ./test/unit-test/*-test.js ./test/integration-tests/express/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
-    "test": "nyc mocha ./test/unit-test/*-test.js ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
+    "unit-tests": "mocha ./test/unit-test/*-test.js",
+    "no-koa-test": "mocha ./test/unit-test/*-test.js ./test/integration-tests/express/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
+    "types-check": "tsc -p .",
+    "test": "mocha ./test/unit-test/*-test.js ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
     "integration-tests": "nyc mocha ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
@@ -31,8 +32,9 @@
     "all": true
   },
   "dependencies": {
-    "@types/koa": "^2.11.3",
     "@types/express": "^4.17.6",
+    "@types/express-serve-static-core": "^4.17.5",
+    "@types/koa": "^2.11.3",
     "debug": "^3.2.6",
     "pkginfo": "^0.4.1"
   },
@@ -66,7 +68,7 @@
     "mocha": "^5.2.0",
     "nock": "^10.0.6",
     "node-mocks-http": "^1.7.3",
-    "nyc": "^13.3.0",
+    "nyc": "^15.0.1",
     "prom-client": "^11.2.1",
     "reflect-metadata": "0.1.10",
     "request": "^2.88.0",
