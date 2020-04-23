@@ -23,24 +23,17 @@ function test (req, res, next) {
         res.json({ message: 'Hello World!' });
         next();
     }, req.body.delay);
-};
+}
 
 function helloTime (req, res, next) {
     setTimeout(() => {
         res.json({ message: 'Hello World!' });
         next();
     }, parseInt(req.param.time));
-};
+}
 
 function bad (req, res, next) {
     next(new Error('My Error'));
-};
-
-// Error handler
-function errorHandler(err, req, res, next) {
-    res.statusCode = 500;
-    // Do not expose your error in production
-    res.json({ error: err.message });
 }
 
 module.exports = router;

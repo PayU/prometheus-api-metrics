@@ -67,9 +67,10 @@ module.exports = (appVersion, projectName, framework = 'express') => {
 
 function frameworkMiddleware (framework) {
     switch (framework) {
-    case 'koa':
+    case 'koa': {
         const middleware = new KoaMiddleware(setupOptions);
         return middleware.middleware.bind(middleware);
+    }
     default: {
         const middleware = new ExpressMiddleware(setupOptions);
         return middleware.middleware.bind(middleware);

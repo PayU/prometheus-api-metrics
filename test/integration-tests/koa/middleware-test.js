@@ -114,7 +114,7 @@ describe('when using koa framework', () => {
             before(() => {
                 return supertest(app)
                     .post('/test')
-                    .send({name: 'john'})
+                    .send({ name: 'john' })
                     .set('Accept', 'application/json')
                     .expect(201)
                     .then((res) => {});
@@ -183,7 +183,7 @@ describe('when using koa framework', () => {
                 before(() => {
                     return supertest(app)
                         .post('/v2/test')
-                        .send({name: 'john'})
+                        .send({ name: 'john' })
                         .set('Accept', 'application/json')
                         .expect(201)
                         .then((res) => {});
@@ -350,7 +350,7 @@ describe('when using koa framework', () => {
                 before(() => {
                     return supertest(app)
                         .post('/v2/v3/test')
-                        .send({name: 'john'})
+                        .send({ name: 'john' })
                         .set('Accept', 'application/json')
                         .expect(201)
                         .then((res) => {});
@@ -501,7 +501,7 @@ describe('when using koa framework', () => {
                 before(() => {
                     return supertest(app)
                         .post('/v2/v4/test')
-                        .send({name: 'john'})
+                        .send({ name: 'john' })
                         .set('Accept', 'application/json')
                         .expect(201)
                         .then((res) => {});
@@ -664,7 +664,7 @@ describe('when using koa framework', () => {
         });
         describe('when calling not existing endpoint', function() {
             before(() => {
-                let notExistingPath = '/notExistingPath' + Math.floor(Math.random() * 10);
+                const notExistingPath = '/notExistingPath' + Math.floor(Math.random() * 10);
                 return supertest(app)
                     .get(notExistingPath)
                     .expect(404)

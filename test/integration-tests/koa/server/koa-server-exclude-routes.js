@@ -14,7 +14,7 @@ app.use(async (ctx, next) => {
     } catch (err) {
         ctx.status = 500;
         // Do not expose your error in production
-        ctx.body = {error: err.message};
+        ctx.body = { error: err.message };
     }
 });
 
