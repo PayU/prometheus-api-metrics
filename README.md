@@ -179,9 +179,9 @@ request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd'
 This package supports koa server that uses [`koa-router`](https://www.npmjs.com/package/koa-router) and [`koa-bodyparser`](https://www.npmjs.com/package/koa-bodyparser)
 
 ```js
-const apiMetrics = require('prometheus-api-metrics').koaMiddleware
+const { koaMiddleware } = require('prometheus-api-metrics')
 
-app.use(apiMetrics())
+app.use(koaMiddleware())
 ```
 
 ## Test
