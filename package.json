@@ -10,7 +10,7 @@
     "test": "mocha ./test/unit-test/*-test.js ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
     "integration-tests": "nyc mocha ./test/**/**/*-test.js --require ts-node/register test/integration-tests/nest-js/*.spec.ts",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
-    "lint": "node_modules/eslint/bin/eslint.js src/**"
+    "lint": "node_modules/eslint/bin/eslint.js src/**/*.js test/**/*.js"
   },
   "main": "src/index.js",
   "nyc": {
