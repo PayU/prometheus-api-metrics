@@ -7,6 +7,7 @@ class ExpressMiddleware {
     constructor(setupOptions) {
         this.setupOptions = setupOptions || {};
     }
+
     _collectDefaultServerMetrics(timeout) {
         const NUMBER_OF_CONNECTIONS_METRICS_NAME = 'expressjs_number_of_open_connections';
         this.setupOptions.numberOfConnectionsGauge = Prometheus.register.getSingleMetric(NUMBER_OF_CONNECTIONS_METRICS_NAME) || new Prometheus.Gauge({
@@ -17,6 +18,7 @@ class ExpressMiddleware {
             setInterval(this._getConnections.bind(this), timeout).unref();
         }
     }
+
     _getConnections() {
         if (this.setupOptions && this.setupOptions.server) {
             this.setupOptions.server.getConnections((error, count) => {
@@ -28,6 +30,7 @@ class ExpressMiddleware {
             });
         }
     }
+
     _handleResponse (req, res) {
         const responseLength = parseInt(res.get('Content-Length')) || 0;
 
@@ -40,6 +43,7 @@ class ExpressMiddleware {
             debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}`);
         }
     }
+
     _getRoute(req) {
         let route = req.baseUrl;
         if (req.route) {
@@ -69,7 +73,7 @@ class ExpressMiddleware {
                 route = route.replace(req.params[paramName], ':' + paramName);
             });
         }
-        
+
         // this condition will evaluate to true only in
         // express framework and no route was found for the request. if we log this metrics
         // we'll risk in a memory leak since the route is not a pattern but a hardcoded string.
@@ -80,6 +84,7 @@ class ExpressMiddleware {
 
         return route;
     }
+
     middleware(req, res, next) {
         if (!this.setupOptions.server && req.socket) {
             this.setupOptions.server = req.socket.server;

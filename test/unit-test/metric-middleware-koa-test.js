@@ -365,7 +365,7 @@ describe('metrics-middleware', () => {
             it('should set the updated route', () => {
                 const next = sinon.stub();
                 const set = sinon.stub();
-                let ctx = { body: {}, set: set, req: { url: '/v1/metrics' } };
+                const ctx = { body: {}, set: set, req: { url: '/v1/metrics' } };
                 func(ctx, next);
                 sinon.assert.calledOnce(next);
                 expect(ctx.body).to.eql(Prometheus.register.metrics());
@@ -499,7 +499,7 @@ describe('metrics-middleware', () => {
         describe('when using middleware request and route is with sub routing', function () {
             let match, func, req, res, ctx, next, requestSizeObserve, responseTimeObserve, endTimerStub;
             before(() => {
-                match = sinon.stub().returns({path: [{path: '/path/:id'}]});
+                match = sinon.stub().returns({ path: [{ path: '/path/:id' }] });
                 next = sinon.stub();
                 req = httpMocks.createRequest({
                     url: '/path/:id',
@@ -517,7 +517,7 @@ describe('metrics-middleware', () => {
                 });
                 delete req.baseUrl;
                 res.statusCode = 200;
-                ctx = { req: req, res: res, request: req, response: res, router: {match: match}, _matchedRoute: '/v1(.*)', originalUrl: '/v1/path/123' };
+                ctx = { req: req, res: res, request: req, response: res, router: { match: match }, _matchedRoute: '/v1(.*)', originalUrl: '/v1/path/123' };
                 func = middleware();
                 endTimerStub = sinon.stub();
                 responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
@@ -549,7 +549,7 @@ describe('metrics-middleware', () => {
         describe('when using middleware request and route is with sub routing, first path is with place holder', function () {
             let match, func, req, res, ctx, next, requestSizeObserve, responseTimeObserve, endTimerStub;
             before(() => {
-                match = sinon.stub().returns({path: [{path: '/v1(.*)'}, {path: '/path/:id'}]});
+                match = sinon.stub().returns({ path: [{ path: '/v1(.*)' }, { path: '/path/:id' }] });
                 next = sinon.stub();
                 req = httpMocks.createRequest({
                     url: '/path/:id',
@@ -567,7 +567,7 @@ describe('metrics-middleware', () => {
                 });
                 delete req.baseUrl;
                 res.statusCode = 200;
-                ctx = { req: req, res: res, request: req, response: res, router: {match: match}, _matchedRoute: '/v1(.*)', originalUrl: '/v1/path/123' };
+                ctx = { req: req, res: res, request: req, response: res, router: { match: match }, _matchedRoute: '/v1(.*)', originalUrl: '/v1/path/123' };
                 func = middleware();
                 endTimerStub = sinon.stub();
                 responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
@@ -600,8 +600,8 @@ describe('metrics-middleware', () => {
             let match, func, req, res, ctx, next, requestSizeObserve, responseTimeObserve, endTimerStub;
             before(() => {
                 match = sinon.stub();
-                match.onFirstCall().returns({path: []});
-                match.onSecondCall().returns({path: [{path: '/v1(.*)'}, {path: '/v1/path/:id'}]});
+                match.onFirstCall().returns({ path: [] });
+                match.onSecondCall().returns({ path: [{ path: '/v1(.*)' }, { path: '/v1/path/:id' }] });
                 next = sinon.stub();
                 req = httpMocks.createRequest({
                     url: '/path/:id',
@@ -619,7 +619,7 @@ describe('metrics-middleware', () => {
                 });
                 delete req.baseUrl;
                 res.statusCode = 200;
-                ctx = { req: req, res: res, request: req, response: res, router: {match: match}, _matchedRoute: '/v1(.*)', originalUrl: '/v1/path/123' };
+                ctx = { req: req, res: res, request: req, response: res, router: { match: match }, _matchedRoute: '/v1(.*)', originalUrl: '/v1/path/123' };
                 func = middleware();
                 endTimerStub = sinon.stub();
                 responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
@@ -658,7 +658,7 @@ describe('metrics-middleware', () => {
             });
             describe('when there is no server', function () {
                 before(function () {
-                    let koaMiddleware = new Middleware({});
+                    const koaMiddleware = new Middleware({});
                     koaMiddleware._getConnections();
                 });
                 it('should not call getConnections', function () {
@@ -681,7 +681,7 @@ describe('metrics-middleware', () => {
                 describe('when getConnections return count', function () {
                     before(function () {
                         server.getConnections = sinon.stub().yields(null, 1);
-                        koaMiddleware = new Middleware({server: server, numberOfConnectionsGauge: numberOfConnectionsGauge});
+                        koaMiddleware = new Middleware({ server: server, numberOfConnectionsGauge: numberOfConnectionsGauge });
                         koaMiddleware._collectDefaultServerMetrics(1000);
                     });
                     it('should call numberOfConnectionsGauge.set with count', function (done) {
@@ -697,7 +697,7 @@ describe('metrics-middleware', () => {
                     before(function () {
                         server.getConnections = sinon.stub().reset();
                         server.getConnections = sinon.stub().yields(new Error('error'));
-                        koaMiddleware = new Middleware({server: server, numberOfConnectionsGauge: numberOfConnectionsGauge});
+                        koaMiddleware = new Middleware({ server: server, numberOfConnectionsGauge: numberOfConnectionsGauge });
                         koaMiddleware._collectDefaultServerMetrics(500);
                     });
                     it('should not call numberOfConnectionsGauge.set with count', function (done) {

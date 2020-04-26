@@ -34,7 +34,7 @@ function helloTime (ctx, next) {
 };
 
 function bad (ctx) {
-    throw new Error({error: 'My Error'});
+    throw new Error({ error: 'My Error' });
 };
 
 module.exports = router;
