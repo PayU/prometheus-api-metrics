@@ -125,7 +125,7 @@ This will work only if you use the default Prometheus registry - do not use `new
 This feature enables you to easily process the result of Request.js timings feature.
 
 ### Usage
-####Initialize
+#### Initialize
 You can choose to initialized this functionality as a Class or not
 
 **Class:**
@@ -178,6 +178,11 @@ request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd'
 ## Usage in koa
 This package supports koa server that uses [`koa-router`](https://www.npmjs.com/package/koa-router) and [`koa-bodyparser`](https://www.npmjs.com/package/koa-bodyparser)
 
+```js
+const { koaMiddleware } = require('prometheus-api-metrics')
+
+app.use(koaMiddleware())
+```
 
 ## Test
 
