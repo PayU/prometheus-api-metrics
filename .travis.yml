@@ -22,3 +22,8 @@ jobs:
       node_js: node
       script:
         - "npm run types-check"
+    - language: node_js
+      name: lint
+      node_js: node
+      script:
+        - npm run lint

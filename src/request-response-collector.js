@@ -26,10 +26,10 @@ class HttpMetricsCollector {
 
 function _collectHttpTiming(res, southboundResponseTimeHistogram, southboundClientErrors) {
     if (res instanceof Error && !res.response && southboundClientErrors) {
-        let error = res.error || res;
+        const error = res.error || res;
         southboundClientErrors.inc({ target: error.hostname, error: error.code });
     } else {
-        let response = res.response || res;
+        const response = res.response || res;
         if (response.timings) {
             response.request.metrics = response.request.metrics || {};
             southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'total' }, response.timingPhases.total / 1000);

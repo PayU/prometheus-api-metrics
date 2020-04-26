@@ -521,7 +521,7 @@ describe('metrics-middleware', () => {
         });
         describe('when there is no server', function () {
             before(function () {
-                let expressMiddleware = new Middleware({});
+                const expressMiddleware = new Middleware({});
                 expressMiddleware._getConnections();
             });
             it('should not call getConnections', function () {
@@ -544,7 +544,7 @@ describe('metrics-middleware', () => {
             describe('when getConnections return count', function () {
                 before(function () {
                     server.getConnections = sinon.stub().yields(null, 1);
-                    expressMiddleware = new Middleware({server: server, numberOfConnectionsGauge: numberOfConnectionsGauge});
+                    expressMiddleware = new Middleware({ server: server, numberOfConnectionsGauge: numberOfConnectionsGauge });
                     expressMiddleware._collectDefaultServerMetrics(1000);
                 });
                 it('should call numberOfConnectionsGauge.set with count', function (done) {
@@ -559,7 +559,7 @@ describe('metrics-middleware', () => {
             describe('when getConnections return count', function () {
                 before(function () {
                     server.getConnections = sinon.stub().yields(new Error('error'));
-                    expressMiddleware = new Middleware({server: server, numberOfConnectionsGauge: numberOfConnectionsGauge});
+                    expressMiddleware = new Middleware({ server: server, numberOfConnectionsGauge: numberOfConnectionsGauge });
                     expressMiddleware._collectDefaultServerMetrics(500);
                 });
                 it('should not call numberOfConnectionsGauge.set with count', function (done) {

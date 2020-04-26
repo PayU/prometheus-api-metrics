@@ -9,6 +9,7 @@ class KoaMiddleware {
     constructor(setupOptions) {
         this.setupOptions = setupOptions;
     }
+
     _collectDefaultServerMetrics(timeout) {
         const NUMBER_OF_CONNECTIONS_METRICS_NAME = 'koajs_number_of_open_connections';
         this.setupOptions.numberOfConnectionsGauge = Prometheus.register.getSingleMetric(NUMBER_OF_CONNECTIONS_METRICS_NAME) || new Prometheus.Gauge({
@@ -19,6 +20,7 @@ class KoaMiddleware {
             setInterval(this._getConnections.bind(this), timeout).unref();
         }
     }
+
     _getConnections() {
         if (this.setupOptions.server) {
             this.setupOptions.server.getConnections((error, count) => {
@@ -30,6 +32,7 @@ class KoaMiddleware {
             });
         }
     }
+
     _handleResponse (ctx) {
         const responseLength = parseInt(ctx.response.get('Content-Length')) || 0;
 
@@ -41,7 +44,7 @@ class KoaMiddleware {
                 route: route,
                 code: ctx.res.statusCode
             }, ctx.req.metrics.contentLength);
-            ctx.req.metrics.timer({route: route, code: ctx.res.statusCode});
+            ctx.req.metrics.timer({ route: route, code: ctx.res.statusCode });
             this.setupOptions.responseSizeHistogram.observe({
                 method: ctx.req.method,
                 route: route,
@@ -50,6 +53,7 @@ class KoaMiddleware {
             debug(`metrics updated, request length: ${ctx.req.metrics.contentLength}, response length: ${responseLength}`);
         }
     }
+
     _getRoute(ctx) {
         let route;
         if (ctx._matchedRoute && !ctx._matchedRoute.endsWith(WILDCARD_ROUTE_ENDING)) {
@@ -65,9 +69,10 @@ class KoaMiddleware {
 
         return route;
     }
+
     _handleSubRoutes(matchedRoute, originalUrl, method, router) {
         let route;
-        let routeStart = matchedRoute.substring(0, matchedRoute.length - WILDCARD_ROUTE_ENDING.length);
+        const routeStart = matchedRoute.substring(0, matchedRoute.length - WILDCARD_ROUTE_ENDING.length);
         let url = this._removeQueryFromUrl(originalUrl).substring(routeStart.length);
         let matchedRoutes = router.match(url, method);
         if (matchedRoutes.path.length > 0) {
@@ -82,8 +87,9 @@ class KoaMiddleware {
             }
         }
     }
+
     _findFirstProperRoute(routes) {
-        let properRoute = routes.find(route => {
+        const properRoute = routes.find(route => {
             if (!route.path.endsWith('(.*)')) {
                 return route;
             }
@@ -93,9 +99,11 @@ class KoaMiddleware {
         route = route.endsWith('/') ? route.substring(0, route.length - 1) : route;
         return route;
     }
+
     _removeQueryFromUrl(url) {
         return url.split('?')[0];
     }
+
     middleware(ctx, next) {
         if (!this.setupOptions.server && ctx.req.socket) {
             this.setupOptions.server = ctx.req.socket.server;
