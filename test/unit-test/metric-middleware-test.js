@@ -379,7 +379,9 @@ describe('metrics-middleware', () => {
                 set: set
             });
             sinon.assert.calledOnce(end);
+            // eslint-disable-next-line no-control-regex
             const endFormalized = end.getCall(0).args[0].replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
+            // eslint-disable-next-line no-control-regex
             const apiFormalized = Prometheus.register.metrics().replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
             expect(endFormalized).to.eql(apiFormalized);
             sinon.assert.calledWith(set, 'Content-Type', Prometheus.register.contentType);
@@ -393,7 +395,9 @@ describe('metrics-middleware', () => {
         let firstFunction, secondFunction;
         before(() => {
             firstFunction = middleware();
-            secondFunction = middleware();
+        });
+        it('Cannot add the default metrics twice to the same registry', () => {
+            expect(() => { secondFunction = middleware() }).to.throw('Cannot add the default metrics twice to the same registry');
         });
         it('should not return the same middleware fundtion', () => {
             expect(firstFunction).to.not.equal(secondFunction);
@@ -460,6 +464,7 @@ describe('metrics-middleware', () => {
         after(() => {
             requestSizeObserve.restore();
             responseTimeObserve.restore();
+            Prometheus.register.clear();
         });
     });
     describe('when using middleware request baseUrl is undifined and path is not "/"', function () {
@@ -511,6 +516,7 @@ describe('metrics-middleware', () => {
         after(() => {
             requestSizeObserve.restore();
             responseTimeObserve.restore();
+            Prometheus.register.clear();
         });
     });
     describe('when _getConnections called', function () {

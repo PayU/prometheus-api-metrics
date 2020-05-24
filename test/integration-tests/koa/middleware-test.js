@@ -690,6 +690,7 @@ describe('when using koa framework', () => {
     });
     describe('when start up with unique metric names', () => {
         before(() => {
+            Prometheus.register.clear();
             app.close();
             config.useUniqueHistogramName = true;
             delete require.cache[require.resolve('./server/koa-server')];
@@ -761,6 +762,7 @@ describe('when using koa framework', () => {
     });
     describe('when start up with exclude route', () => {
         before(() => {
+            Prometheus.register.clear();
             app.close();
             config.useUniqueHistogramName = true;
             delete require.cache[require.resolve('./server/koa-server')];
@@ -819,6 +821,7 @@ describe('when using koa framework', () => {
     });
     describe('when start up with include query params', () => {
         before(() => {
+            Prometheus.register.clear();
             app.close();
             config.useUniqueHistogramName = true;
             delete require.cache[require.resolve('./server/koa-server')];

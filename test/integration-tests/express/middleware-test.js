@@ -775,6 +775,7 @@ describe('when using express framework', () => {
     describe('when start up with exclude route', () => {
         let app;
         before(() => {
+            Prometheus.register.clear();
             config.useUniqueHistogramName = true;
             delete require.cache[require.resolve('./server/express-server')];
             delete require.cache[require.resolve('../../../src/metrics-middleware.js')];
