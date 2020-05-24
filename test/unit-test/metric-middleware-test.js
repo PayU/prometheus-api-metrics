@@ -379,7 +379,9 @@ describe('metrics-middleware', () => {
                 set: set
             });
             sinon.assert.calledOnce(end);
-            sinon.assert.calledWith(end, Prometheus.register.metrics());
+            const endFormalized = end.getCall(0).args[0].replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
+            const apiFormalized = Prometheus.register.metrics().replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
+            expect(endFormalized).to.eql(apiFormalized);
             sinon.assert.calledWith(set, 'Content-Type', Prometheus.register.contentType);
             sinon.assert.calledOnce(set);
         });

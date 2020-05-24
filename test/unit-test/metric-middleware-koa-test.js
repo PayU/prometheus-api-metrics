@@ -368,7 +368,9 @@ describe('metrics-middleware', () => {
                 const ctx = { body: {}, set: set, req: { url: '/v1/metrics' } };
                 func(ctx, next);
                 sinon.assert.calledOnce(next);
-                expect(ctx.body).to.eql(Prometheus.register.metrics());
+                const ctxFormalized = ctx.body.replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
+                const apiFormalized = Prometheus.register.metrics().replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
+                expect(ctxFormalized).to.eql(apiFormalized);
                 sinon.assert.calledWith(set, 'Content-Type', Prometheus.register.contentType);
                 sinon.assert.calledOnce(set);
             });
