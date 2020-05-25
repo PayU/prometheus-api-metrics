@@ -28,16 +28,7 @@ module.exports = (appVersion, projectName, framework = 'express') => {
 
         Prometheus.collectDefaultMetrics({ timeout: defaultMetricsInterval, prefix: `${metricNames.defaultMetricsPrefix}` });
 
-        if (!Prometheus.register.getSingleMetric(metricNames.app_version)) {
-            const version = new Prometheus.Gauge({
-                name: metricNames.app_version,
-                help: 'The service version by package.json',
-                labelNames: ['version', 'major', 'minor', 'patch']
-            });
-
-            const versionSegments = appVersion.split('.').map(Number);
-            version.labels(appVersion, versionSegments[0], versionSegments[1], versionSegments[2]).set(1);
-        }
+        PrometheusRegisterAppVersion(appVersion, metricNames.app_version);
 
         setupOptions.responseTimeHistogram = Prometheus.register.getSingleMetric(metricNames.http_request_duration_seconds) || new Prometheus.Histogram({
             name: metricNames.http_request_duration_seconds,
@@ -64,6 +55,17 @@ module.exports = (appVersion, projectName, framework = 'express') => {
         return frameworkMiddleware(framework);
     };
 };
+
+function PrometheusRegisterAppVersion(appVersion, metricName) {
+    const version = new Prometheus.Gauge({
+        name: metricName,
+        help: 'The service version by package.json',
+        labelNames: ['version', 'major', 'minor', 'patch']
+    });
+
+    const versionSegments = appVersion.split('.').map(Number);
+    version.labels(appVersion, versionSegments[0], versionSegments[1], versionSegments[2]).set(1);
+}
 
 function frameworkMiddleware (framework) {
     switch (framework) {

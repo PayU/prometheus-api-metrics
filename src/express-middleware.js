@@ -5,7 +5,7 @@ const utils = require('./utils');
 
 class ExpressMiddleware {
     constructor(setupOptions) {
-        this.setupOptions = setupOptions || {};
+        this.setupOptions = setupOptions;
     }
 
     _collectDefaultServerMetrics(timeout) {
