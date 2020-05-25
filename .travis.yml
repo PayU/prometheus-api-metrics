@@ -1,6 +1,5 @@
 language: node_js
 node_js:
-  - "8"
   - "10"
   - "12"
 
@@ -9,9 +8,6 @@ script:
 
 jobs:
   include:
-    - language: node_js
-      node_js: 6
-      script: "npm run no-koa-test"
     - language: node_js
       node_js: node
       script:
