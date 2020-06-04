@@ -90,12 +90,15 @@ class ExpressMiddleware {
             this.setupOptions.server = req.socket.server;
             this._collectDefaultServerMetrics(this.setupOptions.defaultMetricsInterval);
         }
-        if (req.url === this.setupOptions.metricsRoute) {
+
+        const routeUrl = req.originalUrl || req.url;
+
+        if (routeUrl === this.setupOptions.metricsRoute) {
             debug('Request to /metrics endpoint');
             res.set('Content-Type', Prometheus.register.contentType);
             return res.end(Prometheus.register.metrics());
         }
-        if (req.url === `${this.setupOptions.metricsRoute}.json`) {
+        if (routeUrl === `${this.setupOptions.metricsRoute}.json`) {
             debug('Request to /metrics endpoint');
             return res.json(Prometheus.register.getMetricsAsJSON());
         }
@@ -107,7 +110,7 @@ class ExpressMiddleware {
             contentLength: parseInt(req.get('content-length')) || 0
         };
 
-        debug(`Set start time and content length for request. url: ${req.url}, method: ${req.method}`);
+        debug(`Set start time and content length for request. url: ${routeUrl}, method: ${req.method}`);
 
         res.once('finish', () => {
             debug('on finish.');
