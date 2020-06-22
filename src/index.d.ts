@@ -6,8 +6,8 @@ export function koaMiddleware(options?: ApiMetricsOpts) : Middleware;
 export function expressMiddleware(options?: ApiMetricsOpts) : RequestHandler;
 export class HttpMetricsCollector {
   constructor(options?: CollectorOpts)
-  init(options?: CollectorOpts): void
-  collect(res: Response | any): void
+  static init(options?: CollectorOpts): void
+  static collect(res: Response | any): void
 }
 
 export interface ApiMetricsOpts {
