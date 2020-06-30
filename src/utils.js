@@ -1,4 +1,4 @@
-'use strics';
+'use strict';
 
 function getMetricNames(metricNames, useUniqueHistogramName, metricsPrefix, projectName) {
     const prefix = useUniqueHistogramName === true ? projectName : metricsPrefix;
