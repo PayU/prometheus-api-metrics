@@ -63,8 +63,8 @@ function PrometheusRegisterAppVersion(appVersion, metricName) {
         labelNames: ['version', 'major', 'minor', 'patch']
     });
 
-    const versionSegments = appVersion.split('.').map(Number);
-    version.labels(appVersion, versionSegments[0], versionSegments[1], versionSegments[2]).set(1);
+    const [major, minor, patch] = appVersion.split('.').map(Number);
+    version.labels(appVersion, major, minor, patch).set(1);
 }
 
 function frameworkMiddleware (framework) {
