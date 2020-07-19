@@ -51,7 +51,7 @@ class ExpressMiddleware {
                 route = route ? route + req.route.path : req.route.path;
             }
 
-            if (!route || route === '') {
+            if (!route || route === '' || typeof route !== 'string') {
                 route = req.originalUrl.split('?')[0];
             } else {
                 const splittedRoute = route.split('/');
