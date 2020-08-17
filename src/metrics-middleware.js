@@ -51,14 +51,14 @@ module.exports = (appVersion, projectName, framework = 'express') => {
             name: metricNames.http_request_size_bytes,
             help: 'Size of HTTP requests in bytes',
             labelNames: ['method', 'route', 'code'],
-            buckets: requestSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000] // buckets for response time from 5 bytes to 10000 bytes
+            buckets: requestSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000] // buckets for request size from 5 bytes to 10000 bytes
         });
 
         setupOptions.responseSizeHistogram = Prometheus.register.getSingleMetric(metricNames.http_response_size_bytes) || new Prometheus.Histogram({
             name: metricNames.http_response_size_bytes,
             help: 'Size of HTTP response in bytes',
             labelNames: ['method', 'route', 'code'],
-            buckets: responseSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000] // buckets for response time from 5 bytes to 10000 bytes
+            buckets: responseSizeBuckets || [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000] // buckets for response size from 5 bytes to 10000 bytes
         });
 
         return frameworkMiddleware(framework);
