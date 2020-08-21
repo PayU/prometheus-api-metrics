@@ -98,8 +98,8 @@ class ExpressMiddleware {
             res.set('Content-Type', Prometheus.register.contentType);
             return res.end(Prometheus.register.metrics());
         }
-        if (routeUrl === `${this.setupOptions.metricsRoute}${this.setupOptions.metricsJsonSuffix}`) {
-            debug('Request to /metrics endpoint');
+        if (routeUrl === this.setupOptions.metricsJsonRoute) {
+            debug('Request to /metrics/json endpoint');
             return res.json(Prometheus.register.getMetricsAsJSON());
         }
 
