@@ -368,7 +368,11 @@ describe('metrics-middleware', () => {
                 const ctx = { body: {}, set: set, req: { url: '/v1/metrics' } };
                 func(ctx, next);
                 sinon.assert.calledOnce(next);
-                expect(ctx.body).to.eql(Prometheus.register.metrics());
+                // eslint-disable-next-line no-control-regex
+                const ctxFormalized = ctx.body.replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
+                // eslint-disable-next-line no-control-regex
+                const apiFormalized = Prometheus.register.metrics().replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
+                expect(ctxFormalized).to.eql(apiFormalized);
                 sinon.assert.calledWith(set, 'Content-Type', Prometheus.register.contentType);
                 sinon.assert.calledOnce(set);
             });
@@ -380,9 +384,11 @@ describe('metrics-middleware', () => {
             let firstFunction, secondFunction;
             before(() => {
                 firstFunction = middleware();
-                secondFunction = middleware();
             });
-            it('should not return the same middleware function', () => {
+            it('Cannot add the default metrics twice to the same registry', () => {
+                expect(() => { secondFunction = middleware() }).to.throw('Cannot add the default metrics twice to the same registry');
+            });
+            it('should not return the same middleware fundtion', () => {
                 expect(firstFunction).to.not.equal(secondFunction);
             });
             it('should have http_request_size_bytes with the right labels', () => {
@@ -445,6 +451,7 @@ describe('metrics-middleware', () => {
             after(() => {
                 requestSizeObserve.restore();
                 responseTimeObserve.restore();
+                Prometheus.register.clear();
             });
         });
         describe('when using middleware request baseUrl is undefined and path is not "/"', function () {
@@ -494,6 +501,7 @@ describe('metrics-middleware', () => {
             after(() => {
                 requestSizeObserve.restore();
                 responseTimeObserve.restore();
+                Prometheus.register.clear();
             });
         });
         describe('when using middleware request and route is with sub routing', function () {
@@ -544,6 +552,7 @@ describe('metrics-middleware', () => {
             after(() => {
                 requestSizeObserve.restore();
                 responseTimeObserve.restore();
+                Prometheus.register.clear();
             });
         });
         describe('when using middleware request and route is with sub routing, first path is with place holder', function () {
@@ -594,6 +603,7 @@ describe('metrics-middleware', () => {
             after(() => {
                 requestSizeObserve.restore();
                 responseTimeObserve.restore();
+                Prometheus.register.clear();
             });
         });
         describe('when using middleware request and route is with sub routing, regex of path with base path', function () {
@@ -646,6 +656,7 @@ describe('metrics-middleware', () => {
             after(() => {
                 requestSizeObserve.restore();
                 responseTimeObserve.restore();
+                Prometheus.register.clear();
             });
         });
         describe('when _getConnections called', function () {
