@@ -23,29 +23,29 @@ app.use(bodyParser());
 
 app.use(router.routes());
 
-router.get('', (ctx, next) => {
-    sleep(Math.round(Math.random() * 200));
+router.get('', async (ctx, next) => {
+    await sleep(Math.round(Math.random() * 200));
     ctx.body = { message: 'Hello World!' };
     ctx.status = 200;
     next();
 });
 
-router.get('/hello', (ctx, next) => {
-    sleep(Math.round(Math.random() * 200));
+router.get('/hello', async (ctx, next) => {
+    await sleep(Math.round(Math.random() * 200));
     ctx.body = { message: 'Hello World!' };
     ctx.status = 200;
     next();
 });
 
-router.get('/health', (ctx, next) => {
-    sleep(ctx.request.body.delay || 1);
+router.get('/health', async (ctx, next) => {
+    await sleep(ctx.request.body.delay || 1);
     ctx.body = { message: 'Hello World!' };
     ctx.status = 200;
     next();
 });
 
-router.get('/health/:id', (ctx, next) => {
-    sleep(ctx.request.body.delay || 1);
+router.get('/health/:id', async (ctx, next) => {
+    await sleep(ctx.request.body.delay || 1);
     ctx.body = { message: 'Hello World!' };
     ctx.status = 200;
     next();

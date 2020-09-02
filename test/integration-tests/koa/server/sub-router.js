@@ -12,16 +12,16 @@ router.patch('/:time', bad);
 router.get('/hello', bad);
 router.get('/hello/:time', helloTime);
 
-function test(ctx, next) {
-    sleep(ctx.request.body.delay || 1);
+async function test(ctx, next) {
+    await sleep(ctx.request.body.delay || 1);
 
     ctx.status = 201;
     ctx.body = { message: 'Hello World!' };
     next();
 };
 
-function helloTime (ctx, next) {
-    sleep(ctx.params.time);
+async function helloTime (ctx, next) {
+    await sleep(ctx.params.time);
     ctx.status = 200;
     ctx.boy = { message: 'Hello World!' };
     next();

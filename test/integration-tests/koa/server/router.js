@@ -19,15 +19,15 @@ router.get('/hello/:time', helloTime);
 router.get('/hello/', helloTime);
 router.get('/error/:var1', bad);
 
-function test (ctx, next) {
-    sleep(ctx.request.body.delay || 1);
+async function test (ctx, next) {
+    await sleep(ctx.request.body.delay || 1);
     ctx.status = 201;
     ctx.body = { message: 'Hello World!' };
     next();
 };
 
-function helloTime (ctx, next) {
-    sleep(parseInt(ctx.params.time));
+async function helloTime (ctx, next) {
+    await sleep(parseInt(ctx.params.time));
     ctx.status = 200;
     ctx.body = { message: 'Hello World!' };
     next();
