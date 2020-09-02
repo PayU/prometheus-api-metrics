@@ -1,5 +1,7 @@
 const Prometheus = require('prom-client');
 const utils = require('./utils');
+const get = require('lodash.get');
+
 let southboundResponseTimeHistogram, southboundClientErrors = null;
 let projectName;
 
@@ -32,12 +34,58 @@ function _collectHttpTiming(res, southboundResponseTimeHistogram, southboundClie
         const response = res.response || res;
         if (response.timings) {
             response.request.metrics = response.request.metrics || {};
-            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'total' }, response.timingPhases.total / 1000);
-            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'socket' }, response.timingPhases.wait / 1000); // timings.socket
-            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'lookup' }, response.timingPhases.dns / 1000); // timings.lookup - timings.socket
-            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'connect' }, response.timingPhases.tcp / 1000); // timings.connect - timings.socket
+
+            const { target, method, route, status_code, timings } = extractResponseData(response);
+
+            if (isAxiosResponse(response)) {
+                southboundResponseTimeHistogram.observe({ target, method, route, status_code, type: 'total' }, timings.total);
+            } else {
+                southboundResponseTimeHistogram.observe({ target, method, route, status_code, type: 'total' }, timings.total);
+                southboundResponseTimeHistogram.observe({ target, method, route, status_code, type: 'socket' }, timings.wait); // timings.socket
+                southboundResponseTimeHistogram.observe({ target, method, route, status_code, type: 'lookup' }, timings.dns); // timings.lookup - timings.socket
+                southboundResponseTimeHistogram.observe({ target, method, route, status_code, type: 'connect' }, timings.tcp); // timings.connect - timings.socket
+            }
         }
     }
+}
+
+function extractResponseData(response) {
+    let status_code, route, method, target, timings;
+
+    // check if response client is axios
+    if (isAxiosResponse(response)) {
+        status_code = response.status;
+        method = response.config.method.toUpperCase();
+        route = get(response, 'config.metrics.route', response.config.url);
+        target = get(response, 'config.metrics.target', response.config.baseURL);
+        timings = {
+            total: response.timings.elapsedTime
+        };
+    } else { // response is request-promise
+        target = get(response, 'request.metrics.target', response.request.originalHost);
+        method = response.request.method;
+        route = get(response, 'request.metrics.route', response.request.path);
+        status_code = response.statusCode;
+        timings = {
+            total: response.timingPhases.total / 1000,
+            wait: response.timingPhases.wait / 1000,
+            dns: response.timingPhases.dns / 1000,
+            tcp: response.timingPhases.tcp / 1000
+        };
+    }
+
+    return {
+        target,
+        method,
+        route,
+        status_code,
+        timings
+    };
+}
+
+function isAxiosResponse(response) {
+    // also make sure that axios response is using the axios-time plugin
+    return response.config && response.timings;
 }
 
 function _init(options = {}) {
