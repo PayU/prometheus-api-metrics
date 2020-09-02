@@ -7,7 +7,7 @@ const config = require('./config');
 const app = new Koa();
 const middleware = require('../../../../src/index.js').koaMiddleware;
 const subRouter = require('./router');
-const sleep = require('sleep');
+const sleep = require('../../../utils/sleep');
 const Router = require('koa-router');
 const router = new Router();
 
@@ -43,14 +43,14 @@ app.use(subRouter.routes());
 app.use(router.routes());
 
 router.get('/hello', (ctx, next) => {
-    sleep.msleep(Math.round(Math.random() * 200));
+    sleep(Math.round(Math.random() * 200));
     ctx.status = 200;
     ctx.body = { message: 'Hello World!' };
     return next();
 });
 
 router.get('/hello/:time', (ctx, next) => {
-    sleep.msleep(ctx.params.time);
+    sleep(ctx.params.time);
     ctx.status = 200;
     ctx.body = { message: 'Hello World!' };
     return next();
@@ -72,7 +72,7 @@ router.get('/checkout', (ctx, next) => {
 });
 
 router.post('/test', (ctx, next) => {
-    sleep.msleep(ctx.request.body.delay || 1);
+    sleep(ctx.request.body.delay || 1);
     ctx.status = 201;
     ctx.body = { message: 'Test World!' };
     return next();

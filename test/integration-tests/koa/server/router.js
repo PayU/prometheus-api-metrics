@@ -4,7 +4,7 @@ const Router = require('koa-router');
 const router = new Router({
     prefix: '/v2'
 });
-const sleep = require('sleep');
+const sleep = require('../../../utils/sleep');
 const subRouter = require('./sub-router');
 
 router.use('/v3', cloneDeep(subRouter.routes())); // Current koa router has an open issue/bug (https://github.com/alexmingoia/koa-router/issues/244), only way found to mount a shared router at different paths.
@@ -20,14 +20,14 @@ router.get('/hello/', helloTime);
 router.get('/error/:var1', bad);
 
 function test (ctx, next) {
-    sleep.msleep(ctx.request.body.delay || 1);
+    sleep(ctx.request.body.delay || 1);
     ctx.status = 201;
     ctx.body = { message: 'Hello World!' };
     next();
 };
 
 function helloTime (ctx, next) {
-    sleep.msleep(parseInt(ctx.params.time));
+    sleep(parseInt(ctx.params.time));
     ctx.status = 200;
     ctx.body = { message: 'Hello World!' };
     next();
