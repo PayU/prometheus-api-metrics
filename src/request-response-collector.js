@@ -35,8 +35,6 @@ function _collectHttpTiming(res, southboundResponseTimeHistogram, southboundClie
     } else {
         const response = res.response || res;
         if (response.timings) {
-            response.request.metrics = response.request.metrics || {};
-
             const responseData = extractResponseData(response);
             addObservers(responseData);
         }
