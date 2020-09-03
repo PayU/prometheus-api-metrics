@@ -61,7 +61,7 @@ function extractResponseData(response) {
         route = get(response, 'config.metrics.route', response.config.url);
         target = get(response, 'config.metrics.target', response.config.baseURL);
         timings = {
-            total: response.timings.elapsedTime
+            total: response.timings.elapsedTime / 1000
         };
     } else { // response is request-promise
         status_code = response.statusCode;
