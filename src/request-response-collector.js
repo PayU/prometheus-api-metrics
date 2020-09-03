@@ -66,10 +66,10 @@ function extractResponseData(response) {
             total: response.timings.elapsedTime
         };
     } else { // response is request-promise
-        target = get(response, 'request.metrics.target', response.request.originalHost);
+        status_code = response.statusCode;
         method = response.request.method;
         route = get(response, 'request.metrics.route', response.request.path);
-        status_code = response.statusCode;
+        target = get(response, 'request.metrics.target', response.request.originalHost);
         timings = {
             total: response.timingPhases.total / 1000,
             socket: response.timingPhases.wait / 1000,
