@@ -36,12 +36,12 @@ function _collectHttpTiming(res, southboundResponseTimeHistogram, southboundClie
         const response = res.response || res;
         if (response.timings) {
             const responseData = extractResponseData(response);
-            addObservers(responseData);
+            addObservers(southboundResponseTimeHistogram, responseData);
         }
     }
 }
 
-function addObservers(responseData) {
+function addObservers(southboundResponseTimeHistogram, responseData) {
     const { target, method, route, status_code, timings } = responseData;
 
     OBSERVER_TYPES.forEach(type => {
