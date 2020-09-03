@@ -14,6 +14,8 @@ module.exports = (name) => {
     return httpMetricsCollector;
 };
 
+const TYPES = ['total', 'socket', 'lookup', 'connect'];
+
 class HttpMetricsCollector {
     constructor(options){
         const setup = _init(options);
@@ -35,18 +37,20 @@ function _collectHttpTiming(res, southboundResponseTimeHistogram, southboundClie
         if (response.timings) {
             response.request.metrics = response.request.metrics || {};
 
-            const { target, method, route, status_code, timings } = extractResponseData(response);
-
-            if (isAxiosResponse(response)) {
-                southboundResponseTimeHistogram.observe({ target, method, route, status_code, type: 'total' }, timings.total);
-            } else {
-                southboundResponseTimeHistogram.observe({ target, method, route, status_code, type: 'total' }, timings.total);
-                southboundResponseTimeHistogram.observe({ target, method, route, status_code, type: 'socket' }, timings.wait); // timings.socket
-                southboundResponseTimeHistogram.observe({ target, method, route, status_code, type: 'lookup' }, timings.dns); // timings.lookup - timings.socket
-                southboundResponseTimeHistogram.observe({ target, method, route, status_code, type: 'connect' }, timings.tcp); // timings.connect - timings.socket
-            }
+            const responseData = extractResponseData(response);
+            addObservers(responseData);
         }
     }
+}
+
+function addObservers(responseData) {
+    const { target, method, route, status_code, timings } = responseData;
+
+    TYPES.forEach(type => {
+        if (typeof responseData.timings[type] !== 'undefined') {
+            southboundResponseTimeHistogram.observe({ target, method, route, status_code, type }, timings[type]);
+        }
+    });
 }
 
 function extractResponseData(response) {
@@ -68,9 +72,9 @@ function extractResponseData(response) {
         status_code = response.statusCode;
         timings = {
             total: response.timingPhases.total / 1000,
-            wait: response.timingPhases.wait / 1000,
-            dns: response.timingPhases.dns / 1000,
-            tcp: response.timingPhases.tcp / 1000
+            socket: response.timingPhases.wait / 1000,
+            lookup: response.timingPhases.dns / 1000,
+            connect: response.timingPhases.tcp / 1000
         };
     }
 

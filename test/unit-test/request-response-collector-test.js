@@ -10,7 +10,7 @@ const Collector = require('../../src/request-response-collector')('prometheus_ap
 const axios = require('axios');
 const axiosTime = require('axios-time');
 const expect = chai.expect;
-
+const axiosNoTiming = axios.create();
 chai.use(chaiAsPromised);
 axiosTime(axios);
 
@@ -353,6 +353,12 @@ describe('request.js response time collector', () => {
                     Collector.collect(err);
                     expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
                 });
+            });
+            it('should not collect metrics when not using axios-time plugin', async() => {
+                nock('http://www.google.com').get('/').reply(200);
+                const response = await axiosNoTiming({ baseURL: 'http://www.google.com', method: 'get', url: '/' });
+                Collector.collect(response);
+                expect(Prometheus.register.metrics()).to.not.include('southbound_request_duration_seconds_bucket{le="+Inf",target="http://www.google.com",method="GET",route="/",status_code="200",type="total"} 1');
             });
         });
         describe('initialized with countClientErrors = true', () => {
