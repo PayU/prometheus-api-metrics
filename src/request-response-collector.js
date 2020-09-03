@@ -14,7 +14,7 @@ module.exports = (name) => {
     return httpMetricsCollector;
 };
 
-const TYPES = ['total', 'socket', 'lookup', 'connect'];
+const OBSERVER_TYPES = ['total', 'socket', 'lookup', 'connect'];
 
 class HttpMetricsCollector {
     constructor(options){
@@ -46,7 +46,7 @@ function _collectHttpTiming(res, southboundResponseTimeHistogram, southboundClie
 function addObservers(responseData) {
     const { target, method, route, status_code, timings } = responseData;
 
-    TYPES.forEach(type => {
+    OBSERVER_TYPES.forEach(type => {
         if (typeof responseData.timings[type] !== 'undefined') {
             southboundResponseTimeHistogram.observe({ target, method, route, status_code, type }, timings[type]);
         }
@@ -88,8 +88,7 @@ function extractResponseData(response) {
 }
 
 function isAxiosResponse(response) {
-    // also make sure that axios response is using the axios-time plugin
-    return response.config && response.timings;
+    return response.config && response.hasOwnProperty('data');
 }
 
 function _init(options = {}) {
