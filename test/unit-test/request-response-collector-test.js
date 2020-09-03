@@ -1,11 +1,18 @@
 'use strict';
 
 const Prometheus = require('prom-client');
-const expect = require('chai').expect;
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const request = require('request');
 const requestPromise = require('request-promise-native');
 const nock = require('nock');
 const Collector = require('../../src/request-response-collector')('prometheus_api_metrics');
+const axios = require('axios');
+const axiosTime = require('axios-time');
+const expect = chai.expect;
+const axiosNoTiming = axios.create();
+chai.use(chaiAsPromised);
+axiosTime(axios);
 
 describe('request.js response time collector', () => {
     describe('while using request', () => {
@@ -285,6 +292,114 @@ describe('request.js response time collector', () => {
             it('shouldn\'t count client error in counter', () => {
                 return requestPromise({ method: 'POST', url: 'http://www.mocky1.io/v2/12345', metrics: { route: 'v2/:id' }, time: true, resolveWithFullResponse: true }).catch((error) => {
                     Collector.collect(error);
+                    expect(Prometheus.register.metrics()).to.not.include('southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
+                });
+            });
+        });
+    });
+    describe('while using axios', () => {
+        describe('Initialize with defaults', () => {
+            before(() => {
+                Collector.init();
+            });
+            afterEach(() => {
+                Prometheus.register.resetMetrics();
+            });
+            after(() => {
+                Prometheus.register.clear();
+            });
+            it('should collect metrics with path and method for valid request', async () => {
+                nock('http://www.google.com').get('/').reply(200);
+                const response = await axios({ baseURL: 'http://www.google.com', method: 'get', url: '/' });
+                Collector.collect(response);
+                expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="http://www.google.com",method="GET",route="/",status_code="200",type="total"} 1');
+            });
+            it('should collect metrics with path and method for valid request (500)', async () => {
+                nock('http://www.mocky.io').get('/v2/5bd57525310000680041daf2').reply(500);
+                await axios({ baseURL: 'http://www.mocky.io', method: 'get', url: '/v2/5bd57525310000680041daf2' }).catch((err) => {
+                    Collector.collect(err);
+                    expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="http://www.mocky.io",method="GET",route="/v2/5bd57525310000680041daf2",status_code="500",type="total"} 1');
+                });
+            });
+            it('should collect metrics with path and method for valid request (POST)', async () => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
+                const response = await axios({ baseURL: 'http://www.mocky.io', method: 'post', url: '/v2/5bd9984b2f00006d0006d1fd' });
+                Collector.collect(response);
+                expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="http://www.mocky.io",method="POST",route="/v2/5bd9984b2f00006d0006d1fd",status_code="201",type="total"} 1');
+            });
+            it('should collect metrics with path and method for valid request override route field on the request', async () => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
+                const response = await axios({ baseURL: 'http://www.mocky.io', method: 'post', url: '/v2/5bd9984b2f00006d0006d1fd', metrics: { route: '/v2/:id' } });
+                Collector.collect(response);
+                expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="http://www.mocky.io",method="POST",route="/v2/:id",status_code="201",type="total"} 1');
+            });
+            it('should collect metrics with path and method for valid request override target field on the request', async () => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
+                const response = await axios({ baseURL: 'http://www.mocky.io', method: 'post', url: '/v2/5bd9984b2f00006d0006d1fd', metrics: { target: 'www.google.com' } });
+                Collector.collect(response);
+                expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="POST",route="/v2/5bd9984b2f00006d0006d1fd",status_code="201",type="total"} 1');
+            });
+            it('should collect metrics with path and method for valid request override target and route field on the request', async () => {
+                nock('http://www.mocky.io').post('/v2/5bd9984b2f00006d0006d1fd').reply(201);
+                const response = await axios({ baseURL: 'http://www.mocky.io', method: 'post', url: '/v2/5bd9984b2f00006d0006d1fd', metrics: { target: 'www.google.com', route: '/v2/:id' } });
+                Collector.collect(response);
+                expect(Prometheus.register.metrics()).to.include('southbound_request_duration_seconds_bucket{le="+Inf",target="www.google.com",method="POST",route="/v2/:id",status_code="201",type="total"} 1');
+            });
+            it('should count client error in counter by default', async() => {
+                await axios({
+                    baseURL: 'http://www.mocky1.io',
+                    method: 'post'
+                }).catch((err) => {
+                    Collector.collect(err);
+                    expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
+                });
+            });
+            it('should not collect metrics when not using axios-time plugin', async() => {
+                nock('http://www.google.com').get('/').reply(200);
+                const response = await axiosNoTiming({ baseURL: 'http://www.google.com', method: 'get', url: '/' });
+                Collector.collect(response);
+                expect(Prometheus.register.metrics()).to.not.include('southbound_request_duration_seconds_bucket{le="+Inf",target="http://www.google.com",method="GET",route="/",status_code="200",type="total"} 1');
+            });
+        });
+        describe('initialized with countClientErrors = true', () => {
+            before(() => {
+                Collector.init({ countClientErrors: true });
+            });
+            afterEach(() => {
+                Prometheus.register.resetMetrics();
+            });
+            after(() => {
+                Prometheus.register.clear();
+            });
+            it('should count client error in counter', async () => {
+                await axios({
+                    baseURL: 'http://www.mocky1.io',
+                    method: 'post',
+                    metrics: { route: 'v2/:id' }
+                }).catch((err) => {
+                    Collector.collect(err);
+                    expect(Prometheus.register.metrics()).to.include('southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
+                });
+            });
+        });
+        describe('initialized with countClientErrors = false', () => {
+            before(() => {
+                Collector.init({ countClientErrors: false });
+            });
+            afterEach(() => {
+                Prometheus.register.resetMetrics();
+            });
+            after(() => {
+                Prometheus.register.clear();
+            });
+            it('shouldn\'t count client error in counter', async () => {
+                await axios({
+                    baseURL: 'http://www.mocky1.io',
+                    url: '/v2/12345',
+                    method: 'post',
+                    metrics: { route: 'v2/:id' }
+                }).catch((err) => {
+                    Collector.collect(err);
                     expect(Prometheus.register.metrics()).to.not.include('southbound_client_errors_count{target="www.mocky1.io",error="ENOTFOUND"} 1');
                 });
             });

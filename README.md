@@ -22,6 +22,7 @@
   - [Usage](#usage-1)
     - [request](#request)
     - [request-promise-native](#request-promise-native)
+    - [axios](#axios)
 - [Test](#test)
 - [Usage in koa](#usage-in-koa)
 - [Prometheus Examples Queries](#prometheus-examples-queries)
@@ -166,6 +167,7 @@ return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f0
 });
 ```
 
+
 **Notes:** 
 1. In order to use this feature you must use `{ time: true }` as part of your request configuration and then pass to the collector the response or error you got.
 2. In order to use the timing feature in request-promise/request-promise-native you must also use `resolveWithFullResponse: true`
@@ -174,6 +176,24 @@ return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f0
 request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { target: 'www.google.com', route: 'v2/:id' }, time: true }, (err, response) => {...};
 });
 ```
+
+#### axios
+```js
+const axios = require('axios');
+const axiosTime = require('axios-time');
+
+axiosTime(axios);
+
+try {
+    const response = await axios({ baseURL: 'http://www.google.com', method: 'get', url: '/' });
+    Collector.collect(response);
+} catch (error) {
+    Collector.collect(error);
+}
+```
+
+**Notes:** 
+* In order to collect metrics from axios client the [`axios-time`](https://www.npmjs.com/package/axios-time) package is required.
 
 ## Usage in koa
 This package supports koa server that uses [`koa-router`](https://www.npmjs.com/package/koa-router) and [`koa-bodyparser`](https://www.npmjs.com/package/koa-bodyparser)
