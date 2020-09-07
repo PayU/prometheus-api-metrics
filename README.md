@@ -46,7 +46,7 @@ API and process monitoring with [Prometheus](https://prometheus.io) for Node.js 
 - Process Metrics as recommended by Prometheus [itself](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors)
 - Endpoint to retrieve the metrics - used for Prometheus scraping
    - Prometheus format
-   - JSON format (`${path}.json`)
+   - JSON format (default to `${path}.json`, can be changed in options)
 - Support custom metrics
 - [Http function to collect request.js HTTP request duration](#requestjs-http-request-duration-collector)
 
@@ -60,6 +60,7 @@ app.use(apiMetrics())
 ### Options
 
 - metricsPath - Path to access the metrics. `default: /metrics`
+- metricsJsonPath - Path to access the json formatted metrics. `default: {metricsPath}.json`
 - defaultMetricsInterval - the interval to collect the process metrics in milliseconds. `default: 10000`
 - durationBuckets - Buckets for response time in seconds. `default: [0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]`
 - requestSizeBuckets - Buckets for request size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
@@ -87,6 +88,7 @@ curl http[s]://<host>:[port]/metrics.json
 
 2. If you are using express framework and no route was found for the request (e.g: 404 status code), the request will not be collected. that's because we'll risk memory leak since the route is not a pattern but a hardcoded string.
 
+3. You can specify your own metrics path via options. see : `metricsJsonPath`
 
 ## Custom Metrics
 
