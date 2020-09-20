@@ -37,9 +37,14 @@ class ExpressMiddleware {
         const route = this._getRoute(req);
 
         if (route && utils.shouldLogMetrics(this.setupOptions.excludeRoutes, route)) {
-            this.setupOptions.requestSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, req.metrics.contentLength);
-            req.metrics.timer({ route: route, code: res.statusCode });
-            this.setupOptions.responseSizeHistogram.observe({ method: req.method, route: route, code: res.statusCode }, responseLength);
+            const labels = {
+                code: res.statusCode,
+                route,
+                ...this.setupOptions.getMetricsExtraLabelValues(req, res)
+            };
+            this.setupOptions.requestSizeHistogram.observe({ method: req.method, ...labels }, req.metrics.contentLength);
+            req.metrics.timer(labels);
+            this.setupOptions.responseSizeHistogram.observe({ method: req.method, ...labels }, responseLength);
             debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}`);
         }
     }
