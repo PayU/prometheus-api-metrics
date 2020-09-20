@@ -38,8 +38,8 @@ class ExpressMiddleware {
 
         if (route && utils.shouldLogMetrics(this.setupOptions.excludeRoutes, route)) {
             const labels = {
-                code: res.statusCode,
                 route,
+                code: res.statusCode,
                 ...this.setupOptions.getMetricsExtraLabelValues(req, res)
             };
             this.setupOptions.requestSizeHistogram.observe({ method: req.method, ...labels }, req.metrics.contentLength);
