@@ -69,15 +69,19 @@ app.use(apiMetrics())
 - metricsPrefix - A custom metrics names prefix, the package will add underscore between your prefix to the metric name.
 - excludeRoutes - Array of routes to exclude. Routes should be in your framework syntax.
 - includeQueryParams - A boolean that indicate if to include query params in route, the query parameters will be sorted in order to eliminate the number of unique labels.
+- metricsExtraLabels - An array of strings indicating custom metrics that can be included to each `http_*` metric. Use in conjunction with `getMetricsExtraLabelValues`.
+- getMetricsExtraLabelValues - A function that can be use to generate the value of custom labels for each of the `http_*` metric.
 
 ### Access the metrics
 
 To get the metrics in Prometheus format use:
+
 ```sh
 curl http[s]://<host>:[port]/metrics
 ```
 
 To get the metrics in JSON format use:
+
 ```sh
 curl http[s]://<host>:[port]/metrics.json
 ```
@@ -92,14 +96,16 @@ curl http[s]://<host>:[port]/metrics.json
 ## Custom Metrics
 
 You can expand the API metrics with more metrics that you would like to expose.
-All you have to do is: 
+All you have to do is:
 
 Require prometheus client
+
 ```js
 const Prometheus = require('prom-client');
 ```
 
 Create new metric from the kind that you like
+
 ```js
 const checkoutsTotal = new Prometheus.Counter({
   name: 'checkouts_total',
@@ -109,6 +115,7 @@ const checkoutsTotal = new Prometheus.Counter({
 ```
 
 Update it:
+
 ```js
 checkoutsTotal.inc({
   payment_method: paymentMethod
@@ -120,16 +127,21 @@ The custom metrics will be exposed under the same endpoint as the API metrics.
 For more info about the Node.js Prometheus client you can read [here](https://github.com/siimon/prom-client#prometheus-client-for-nodejs--)
 
 ### Note
+
 This will work only if you use the default Prometheus registry - do not use `new Prometheus.Registry()`
 
 ## Request.js HTTP request duration collector
+
 This feature enables you to easily process the result of Request.js timings feature.
 
 ### Usage
+
 #### Initialize
+
 You can choose to initialized this functionality as a Class or not
 
 **Class:**
+
 ```js
 const HttpMetricsCollector = require('prometheus-api-metrics').HttpMetricsCollector;
 const collector = new HttpMetricsCollector();
@@ -137,12 +149,14 @@ collector.init();
 ```
 
 **Singelton:**
+
 ```js
 const HttpMetricsCollector = require('prometheus-api-metrics').HttpMetricsCollector;
 HttpMetricsCollector.init();
 ```
 
 #### Options
+
 - durationBuckets - the histogram buckets for request duration.
 - countClientErrors - Boolean that indicates whether to collect client errors as Counter, this counter will have target and error code labels.
 - useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
@@ -152,6 +166,7 @@ HttpMetricsCollector.init();
 For Example:
 
 #### request
+
 ```js
 request({ url: 'http://www.google.com', time: true }, (err, response) => {
     Collector.collect(err || response);
@@ -159,6 +174,7 @@ request({ url: 'http://www.google.com', time: true }, (err, response) => {
 ```
 
 #### request-promise-native
+
 ```js
 return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', route: 'v2/:id', time: true, resolveWithFullResponse: true }).then((response) => {
     Collector.collect(response);
@@ -168,16 +184,18 @@ return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f0
 ```
 
 
-**Notes:** 
+**Notes:**
+
 1. In order to use this feature you must use `{ time: true }` as part of your request configuration and then pass to the collector the response or error you got.
 2. In order to use the timing feature in request-promise/request-promise-native you must also use `resolveWithFullResponse: true`
 3. Override - you can override the `route` and `target` attribute instead of taking them from the request object. In order to do that you should set a `metrics` object on your request with those attribute:
-``` js
+```js
 request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { target: 'www.google.com', route: 'v2/:id' }, time: true }, (err, response) => {...};
 });
 ```
 
 #### axios
+
 ```js
 const axios = require('axios');
 const axiosTime = require('axios-time');
@@ -192,10 +210,12 @@ try {
 }
 ```
 
-**Notes:** 
+**Notes:**
+
 * In order to collect metrics from axios client the [`axios-time`](https://www.npmjs.com/package/axios-time) package is required.
 
 ## Usage in koa
+
 This package supports koa server that uses [`koa-router`](https://www.npmjs.com/package/koa-router) and [`koa-bodyparser`](https://www.npmjs.com/package/koa-bodyparser)
 
 ```js
@@ -206,7 +226,7 @@ app.use(koaMiddleware())
 
 ## Test
 
-```
+```sh
 npm test
 ```
 
@@ -219,31 +239,37 @@ npm test
 ```
 
 ### 95th Response Time by specific route and status code
+
 ```
 histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>", code="200"}[10m])) by (le))
 ```
 
 ### Median Response Time Overall
+
 ```
 histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
 ```
 
 ### Median Request Size Overall
+
 ```
 histogram_quantile(0.50, sum(rate(http_request_size_bytes_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
 ```
 
 ### Median Response Size Overall
+
 ```
 histogram_quantile(0.50, sum(rate(http_response_size_bytes_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
 ```
 
 ### Avarage Memory Usage - All services
+
 ```
 avg(nodejs_external_memory_bytes / 1024 / 1024) by (<SERVICE_LABLE_FIELD)
 ```
 
 ### Avarage Eventloop Latency - All services
+
 ```
 avg(nodejs_eventloop_lag_seconds) by (<SERVICE_LABLE_FIELD)
 ```
