@@ -28,7 +28,8 @@ module.exports = (appVersion, projectName, framework = 'express') => {
         setupOptions.excludeRoutes = excludeRoutes || [];
         setupOptions.includeQueryParams = includeQueryParams;
         setupOptions.defaultMetricsInterval = defaultMetricsInterval;
-        setupOptions.getMetricsExtraLabelValues = typeof getLabelValues === 'function' ? getMetricsExtraLabelValues : () => ({});
+        setupOptions.metricsExtraLabels = metricsExtraLabels || [];
+        setupOptions.getMetricsExtraLabelValues = typeof getMetricsExtraLabelValues === 'function' ? getMetricsExtraLabelValues : () => ({});
 
         const metricNames = utils.getMetricNames(
             {
