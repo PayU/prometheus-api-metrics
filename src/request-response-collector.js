@@ -1,5 +1,7 @@
 const Prometheus = require('prom-client');
 const utils = require('./utils');
+const get = require('lodash.get');
+
 let southboundResponseTimeHistogram, southboundClientErrors = null;
 let projectName;
 
@@ -11,6 +13,8 @@ module.exports = (name) => {
 
     return httpMetricsCollector;
 };
+
+const OBSERVER_TYPES = ['total', 'socket', 'lookup', 'connect'];
 
 class HttpMetricsCollector {
     constructor(options){
@@ -31,13 +35,58 @@ function _collectHttpTiming(res, southboundResponseTimeHistogram, southboundClie
     } else {
         const response = res.response || res;
         if (response.timings) {
-            response.request.metrics = response.request.metrics || {};
-            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'total' }, response.timingPhases.total / 1000);
-            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'socket' }, response.timingPhases.wait / 1000); // timings.socket
-            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'lookup' }, response.timingPhases.dns / 1000); // timings.lookup - timings.socket
-            southboundResponseTimeHistogram.observe({ target: response.request.metrics.target || response.request.originalHost, method: response.request.method, route: response.request.metrics.route || response.request.path, status_code: response.statusCode, type: 'connect' }, response.timingPhases.tcp / 1000); // timings.connect - timings.socket
+            const responseData = extractResponseData(response);
+            addObservers(southboundResponseTimeHistogram, responseData);
         }
     }
+}
+
+function addObservers(southboundResponseTimeHistogram, responseData) {
+    const { target, method, route, status_code, timings } = responseData;
+
+    OBSERVER_TYPES.forEach(type => {
+        if (typeof responseData.timings[type] !== 'undefined') {
+            southboundResponseTimeHistogram.observe({ target, method, route, status_code, type }, timings[type]);
+        }
+    });
+}
+
+function extractResponseData(response) {
+    let status_code, route, method, target, timings;
+
+    // check if response client is axios
+    if (isAxiosResponse(response)) {
+        status_code = response.status;
+        method = response.config.method.toUpperCase();
+        route = get(response, 'config.metrics.route', response.config.url);
+        target = get(response, 'config.metrics.target', response.config.baseURL);
+        timings = {
+            total: response.timings.elapsedTime / 1000
+        };
+    } else { // response is request-promise
+        status_code = response.statusCode;
+        method = response.request.method;
+        route = get(response, 'request.metrics.route', response.request.path);
+        target = get(response, 'request.metrics.target', response.request.originalHost);
+        timings = {
+            total: response.timingPhases.total / 1000,
+            socket: response.timingPhases.wait / 1000,
+            lookup: response.timingPhases.dns / 1000,
+            connect: response.timingPhases.tcp / 1000
+        };
+    }
+
+    return {
+        target,
+        method,
+        route,
+        status_code,
+        timings
+    };
+}
+
+function isAxiosResponse(response) {
+    return response.config && response.hasOwnProperty('data');
 }
 
 function _init(options = {}) {

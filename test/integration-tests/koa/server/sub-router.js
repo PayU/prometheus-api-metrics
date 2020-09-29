@@ -1,7 +1,7 @@
 'use strict';
 var Router = require('koa-router');
 var router = new Router();
-const sleep = require('sleep');
+const sleep = require('../../../utils/sleep');
 
 router.get('/', bad);
 router.get('/bad', bad);
@@ -12,16 +12,16 @@ router.patch('/:time', bad);
 router.get('/hello', bad);
 router.get('/hello/:time', helloTime);
 
-function test(ctx, next) {
-    sleep.msleep(ctx.request.body.delay || 1);
+async function test(ctx, next) {
+    await sleep(ctx.request.body.delay || 1);
 
     ctx.status = 201;
     ctx.body = { message: 'Hello World!' };
     next();
 };
 
-function helloTime (ctx, next) {
-    sleep.msleep(ctx.params.time);
+async function helloTime (ctx, next) {
+    await sleep(ctx.params.time);
     ctx.status = 200;
     ctx.boy = { message: 'Hello World!' };
     next();

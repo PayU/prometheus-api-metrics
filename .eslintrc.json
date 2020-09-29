@@ -19,6 +19,7 @@
         "space-before-blocks": ["off"],
         "camelcase": ["warn"],
         "no-unused-expressions": 0,
-        "chai-friendly/no-unused-expressions": 2
+        "chai-friendly/no-unused-expressions": 2,
+        "no-prototype-builtins": "off"
     }
   }

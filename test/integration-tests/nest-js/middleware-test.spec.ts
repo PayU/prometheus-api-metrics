@@ -5,22 +5,18 @@ import { Test } from '@nestjs/testing';
 import { UsersModule } from "./users.module";
 
 const expect = require('chai').expect;
-let server;
 describe('when using nest-js framework', () => {
-    before(() => {
+    let server;
+    before(async () => {
         const middleware = require('../../../src/index.js');
-        server = express();
 
         let module = Test.createTestingModule({imports: [UsersModule]});
-
-        return module.compile()
-            .then((compiledModule) => {
-                let app = compiledModule.createNestApplication(server);
-
-                app.use(middleware());
-
-                return app.init();
-            });
+        
+        const moduleRef = await module.compile()
+        const app = moduleRef.createNestApplication();
+        app.use(middleware());
+        await app.init();
+        server = app.getHttpServer();
     });
     after(() => {
         Prometheus.register.clear();
@@ -87,20 +83,18 @@ describe('when using nest-js framework', () => {
 });
 
 describe('when using nest-js framework and includeQueryParams', () => {
-    before(() => {
+    let server;
+    before(async () => {
         const middleware = require('../../../src/index.js');
-        server = express();
 
-        let module = Test.createTestingModule({imports: [UsersModule]});
+        const module = Test.createTestingModule({imports: [UsersModule]});
 
-        return module.compile()
-            .then((compiledModule) => {
-                let app = compiledModule.createNestApplication(server);
+        const moduleRef = await module.compile();
+        const app = moduleRef.createNestApplication(server);
+        app.use(middleware({ includeQueryParams: true }));
 
-                app.use(middleware({ includeQueryParams: true }));
-
-                return app.init();
-            });
+        await app.init();
+        server = app.getHttpServer();
     });
     after(() => {
         Prometheus.register.clear();
