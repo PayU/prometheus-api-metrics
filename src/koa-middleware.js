@@ -40,9 +40,9 @@ class KoaMiddleware {
 
         if (route && utils.shouldLogMetrics(this.setupOptions.excludeRoutes, route)) {
             const labels = {
+                method: ctx.req.method,
                 route,
                 code: ctx.res.statusCode,
-                method: ctx.req.method,
                 ...this.setupOptions.getMetricsAdditionalLabelValues(ctx)
             };
             this.setupOptions.requestSizeHistogram.observe(labels, ctx.req.metrics.contentLength);
