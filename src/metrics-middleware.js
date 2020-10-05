@@ -80,28 +80,29 @@ module.exports = (appVersion, projectName, framework = 'express') => {
             ...metricAdditionalLabels
         ].filter(Boolean);
 
-        const defaultSizeBuckets = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
+        const defaultDurationMsBuckets = [0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5];
+        const defaultSizeBytesBuckets = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
 
         setupOptions.responseTimeHistogram = Prometheus.register.getSingleMetric(metricNames.http_request_duration_seconds) || new Prometheus.Histogram({
             name: metricNames.http_request_duration_seconds,
             help: 'Duration of HTTP requests in seconds',
             labelNames: metricLabels,
             // buckets for response time from 1ms to 500ms
-            buckets: durationBuckets || [0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]
+            buckets: durationBuckets || defaultDurationMsBuckets
         });
 
         setupOptions.requestSizeHistogram = Prometheus.register.getSingleMetric(metricNames.http_request_size_bytes) || new Prometheus.Histogram({
             name: metricNames.http_request_size_bytes,
             help: 'Size of HTTP requests in bytes',
             labelNames: metricLabels,
-            buckets: requestSizeBuckets || defaultSizeBuckets // buckets for request size from 5 bytes to 10000 bytes
+            buckets: requestSizeBuckets || defaultSizeBytesBuckets // buckets for request size from 5 bytes to 10000 bytes
         });
 
         setupOptions.responseSizeHistogram = Prometheus.register.getSingleMetric(metricNames.http_response_size_bytes) || new Prometheus.Histogram({
             name: metricNames.http_response_size_bytes,
             help: 'Size of HTTP response in bytes',
             labelNames: metricLabels,
-            buckets: responseSizeBuckets || defaultSizeBuckets // buckets for response size from 5 bytes to 10000 bytes
+            buckets: responseSizeBuckets || defaultSizeBytesBuckets // buckets for response size from 5 bytes to 10000 bytes
         });
 
         return frameworkMiddleware(framework);
