@@ -38,16 +38,16 @@ API and process monitoring with [Prometheus](https://prometheus.io) for Node.js 
 ## Features
 
 - [Collect API metrics for each call](#usage)
-   - Response time in seconds
-   - Request size in bytes
-   - Response size in bytes
-   - Add prefix to metrics names - custom or project name
-   - Exclude specific routes from being collect
-   - Number of open connections to the server
+  - Response time in seconds
+  - Request size in bytes
+  - Response size in bytes
+  - Add prefix to metrics names - custom or project name
+  - Exclude specific routes from being collect
+  - Number of open connections to the server
 - Process Metrics as recommended by Prometheus [itself](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors)
 - Endpoint to retrieve the metrics - used for Prometheus scraping
-   - Prometheus format
-   - JSON format (`${path}.json`)
+  - Prometheus format
+  - JSON format (`${path}.json`)
 - Support custom metrics
 - [Http function to collect request.js HTTP request duration](#requestjs-http-request-duration-collector)
 
@@ -162,7 +162,6 @@ HttpMetricsCollector.init();
 - useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
 - prefix - A custom metrics names prefix, the package will add underscore between your prefix to the metric name.
 
-
 For Example:
 
 #### request
@@ -182,7 +181,6 @@ return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f0
     Collector.collect(error);
 });
 ```
-
 
 **Notes:**
 
@@ -212,7 +210,7 @@ try {
 
 **Notes:**
 
-* In order to collect metrics from axios client the [`axios-time`](https://www.npmjs.com/package/axios-time) package is required.
+- In order to collect metrics from axios client the [`axios-time`](https://www.npmjs.com/package/axios-time) package is required.
 
 ## Usage in koa
 
