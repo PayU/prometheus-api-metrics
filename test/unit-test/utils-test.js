@@ -92,5 +92,14 @@ describe('utils', () => {
             });
             expect(value).to.equal('default-string');
         });
+        it('should throw if input is not valid', () => {
+            const fn = utils.validateInput.bind(utils.validateInput, {
+                input: true,
+                isValidInputFn: utils.isString,
+                defaultValue: 'default-string',
+                errorMessage: 'error message'
+            });
+            expect(fn).to.throw('error message');
+        });
     });
 });
