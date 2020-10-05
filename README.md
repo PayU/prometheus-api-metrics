@@ -69,8 +69,8 @@ app.use(apiMetrics())
 - metricsPrefix - A custom metrics names prefix, the package will add underscore between your prefix to the metric name.
 - excludeRoutes - Array of routes to exclude. Routes should be in your framework syntax.
 - includeQueryParams - A boolean that indicate if to include query params in route, the query parameters will be sorted in order to eliminate the number of unique labels.
-- metricsExtraLabels - An array of strings indicating custom metrics that can be included to each `http_*` metric. Use in conjunction with `getMetricsExtraLabelValues`.
-- getMetricsExtraLabelValues - A function that can be use to generate the value of custom labels for each of the `http_*` metric.
+- metricAdditionalLabels - An array of strings indicating custom metrics that can be included to each `http_*` metric. Use in conjunction with `getMetricsAdditionalLabelValues`.
+- getMetricsAdditionalLabelValues - A function that can be use to generate the value of custom labels for each of the `http_*` metric. When using koa, the function takes `ctx`, when using express, it takes `req, res` as arguments.
 
 ### Access the metrics
 

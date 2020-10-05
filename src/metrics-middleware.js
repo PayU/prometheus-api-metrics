@@ -20,16 +20,41 @@ module.exports = (appVersion, projectName, framework = 'express') => {
             metricsPrefix,
             excludeRoutes,
             includeQueryParams,
-            metricsExtraLabels = [],
-            getMetricsExtraLabelValues
+            metricAdditionalLabels = [],
+            getMetricsAdditionalLabelValues
         } = options;
         debug(`Init metrics middleware with options: ${JSON.stringify(options)}`);
-        setupOptions.metricsRoute = metricsPath || '/metrics';
-        setupOptions.excludeRoutes = excludeRoutes || [];
+
+        setupOptions.metricsRoute = utils.validateInput({
+            input: metricsPath,
+            isValidInputFn: utils.isString,
+            defaultValue: '/metrics',
+            errorMessage: 'metricsPath should be an string'
+        });
+
+        setupOptions.excludeRoutes = utils.validateInput({
+            input: excludeRoutes,
+            isValidInputFn: utils.isArray,
+            defaultValue: [],
+            errorMessage: 'excludeRoutes should be an array'
+        });
+
         setupOptions.includeQueryParams = includeQueryParams;
         setupOptions.defaultMetricsInterval = defaultMetricsInterval;
-        setupOptions.metricsExtraLabels = metricsExtraLabels || [];
-        setupOptions.getMetricsExtraLabelValues = typeof getMetricsExtraLabelValues === 'function' ? getMetricsExtraLabelValues : () => ({});
+
+        setupOptions.metricAdditionalLabels = utils.validateInput({
+            input: metricAdditionalLabels,
+            isValidInputFn: utils.isArray,
+            defaultValue: [],
+            errorMessage: 'metricAdditionalLabels should be an array'
+        });
+
+        setupOptions.getMetricsAdditionalLabelValues = utils.validateInput({
+            input: getMetricsAdditionalLabelValues,
+            isValidInputFn: utils.isFunction,
+            defaultValue: () => ({}),
+            errorMessage: 'getMetricsAdditionalLabelValues should be a function'
+        });
 
         const metricNames = utils.getMetricNames(
             {
@@ -52,7 +77,7 @@ module.exports = (appVersion, projectName, framework = 'express') => {
             'method',
             'route',
             'code',
-            ...Array.isArray(metricsExtraLabels) ? metricsExtraLabels : []
+            ...metricAdditionalLabels
         ].filter(Boolean);
 
         const defaultSizeBuckets = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000];

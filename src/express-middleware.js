@@ -40,11 +40,12 @@ class ExpressMiddleware {
             const labels = {
                 route,
                 code: res.statusCode,
-                ...this.setupOptions.getMetricsExtraLabelValues(req, res)
+                method: req.method,
+                ...this.setupOptions.getMetricsAdditionalLabelValues(req, res)
             };
-            this.setupOptions.requestSizeHistogram.observe({ method: req.method, ...labels }, req.metrics.contentLength);
+            this.setupOptions.requestSizeHistogram.observe(labels, req.metrics.contentLength);
             req.metrics.timer(labels);
-            this.setupOptions.responseSizeHistogram.observe({ method: req.method, ...labels }, responseLength);
+            this.setupOptions.responseSizeHistogram.observe(labels, responseLength);
             debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}`);
         }
     }
@@ -109,9 +110,7 @@ class ExpressMiddleware {
         }
 
         req.metrics = {
-            timer: this.setupOptions.responseTimeHistogram.startTimer({
-                method: req.method
-            }),
+            timer: this.setupOptions.responseTimeHistogram.startTimer(),
             contentLength: parseInt(req.get('content-length')) || 0
         };
 
