@@ -60,17 +60,19 @@ app.use(apiMetrics())
 
 ### Options
 
-- metricsPath - Path to access the metrics. `default: /metrics`
-- defaultMetricsInterval - the interval to collect the process metrics in milliseconds. `default: 10000`
-- durationBuckets - Buckets for response time in seconds. `default: [0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]`
-- requestSizeBuckets - Buckets for request size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
-- responseSizeBuckets - Buckets for response size in bytes. `default: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]`
-- useUniqueHistogramName - Add to metrics names the project name as a prefix (from package.json)
-- metricsPrefix - A custom metrics names prefix, the package will add underscore between your prefix to the metric name.
-- excludeRoutes - Array of routes to exclude. Routes should be in your framework syntax.
-- includeQueryParams - A boolean that indicate if to include query params in route, the query parameters will be sorted in order to eliminate the number of unique labels.
-- metricAdditionalLabels - An array of strings indicating custom metrics that can be included to each `http_*` metric. Use in conjunction with `getMetricsAdditionalLabelValues`.
-- getMetricsAdditionalLabelValues - A function that can be use to generate the value of custom labels for each of the `http_*` metric. When using koa, the function takes `ctx`, when using express, it takes `req, res` as arguments.
+| Option                   | Type      | Description | Default Value |
+|--------------------------|-----------|-------------|---------------|
+| `metricsPath`            | `String`  | Path to access the metrics | `/metrics` |
+| `defaultMetricsInterval` | `Number`  | Interval to collect the process metrics in milliseconds | `10000` |
+| `durationBuckets`        | `Array<Number>` | Buckets for response time in seconds | `[0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]` |
+| `requestSizeBuckets`     | `Array<Number>` | Buckets for request size in bytes | `[5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]` |
+| `responseSizeBuckets`    | `Array<Number>` | Buckets for response size in bytes | `[5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]` |
+| `useUniqueHistogramName` | `Boolean` | Add to metrics names the project name as a prefix (from package.json) | `false` |
+| `metricsPrefix`          | `String`  | A custom metrics names prefix, the package will add underscore between your prefix to the metric name | |
+| `excludeRoutes`          | `Array<String>` | Array of routes to exclude. Routes should be in your framework syntax | |
+| `includeQueryParams`     | `Boolean` | Indicate if to include query params in route, the query parameters will be sorted in order to eliminate the number of unique labels | `false` |
+| `metricAdditionalLabels`          | `Array<string>` | Indicating custom metrics that can be included to each `http_*` metric. Use in conjunction with `getMetricsAdditionalLabelValues`. |
+| `getMetricsAdditionalLabelValues` | `Function`      | A function that can be use to generate the value of custom labels for each of the `http_*` metric. When using koa, the function takes `ctx`, when using express, it takes `req, res` as arguments | |
 
 ### Access the metrics
 
