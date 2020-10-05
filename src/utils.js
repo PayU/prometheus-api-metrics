@@ -21,7 +21,7 @@ const isString = (input) => typeof input === 'string';
 const shouldLogMetrics = (excludeRoutes, route) => excludeRoutes.every((path) => !route.includes(path));
 
 const validateInput = ({ input, isValidInputFn, defaultValue, errorMessage }) => {
-    if (input) {
+    if (typeof input !== 'undefined') {
         if (isValidInputFn(input)) {
             return input;
         } else {
