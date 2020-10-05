@@ -5,7 +5,7 @@ const utils = require('../../src/utils');
 
 describe('utils', () => {
     describe('getMetricNames', () => {
-        it('', () => {
+        it('should include project name', () => {
             const metricNames = ['metric1'];
             const useUniqueHistogramName = true;
             const metricsPrefix = true;
