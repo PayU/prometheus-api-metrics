@@ -43,7 +43,7 @@ class KoaMiddleware {
                 method: ctx.req.method,
                 route,
                 code: ctx.res.statusCode,
-                ...this.setupOptions.getMetricsAdditionalLabelValues(ctx)
+                ...this.setupOptions.getMetricAdditionalLabelValues(ctx)
             };
             this.setupOptions.requestSizeHistogram.observe(labels, ctx.req.metrics.contentLength);
             ctx.req.metrics.timer(labels);

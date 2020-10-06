@@ -41,7 +41,7 @@ class ExpressMiddleware {
                 method: req.method,
                 route,
                 code: res.statusCode,
-                ...this.setupOptions.getMetricsAdditionalLabelValues(req, res)
+                ...this.setupOptions.getMetricAdditionalLabelValues(req, res)
             };
             this.setupOptions.requestSizeHistogram.observe(labels, req.metrics.contentLength);
             req.metrics.timer(labels);

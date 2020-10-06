@@ -21,7 +21,7 @@ export interface ApiMetricsOpts {
   excludeRoutes?:string[];
   includeQueryParams?: boolean;
   metricAdditionalLabels?: string[];
-  getMetricsAdditionalLabelValues?: ((req: Request, res: Response) => Record<string, unknown>) | ((ctx: Context) => Record<string, unknown>)
+  getMetricAdditionalLabelValues?: ((req: Request, res: Response) => Record<string, unknown>) | ((ctx: Context) => Record<string, unknown>)
 }
 
 export interface CollectorOpts {

@@ -621,7 +621,7 @@ describe('metrics-middleware', () => {
             res.statusCode = 200;
             func = middleware({
                 metricAdditionalLabels: ['label1', 'label2'],
-                getMetricsAdditionalLabelValues: () => ({ label1: 'valueLabel1', label2: 'valueLabel2' })
+                getMetricAdditionalLabelValues: () => ({ label1: 'valueLabel1', label2: 'valueLabel2' })
             });
             endTimerStub = sinon.stub();
             requestTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);

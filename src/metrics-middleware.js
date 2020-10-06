@@ -21,7 +21,7 @@ module.exports = (appVersion, projectName, framework = 'express') => {
             excludeRoutes,
             includeQueryParams,
             metricAdditionalLabels = [],
-            getMetricsAdditionalLabelValues
+            getMetricAdditionalLabelValues
         } = options;
         debug(`Init metrics middleware with options: ${JSON.stringify(options)}`);
 
@@ -49,11 +49,11 @@ module.exports = (appVersion, projectName, framework = 'express') => {
             errorMessage: 'metricAdditionalLabels should be an array'
         });
 
-        setupOptions.getMetricsAdditionalLabelValues = utils.validateInput({
-            input: getMetricsAdditionalLabelValues,
+        setupOptions.getMetricAdditionalLabelValues = utils.validateInput({
+            input: getMetricAdditionalLabelValues,
             isValidInputFn: utils.isFunction,
             defaultValue: () => ({}),
-            errorMessage: 'getMetricsAdditionalLabelValues should be a function'
+            errorMessage: 'getMetricAdditionalLabelValues should be a function'
         });
 
         const metricNames = utils.getMetricNames(
