@@ -378,14 +378,18 @@ describe('metrics-middleware', () => {
                 end: end,
                 set: set
             });
-            sinon.assert.calledOnce(end);
-            // eslint-disable-next-line no-control-regex
-            const endFormalized = end.getCall(0).args[0].replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
-            // eslint-disable-next-line no-control-regex
-            const apiFormalized = Prometheus.register.metrics().replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
-            expect(endFormalized).to.eql(apiFormalized);
-            sinon.assert.calledWith(set, 'Content-Type', Prometheus.register.contentType);
-            sinon.assert.calledOnce(set);
+
+            setTimeout(() => {
+                sinon.assert.calledOnce(end);
+                // eslint-disable-next-line no-control-regex
+                const endFormalized = end.getCall(0).args[0].replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
+                // eslint-disable-next-line no-control-regex
+                let apiFormalized = Prometheus.register.metrics()
+                apiFormalized = apiFormalized.replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
+                expect(endFormalized).to.eql(apiFormalized);
+                sinon.assert.calledWith(set, 'Content-Type', Prometheus.register.contentType);
+                sinon.assert.calledOnce(set);
+            })
         });
         after(() => {
             Prometheus.register.clear();
