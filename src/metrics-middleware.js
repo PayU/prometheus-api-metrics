@@ -10,9 +10,10 @@ const setupOptions = {};
 
 module.exports = (appVersion, projectName, framework = 'express') => {
     return (options = {}) => {
-        const { metricsPath, defaultMetricsInterval = 10000, durationBuckets, requestSizeBuckets, responseSizeBuckets, useUniqueHistogramName, metricsPrefix, excludeRoutes, includeQueryParams } = options;
+        const { metricsPath, metricsJsonPath, defaultMetricsInterval = 10000, durationBuckets, requestSizeBuckets, responseSizeBuckets, useUniqueHistogramName, metricsPrefix, excludeRoutes, includeQueryParams } = options;
         debug(`Init metrics middleware with options: ${JSON.stringify(options)}`);
         setupOptions.metricsRoute = metricsPath || '/metrics';
+        setupOptions.metricsJsonRoute = metricsJsonPath || `${setupOptions.metricsRoute}.json`;
         setupOptions.excludeRoutes = excludeRoutes || [];
         setupOptions.includeQueryParams = includeQueryParams;
         setupOptions.defaultMetricsInterval = defaultMetricsInterval;

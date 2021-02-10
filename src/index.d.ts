@@ -12,6 +12,7 @@ export class HttpMetricsCollector {
 
 export interface ApiMetricsOpts {
   metricsPath?: string;
+  metricsJsonPath?: string,
   defaultMetricsInterval?: number;
   durationBuckets?: number[];
   requestSizeBuckets?: number[];
