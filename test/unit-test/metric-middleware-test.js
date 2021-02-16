@@ -154,7 +154,7 @@ describe('metrics-middleware', () => {
     });
     describe('when using the middleware request has body', () => {
         let func, req, res, next, requestSizeObserve, responseTimeObserve, endTimerStub;
-        before(() => {
+        before(async () => {
             next = sinon.stub();
             req = httpMocks.createRequest({
                 url: '/path',
@@ -174,7 +174,7 @@ describe('metrics-middleware', () => {
                 eventEmitter: EventEmitter
             });
             res.statusCode = 200;
-            func = middleware();
+            func = await middleware();
             endTimerStub = sinon.stub();
             responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
             func(req, res, next);
@@ -217,7 +217,7 @@ describe('metrics-middleware', () => {
     });
     describe('when using the middleware request has\'t body', () => {
         let func, req, res, next, responseTimeObserve, requestSizeObserve, endTimerStub;
-        before(() => {
+        before(async () => {
             next = sinon.stub();
             req = httpMocks.createRequest({
                 url: '/path',
@@ -231,7 +231,7 @@ describe('metrics-middleware', () => {
                 eventEmitter: EventEmitter
             });
             res.statusCode = 200;
-            func = middleware();
+            func = await middleware();
             endTimerStub = sinon.stub();
             responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
             func(req, res, next);
@@ -274,7 +274,7 @@ describe('metrics-middleware', () => {
     });
     describe('when using the middleware response has body', () => {
         let func, req, res, next, responseSizeObserve, responseTimeObserve, endTimerStub;
-        before(() => {
+        before(async () => {
             next = sinon.stub();
             req = httpMocks.createRequest({
                 url: '/path',
@@ -291,7 +291,7 @@ describe('metrics-middleware', () => {
             res._headers = {
                 'content-length': '25'
             };
-            func = middleware();
+            func = await middleware();
             responseSizeObserve = sinon.spy(Prometheus.register.getSingleMetric('http_response_size_bytes'), 'observe');
             endTimerStub = sinon.stub();
             responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
@@ -322,7 +322,7 @@ describe('metrics-middleware', () => {
     });
     describe('when using the middleware response has\'t body', () => {
         let func, req, res, next, responseSizeObserve, responseTimeObserve, endTimerStub;
-        before(() => {
+        before(async () => {
             next = sinon.stub();
             req = httpMocks.createRequest({
                 url: '/path',
@@ -336,7 +336,7 @@ describe('metrics-middleware', () => {
                 eventEmitter: EventEmitter
             });
             res.statusCode = 200;
-            func = middleware();
+            func = await middleware();
             endTimerStub = sinon.stub();
             responseSizeObserve = sinon.spy(Prometheus.register.getSingleMetric('http_response_size_bytes'), 'observe');
             responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
@@ -367,8 +367,8 @@ describe('metrics-middleware', () => {
     });
     describe('override the default path', () => {
         let func;
-        beforeEach(() => {
-            func = middleware({
+        beforeEach(async () => {
+            func = await middleware({
                 metricsPath: '/v1/metrics'
             });
         });
@@ -420,7 +420,7 @@ describe('metrics-middleware', () => {
     });
     describe('when using middleware request baseUrl is undefined', function () {
         let func, req, res, next, requestSizeObserve, responseTimeObserve, endTimerStub;
-        before(() => {
+        before(async () => {
             next = sinon.stub();
             req = httpMocks.createRequest({
                 url: '/path',
@@ -441,7 +441,7 @@ describe('metrics-middleware', () => {
             });
             delete req.baseUrl;
             res.statusCode = 200;
-            func = middleware();
+            func = await middleware();
             endTimerStub = sinon.stub();
             responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
             func(req, res, next);
@@ -472,7 +472,7 @@ describe('metrics-middleware', () => {
     });
     describe('when using middleware request baseUrl is undifined and path is not "/"', function () {
         let func, req, res, next, requestSizeObserve, responseTimeObserve, endTimerStub;
-        before(() => {
+        before(async () => {
             next = sinon.stub();
             req = httpMocks.createRequest({
                 url: '/path/:id',
@@ -493,7 +493,7 @@ describe('metrics-middleware', () => {
             });
             delete req.baseUrl;
             res.statusCode = 200;
-            func = middleware();
+            func = await middleware();
             endTimerStub = sinon.stub();
             responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
             func(req, res, next);
