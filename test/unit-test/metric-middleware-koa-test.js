@@ -369,7 +369,7 @@ describe('metrics-middleware', () => {
                 const next = sinon.stub();
                 const set = sinon.stub();
                 const ctx = { body: {}, set: set, req: { url: '/v1/metrics' } };
-                func(ctx, next);
+                await func(ctx, next);
                 sinon.assert.calledOnce(next);
                 // eslint-disable-next-line no-control-regex
                 const ctxFormalized = ctx.body.replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
