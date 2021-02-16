@@ -2,19 +2,22 @@
 
 const Prometheus = require('prom-client');
 const sinon = require('sinon');
-const expect = require('chai').expect;
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const rewire = require('rewire');
 const middleware = rewire('../../src/metrics-middleware')('1.0.0');
 const httpMocks = require('node-mocks-http');
 const EventEmitter = require('events').EventEmitter;
+const expect = chai.expect;
+chai.use(chaiAsPromised);
 
 describe('metrics-middleware', () => {
     after(() => {
         Prometheus.register.clear();
     });
     describe('when calling the function with options', () => {
-        before(() => {
-            middleware({
+        before(async () => {
+            await middleware({
                 durationBuckets: [1, 10, 50, 100, 300, 500, 1000],
                 requestSizeBuckets: [0, 1, 5, 10, 15],
                 responseSizeBuckets: [250, 500, 1000, 2500, 5000, 10000, 15000, 20000]
@@ -43,8 +46,8 @@ describe('metrics-middleware', () => {
         });
     });
     describe('when calling the function with options (metrics prefix)', () => {
-        before(() => {
-            middleware({
+        before(async () => {
+            await middleware({
                 durationBuckets: [1, 10, 50, 100, 300, 500, 1000],
                 requestSizeBuckets: [0, 1, 5, 10, 15],
                 responseSizeBuckets: [250, 500, 1000, 2500, 5000, 10000, 15000, 20000],
@@ -94,8 +97,8 @@ describe('metrics-middleware', () => {
         });
     });
     describe('when calling the function with options empty arrays', () => {
-        before(() => {
-            middleware({
+        before(async () => {
+            await middleware({
                 durationBuckets: [],
                 requestSizeBuckets: [],
                 responseSizeBuckets: []
@@ -124,8 +127,8 @@ describe('metrics-middleware', () => {
         });
     });
     describe('when calling the function without options', () => {
-        before(() => {
-            middleware();
+        before(async () => {
+            await middleware();
         });
         it('should have http_request_size_bytes metrics with default buckets', () => {
             expect(Prometheus.register.getSingleMetric('http_request_size_bytes').bucketValues).to.have.all.keys([5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]);
@@ -372,7 +375,7 @@ describe('metrics-middleware', () => {
         it('should set the updated route', async () => {
             const end = sinon.stub();
             const set = sinon.stub();
-            func({
+            await func({
                 url: '/v1/metrics'
             }, {
                 end: end,
@@ -393,13 +396,13 @@ describe('metrics-middleware', () => {
     });
     describe('when initialize the middleware twice', () => {
         let firstFunction, secondFunction;
-        before(() => {
-            firstFunction = middleware();
+        before(async () => {
+            firstFunction = await middleware();
         });
-        it('Cannot add the default metrics twice to the same registry', () => {
-            expect(() => { secondFunction = middleware() }).to.throw('Cannot add the default metrics twice to the same registry');
+        it('should throw error if metric already registered', async () => {
+            expect((async () => { secondFunction = await middleware() })()).to.be.rejectedWith('A metric with the name process_cpu_user_seconds_total has already been registered');
         });
-        it('should not return the same middleware fundtion', () => {
+        it('should not return the same middleware function', () => {
             expect(firstFunction).to.not.equal(secondFunction);
         });
         it('should have http_request_size_bytes with the right labels', () => {
@@ -415,7 +418,7 @@ describe('metrics-middleware', () => {
             Prometheus.register.clear();
         });
     });
-    describe('when using middleware request baseUrl is undifined', function () {
+    describe('when using middleware request baseUrl is undefined', function () {
         let func, req, res, next, requestSizeObserve, responseTimeObserve, endTimerStub;
         before(() => {
             next = sinon.stub();
