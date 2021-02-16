@@ -72,7 +72,7 @@ app.use(apiMetrics())
 | `excludeRoutes`          | `Array<String>` | Array of routes to exclude. Routes should be in your framework syntax | |
 | `includeQueryParams`     | `Boolean` | Indicate if to include query params in route, the query parameters will be sorted in order to eliminate the number of unique labels | `false` |
 | `metricAdditionalLabels`         | `Array<String>` | Indicating custom metrics that can be included to each `http_*` metric. Use in conjunction with `getMetricAdditionalLabelValues`. |
-| `getMetricAdditionalLabelValues` | `Function`      | A function that can be use to generate the value of custom labels for each of the `http_*` metric. When using koa, the function takes `ctx`, when using express, it takes `req, res` as arguments | |
+| `getMetricAdditionalLabelValues` | `Function`      | A function that can be use to generate the value of custom labels for each of the `http_*` metrics. When using koa, the function takes `ctx`, when using express, it takes `req, res` as arguments | |
 
 ### Access the metrics
 
