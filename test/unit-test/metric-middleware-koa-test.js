@@ -362,7 +362,7 @@ describe('metrics-middleware', () => {
                     metricsPath: '/v1/metrics'
                 });
             });
-            it('should set the updated route', () => {
+            it('should set the updated route', async () => {
                 const next = sinon.stub();
                 const set = sinon.stub();
                 const ctx = { body: {}, set: set, req: { url: '/v1/metrics' } };
@@ -371,7 +371,7 @@ describe('metrics-middleware', () => {
                 // eslint-disable-next-line no-control-regex
                 const ctxFormalized = ctx.body.replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
                 // eslint-disable-next-line no-control-regex
-                const apiFormalized = Prometheus.register.metrics().replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
+                const apiFormalized = (await Prometheus.register.metrics()).replace(/ ([0-9]*[.])?[0-9]+[\x0a]/g, ' #num\n');
                 expect(ctxFormalized).to.eql(apiFormalized);
                 sinon.assert.calledWith(set, 'Content-Type', Prometheus.register.contentType);
                 sinon.assert.calledOnce(set);

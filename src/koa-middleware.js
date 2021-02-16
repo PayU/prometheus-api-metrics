@@ -104,7 +104,7 @@ class KoaMiddleware {
         return url.split('?')[0];
     }
 
-    middleware(ctx, next) {
+    async middleware(ctx, next) {
         if (!this.setupOptions.server && ctx.req.socket) {
             this.setupOptions.server = ctx.req.socket.server;
             this._collectDefaultServerMetrics(this.setupOptions.defaultMetricsInterval);
@@ -112,12 +112,12 @@ class KoaMiddleware {
         if (ctx.req.url === this.setupOptions.metricsRoute) {
             debug('Request to /metrics endpoint');
             ctx.set('Content-Type', Prometheus.register.contentType);
-            ctx.body = Prometheus.register.metrics();
+            ctx.body = await Prometheus.register.metrics();
             return next();
         }
         if (ctx.req.url === `${this.setupOptions.metricsRoute}.json`) {
             debug('Request to /metrics endpoint');
-            ctx.body = Prometheus.register.getMetricsAsJSON();
+            ctx.body = await Prometheus.register.getMetricsAsJSON();
             return next();
         }
 
