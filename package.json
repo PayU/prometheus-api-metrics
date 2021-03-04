@@ -41,7 +41,7 @@
     "pkginfo": "^0.4.1"
   },
   "peerDependencies": {
-    "prom-client": "12.x"
+    "prom-client": "13.x"
   },
   "devDependencies": {
     "@nestjs/common": "^7.4.4",
@@ -75,7 +75,7 @@
     "nock": "^10.0.6",
     "node-mocks-http": "^1.9.0",
     "nyc": "^15.1.0",
-    "prom-client": "^12.0.0",
+    "prom-client": "^13.0.0",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.9",
