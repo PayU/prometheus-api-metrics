@@ -2,6 +2,8 @@
 
 ## Master
 
+- Add `additionalLabels` and `extractAdditionalLabelValuesFn` options, see [README](README.md) for more info.
+
 ### Breaking Changes
 
 - Add support for `prom-client v13`, which includes a few breaking changes, mainly the following functions are now async (return a promise):
