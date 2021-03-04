@@ -51,7 +51,7 @@
     "@types/mocha": "^5.2.6",
     "@types/node": "^9.6.57",
     "@types/supertest": "^2.0.10",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "axios-time": "^1.0.0",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
