@@ -20,8 +20,8 @@ module.exports = (appVersion, projectName, framework = 'express') => {
             metricsPrefix,
             excludeRoutes,
             includeQueryParams,
-            metricAdditionalLabels = [],
-            getMetricAdditionalLabelValues
+            additionalLabels = [],
+            extractAdditionalLabelValuesFn
         } = options;
         debug(`Init metrics middleware with options: ${JSON.stringify(options)}`);
 
@@ -42,18 +42,18 @@ module.exports = (appVersion, projectName, framework = 'express') => {
         setupOptions.includeQueryParams = includeQueryParams;
         setupOptions.defaultMetricsInterval = defaultMetricsInterval;
 
-        setupOptions.metricAdditionalLabels = utils.validateInput({
-            input: metricAdditionalLabels,
+        setupOptions.additionalLabels = utils.validateInput({
+            input: additionalLabels,
             isValidInputFn: utils.isArray,
             defaultValue: [],
-            errorMessage: 'metricAdditionalLabels should be an array'
+            errorMessage: 'additionalLabels should be an array'
         });
 
-        setupOptions.getMetricAdditionalLabelValues = utils.validateInput({
-            input: getMetricAdditionalLabelValues,
+        setupOptions.extractAdditionalLabelValuesFn = utils.validateInput({
+            input: extractAdditionalLabelValuesFn,
             isValidInputFn: utils.isFunction,
             defaultValue: () => ({}),
-            errorMessage: 'getMetricAdditionalLabelValues should be a function'
+            errorMessage: 'extractAdditionalLabelValuesFn should be a function'
         });
 
         const metricNames = utils.getMetricNames(
@@ -77,7 +77,7 @@ module.exports = (appVersion, projectName, framework = 'express') => {
             'method',
             'route',
             'code',
-            ...metricAdditionalLabels
+            ...additionalLabels
         ].filter(Boolean);
 
         // Buckets for response time from 1ms to 500ms

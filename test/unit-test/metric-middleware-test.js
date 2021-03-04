@@ -577,10 +577,10 @@ describe('metrics-middleware', () => {
             });
         });
     });
-    describe('when calling the function with metricAdditionalLabels option', () => {
+    describe('when calling the function with additionalLabels option', () => {
         before(() => {
             middleware({
-                metricAdditionalLabels: ['label1', 'label2']
+                additionalLabels: ['label1', 'label2']
             });
         });
         it('should have http_request_duration_seconds with the right labels', () => {
@@ -596,7 +596,7 @@ describe('metrics-middleware', () => {
             Prometheus.register.clear();
         });
     });
-    describe('when using the middleware with metricAdditionalLabels options', () => {
+    describe('when using the middleware with additionalLabels options', () => {
         let func, req, res, next, requestSizeObserve, requestTimeObserve, endTimerStub;
         before(() => {
             next = sinon.stub();
@@ -620,8 +620,8 @@ describe('metrics-middleware', () => {
             delete req.baseUrl;
             res.statusCode = 200;
             func = middleware({
-                metricAdditionalLabels: ['label1', 'label2'],
-                getMetricAdditionalLabelValues: () => ({ label1: 'valueLabel1', label2: 'valueLabel2' })
+                additionalLabels: ['label1', 'label2'],
+                extractAdditionalLabelValuesFn: () => ({ label1: 'valueLabel1', label2: 'valueLabel2' })
             });
             endTimerStub = sinon.stub();
             requestTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);

@@ -20,8 +20,8 @@ export interface ApiMetricsOpts {
   metricsPrefix?: string;
   excludeRoutes?:string[];
   includeQueryParams?: boolean;
-  metricAdditionalLabels?: string[];
-  getMetricAdditionalLabelValues?: ((req: Request, res: Response) => Record<string, unknown>) | ((ctx: Context) => Record<string, unknown>)
+  additionalLabels?: string[];
+  extractAdditionalLabelValuesFn?: ((req: Request, res: Response) => Record<string, unknown>) | ((ctx: Context) => Record<string, unknown>)
 }
 
 export interface CollectorOpts {
