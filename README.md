@@ -72,7 +72,7 @@ app.use(apiMetrics())
 | `excludeRoutes`          | `Array<String>` | Array of routes to exclude. Routes should be in your framework syntax | |
 | `includeQueryParams`     | `Boolean` | Indicate if to include query params in route, the query parameters will be sorted in order to eliminate the number of unique labels | `false` |
 | `additionalLabels`       | `Array<String>` | Indicating custom labels that can be included on each `http_*` metric. Use in conjunction with `extractAdditionalLabelValuesFn`. |
-| `extractAdditionalLabelValuesFn` | `Function`      | A function that can be use to generate the value of custom labels for each of the `http_*` metrics. When using koa, the function takes `ctx`, when using express, it takes `req, res` as arguments | |
+| `extractAdditionalLabelValuesFn` | `Function` | A function that can be use to generate the value of custom labels for each of the `http_*` metrics. When using koa, the function takes `ctx`, when using express, it takes `req, res` as arguments | |
 
 ### Access the metrics
 
@@ -93,7 +93,6 @@ curl http[s]://<host>:[port]/metrics.json
 1. If you pass to the middleware the `metricsPath` option the path will be the one that you chose.
 
 2. If you are using express framework and no route was found for the request (e.g: 404 status code), the request will not be collected. that's because we'll risk memory leak since the route is not a pattern but a hardcoded string.
-
 
 ## Custom Metrics
 
@@ -131,6 +130,26 @@ For more info about the Node.js Prometheus client you can read [here](https://gi
 ### Note
 
 This will work only if you use the default Prometheus registry - do not use `new Prometheus.Registry()`
+
+## Additional Metric Labels
+
+You can define additional metric labels by using `additionalLabels` and `extractAdditionalLabelValuesFn` options.
+
+For instance:
+
+```js
+const apiMetrics = require('prometheus-api-metrics');
+app.use(apiMetrics({
+  additionalLabels: ['customer', 'cluster'],
+  extractAdditionalLabelValuesFn: (req, res) => {
+      const { headers } = req.headers;
+      return {
+        customer: headers['x-custom-header-customer'],
+        cluster: headers['x-custom-header-cluster']
+      }
+  }
+}))
+```
 
 ## Request.js HTTP request duration collector
 
