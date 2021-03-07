@@ -2,7 +2,9 @@
 
 ## Master
 
-- Add `additionalLabels` and `extractAdditionalLabelValuesFn` options, see [README](README.md) for more info.
+### Features
+
+- Add support for custom labels addition to metrics
 
 ### Breaking Changes
 
