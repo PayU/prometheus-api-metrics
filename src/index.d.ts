@@ -1,5 +1,5 @@
-import { RequestHandler, Response } from 'express';
-import { Middleware } from 'koa';
+import { Request, RequestHandler, Response } from 'express';
+import { Context, Middleware } from 'koa';
 
 export default function middleware(options?: ApiMetricsOpts) : RequestHandler;
 export function koaMiddleware(options?: ApiMetricsOpts) : Middleware;
@@ -20,6 +20,8 @@ export interface ApiMetricsOpts {
   metricsPrefix?: string;
   excludeRoutes?:string[];
   includeQueryParams?: boolean;
+  additionalLabels?: string[];
+  extractAdditionalLabelValuesFn?: ((req: Request, res: Response) => Record<string, unknown>) | ((ctx: Context) => Record<string, unknown>)
 }
 
 export interface CollectorOpts {

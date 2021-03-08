@@ -39,17 +39,15 @@ class KoaMiddleware {
         const route = this._getRoute(ctx) || 'N/A';
 
         if (route && utils.shouldLogMetrics(this.setupOptions.excludeRoutes, route)) {
-            this.setupOptions.requestSizeHistogram.observe({
+            const labels = {
                 method: ctx.req.method,
-                route: route,
-                code: ctx.res.statusCode
-            }, ctx.req.metrics.contentLength);
-            ctx.req.metrics.timer({ route: route, code: ctx.res.statusCode });
-            this.setupOptions.responseSizeHistogram.observe({
-                method: ctx.req.method,
-                route: route,
-                code: ctx.res.statusCode
-            }, responseLength);
+                route,
+                code: ctx.res.statusCode,
+                ...this.setupOptions.extractAdditionalLabelValuesFn(ctx)
+            };
+            this.setupOptions.requestSizeHistogram.observe(labels, ctx.req.metrics.contentLength);
+            ctx.req.metrics.timer(labels);
+            this.setupOptions.responseSizeHistogram.observe(labels, responseLength);
             debug(`metrics updated, request length: ${ctx.req.metrics.contentLength}, response length: ${responseLength}`);
         }
     }
@@ -122,9 +120,7 @@ class KoaMiddleware {
         }
 
         ctx.req.metrics = {
-            timer: this.setupOptions.responseTimeHistogram.startTimer({
-                method: ctx.req.method
-            }),
+            timer: this.setupOptions.responseTimeHistogram.startTimer(),
             contentLength: parseInt(ctx.request.get('content-length')) || 0
         };
 

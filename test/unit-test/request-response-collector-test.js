@@ -405,7 +405,7 @@ describe('request.js response time collector', () => {
             });
         });
     });
-    describe('initizalized with useUniqueHistogramName = true', () => {
+    describe('initialized with useUniqueHistogramName = true', () => {
         before(() => {
             Collector.init({ useUniqueHistogramName: true });
         });
@@ -433,7 +433,7 @@ describe('request.js response time collector', () => {
             });
         });
     });
-    describe('initizalized with prefix name', () => {
+    describe('initialized with prefix name', () => {
         before(() => {
             Collector.init({ prefix: 'prefix' });
         });
@@ -461,7 +461,7 @@ describe('request.js response time collector', () => {
             });
         });
     });
-    describe('initizalized with customized durationBuckets', () => {
+    describe('initialized with customized durationBuckets', () => {
         before(() => {
             Collector.init({ durationBuckets: [0.002, 0.01, 0.025, 0.035, 0.055, 0.15, 0.155, 0.35, 0.55] });
         });
@@ -491,7 +491,7 @@ describe('request.js response time collector', () => {
             });
         });
     });
-    describe('initizalized with both useUniqueHistogramName = true and prefix', () => {
+    describe('initialized with both useUniqueHistogramName = true and prefix', () => {
         before(() => {
             Collector.init({ useUniqueHistogramName: true, prefix: 'prefix' });
         });
@@ -509,9 +509,9 @@ describe('request.js response time collector', () => {
             });
         });
     });
-    describe('use claas format', function () {
+    describe('use claas format', () => {
         let collectorInstance;
-        before(function () {
+        before(() => {
             collectorInstance = new Collector();
         });
         afterEach(() => {

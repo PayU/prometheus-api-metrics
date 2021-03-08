@@ -153,7 +153,7 @@ describe('metrics-middleware', () => {
         });
     });
     describe('when using the middleware request has body', () => {
-        let func, req, res, next, requestSizeObserve, responseTimeObserve, endTimerStub;
+        let func, req, res, next, requestSizeObserve, requestTimeObserve, endTimerStub;
         before(async () => {
             next = sinon.stub();
             req = httpMocks.createRequest({
@@ -176,7 +176,7 @@ describe('metrics-middleware', () => {
             res.statusCode = 200;
             func = await middleware();
             endTimerStub = sinon.stub();
-            responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
+            requestTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
             func(req, res, next);
         });
         it('should save the request size and start time on the request', () => {
@@ -196,19 +196,18 @@ describe('metrics-middleware', () => {
                     route: '/path',
                     code: 200
                 }, 25);
-                sinon.assert.calledWith(responseTimeObserve, {
-                    method: 'GET'
-                });
+                sinon.assert.called(requestTimeObserve);
                 sinon.assert.calledWith(endTimerStub, {
+                    method: 'GET',
                     route: '/path',
                     code: 200
                 });
-                sinon.assert.calledOnce(responseTimeObserve);
+                sinon.assert.calledOnce(requestTimeObserve);
                 sinon.assert.calledOnce(endTimerStub);
             });
             after(() => {
                 requestSizeObserve.restore();
-                responseTimeObserve.restore();
+                requestTimeObserve.restore();
             });
         });
         after(() => {
@@ -216,7 +215,7 @@ describe('metrics-middleware', () => {
         });
     });
     describe('when using the middleware request has\'t body', () => {
-        let func, req, res, next, responseTimeObserve, requestSizeObserve, endTimerStub;
+        let func, req, res, next, requestTimeObserve, requestSizeObserve, endTimerStub;
         before(async () => {
             next = sinon.stub();
             req = httpMocks.createRequest({
@@ -233,7 +232,7 @@ describe('metrics-middleware', () => {
             res.statusCode = 200;
             func = await middleware();
             endTimerStub = sinon.stub();
-            responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
+            requestTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
             func(req, res, next);
         });
         it('should save the request size and start time on the request', () => {
@@ -253,19 +252,18 @@ describe('metrics-middleware', () => {
                     route: '/path/:id',
                     code: 200
                 }, 0);
-                sinon.assert.calledWith(responseTimeObserve, {
-                    method: 'GET'
-                });
+                sinon.assert.called(requestTimeObserve);
                 sinon.assert.calledWith(endTimerStub, {
+                    method: 'GET',
                     route: '/path/:id',
                     code: 200
                 });
                 sinon.assert.calledOnce(endTimerStub);
-                sinon.assert.calledOnce(responseTimeObserve);
+                sinon.assert.calledOnce(requestTimeObserve);
             });
             after(() => {
                 requestSizeObserve.restore();
-                responseTimeObserve.restore();
+                requestTimeObserve.restore();
             });
         });
         after(() => {
@@ -273,7 +271,7 @@ describe('metrics-middleware', () => {
         });
     });
     describe('when using the middleware response has body', () => {
-        let func, req, res, next, responseSizeObserve, responseTimeObserve, endTimerStub;
+        let func, req, res, next, responseSizeObserve, requestTimeObserve, endTimerStub;
         before(async () => {
             next = sinon.stub();
             req = httpMocks.createRequest({
@@ -294,7 +292,7 @@ describe('metrics-middleware', () => {
             func = await middleware();
             responseSizeObserve = sinon.spy(Prometheus.register.getSingleMetric('http_response_size_bytes'), 'observe');
             endTimerStub = sinon.stub();
-            responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
+            requestTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
             func(req, res, next);
             res.emit('finish');
         });
@@ -304,24 +302,23 @@ describe('metrics-middleware', () => {
                 route: '/path',
                 code: 200
             }, 25);
-            sinon.assert.calledWith(responseTimeObserve, {
-                method: 'GET'
-            });
+            sinon.assert.called(requestTimeObserve);
             sinon.assert.calledWith(endTimerStub, {
+                method: 'GET',
                 route: '/path',
                 code: 200
             });
-            sinon.assert.calledOnce(responseTimeObserve);
+            sinon.assert.calledOnce(requestTimeObserve);
             sinon.assert.calledOnce(endTimerStub);
         });
         after(() => {
             responseSizeObserve.restore();
-            responseTimeObserve.restore();
+            requestTimeObserve.restore();
             Prometheus.register.clear();
         });
     });
     describe('when using the middleware response has\'t body', () => {
-        let func, req, res, next, responseSizeObserve, responseTimeObserve, endTimerStub;
+        let func, req, res, next, responseSizeObserve, requestTimeObserve, endTimerStub;
         before(async () => {
             next = sinon.stub();
             req = httpMocks.createRequest({
@@ -339,7 +336,7 @@ describe('metrics-middleware', () => {
             func = await middleware();
             endTimerStub = sinon.stub();
             responseSizeObserve = sinon.spy(Prometheus.register.getSingleMetric('http_response_size_bytes'), 'observe');
-            responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
+            requestTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
             func(req, res, next);
             res.emit('finish');
         });
@@ -349,19 +346,18 @@ describe('metrics-middleware', () => {
                 route: '/path',
                 code: 200
             }, 0);
-            sinon.assert.calledWith(responseTimeObserve, {
-                method: 'GET'
-            });
+            sinon.assert.called(requestTimeObserve);
             sinon.assert.calledWith(endTimerStub, {
+                method: 'GET',
                 route: '/path',
                 code: 200
             });
-            sinon.assert.calledOnce(responseTimeObserve);
+            sinon.assert.calledOnce(requestTimeObserve);
             sinon.assert.calledOnce(endTimerStub);
         });
         after(() => {
             responseSizeObserve.restore();
-            responseTimeObserve.restore();
+            requestTimeObserve.restore();
             Prometheus.register.clear();
         });
     });
@@ -418,8 +414,8 @@ describe('metrics-middleware', () => {
             Prometheus.register.clear();
         });
     });
-    describe('when using middleware request baseUrl is undefined', function () {
-        let func, req, res, next, requestSizeObserve, responseTimeObserve, endTimerStub;
+    describe('when using middleware request baseUrl is undefined', () => {
+        let func, req, res, next, requestSizeObserve, requestTimeObserve, endTimerStub;
         before(async () => {
             next = sinon.stub();
             req = httpMocks.createRequest({
@@ -443,7 +439,7 @@ describe('metrics-middleware', () => {
             res.statusCode = 200;
             func = await middleware();
             endTimerStub = sinon.stub();
-            responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
+            requestTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
             func(req, res, next);
             requestSizeObserve = sinon.spy(Prometheus.register.getSingleMetric('http_request_size_bytes'), 'observe');
             res.emit('finish');
@@ -454,24 +450,23 @@ describe('metrics-middleware', () => {
                 route: '/path',
                 code: 200
             }, 25);
-            sinon.assert.calledWith(responseTimeObserve, {
-                method: 'GET'
-            });
+            sinon.assert.called(requestTimeObserve);
             sinon.assert.calledWith(endTimerStub, {
+                method: 'GET',
                 route: '/path',
                 code: 200
             });
-            sinon.assert.calledOnce(responseTimeObserve);
+            sinon.assert.calledOnce(requestTimeObserve);
             sinon.assert.calledOnce(endTimerStub);
         });
         after(() => {
             requestSizeObserve.restore();
-            responseTimeObserve.restore();
+            requestTimeObserve.restore();
             Prometheus.register.clear();
         });
     });
-    describe('when using middleware request baseUrl is undifined and path is not "/"', function () {
-        let func, req, res, next, requestSizeObserve, responseTimeObserve, endTimerStub;
+    describe('when using middleware request baseUrl is undefined and path is not "/"', () => {
+        let func, req, res, next, requestSizeObserve, requestTimeObserve, endTimerStub;
         before(async () => {
             next = sinon.stub();
             req = httpMocks.createRequest({
@@ -495,7 +490,7 @@ describe('metrics-middleware', () => {
             res.statusCode = 200;
             func = await middleware();
             endTimerStub = sinon.stub();
-            responseTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
+            requestTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
             func(req, res, next);
             requestSizeObserve = sinon.spy(Prometheus.register.getSingleMetric('http_request_size_bytes'), 'observe');
             res.emit('finish');
@@ -506,59 +501,58 @@ describe('metrics-middleware', () => {
                 route: '/path/:id',
                 code: 200
             }, 25);
-            sinon.assert.calledWith(responseTimeObserve, {
-                method: 'GET'
-            });
+            sinon.assert.called(requestTimeObserve);
             sinon.assert.calledWith(endTimerStub, {
+                method: 'GET',
                 route: '/path/:id',
                 code: 200
             });
-            sinon.assert.calledOnce(responseTimeObserve);
+            sinon.assert.calledOnce(requestTimeObserve);
             sinon.assert.calledOnce(endTimerStub);
         });
         after(() => {
             requestSizeObserve.restore();
-            responseTimeObserve.restore();
+            requestTimeObserve.restore();
             Prometheus.register.clear();
         });
     });
-    describe('when _getConnections called', function () {
-        let Middleware, server, numberOfConnectionsGauge, expressMiddleware, promethusStub;
-        before(function () {
+    describe('when _getConnections called', () => {
+        let Middleware, server, numberOfConnectionsGauge, expressMiddleware, prometheusStub;
+        before(() => {
             Middleware = require('../../src/express-middleware');
             server = {
                 getConnections: sinon.stub()
             };
         });
-        describe('when there is no server', function () {
-            before(function () {
+        describe('when there is no server', () => {
+            before(() => {
                 const expressMiddleware = new Middleware({});
                 expressMiddleware._getConnections();
             });
-            it('should not call getConnections', function () {
+            it('should not call getConnections', () => {
                 sinon.assert.notCalled(server.getConnections);
             });
         });
-        describe('when there is server', function () {
-            after(function () {
-                promethusStub.restore();
+        describe('when there is server', () => {
+            after(() => {
+                prometheusStub.restore();
             });
-            afterEach(function () {
+            afterEach(() => {
                 numberOfConnectionsGauge.set.resetHistory();
             });
-            before(function () {
+            before(() => {
                 numberOfConnectionsGauge = {
                     set: sinon.stub()
                 };
-                promethusStub = sinon.stub(Prometheus.register, 'getSingleMetric').returns(numberOfConnectionsGauge);
+                prometheusStub = sinon.stub(Prometheus.register, 'getSingleMetric').returns(numberOfConnectionsGauge);
             });
-            describe('when getConnections return count', function () {
-                before(function () {
+            describe('when getConnections return count', () => {
+                before(() => {
                     server.getConnections = sinon.stub().yields(null, 1);
                     expressMiddleware = new Middleware({ server: server, numberOfConnectionsGauge: numberOfConnectionsGauge });
                     expressMiddleware._collectDefaultServerMetrics(1000);
                 });
-                it('should call numberOfConnectionsGauge.set with count', function (done) {
+                it('should call numberOfConnectionsGauge.set with count', (done) => {
                     setTimeout(() => {
                         sinon.assert.calledOnce(server.getConnections);
                         sinon.assert.calledOnce(numberOfConnectionsGauge.set);
@@ -567,13 +561,13 @@ describe('metrics-middleware', () => {
                     }, 1100);
                 });
             });
-            describe('when getConnections return count', function () {
-                before(function () {
+            describe('when getConnections return count', () => {
+                before(() => {
                     server.getConnections = sinon.stub().yields(new Error('error'));
                     expressMiddleware = new Middleware({ server: server, numberOfConnectionsGauge: numberOfConnectionsGauge });
                     expressMiddleware._collectDefaultServerMetrics(500);
                 });
-                it('should not call numberOfConnectionsGauge.set with count', function (done) {
+                it('should not call numberOfConnectionsGauge.set with count', (done) => {
                     setTimeout(() => {
                         sinon.assert.calledOnce(server.getConnections);
                         sinon.assert.notCalled(numberOfConnectionsGauge.set);
@@ -581,6 +575,83 @@ describe('metrics-middleware', () => {
                     }, 510);
                 });
             });
+        });
+    });
+    describe('when calling the function with additionalLabels option', () => {
+        before(() => {
+            middleware({
+                additionalLabels: ['label1', 'label2']
+            });
+        });
+        it('should have http_request_duration_seconds with the right labels', () => {
+            expect(Prometheus.register.getSingleMetric('http_request_duration_seconds').labelNames).to.have.members(['method', 'route', 'code', 'label1', 'label2']);
+        });
+        it('should have http_request_size_bytes with the right labels', () => {
+            expect(Prometheus.register.getSingleMetric('http_request_size_bytes').labelNames).to.have.members(['method', 'route', 'code', 'label1', 'label2']);
+        });
+        it('should have http_response_size_bytes with the right labels', () => {
+            expect(Prometheus.register.getSingleMetric('http_response_size_bytes').labelNames).to.have.members(['method', 'route', 'code', 'label1', 'label2']);
+        });
+        after(() => {
+            Prometheus.register.clear();
+        });
+    });
+    describe('when using the middleware with additionalLabels options', () => {
+        let func, req, res, next, requestSizeObserve, requestTimeObserve, endTimerStub;
+        before(() => {
+            next = sinon.stub();
+            req = httpMocks.createRequest({
+                url: '/path/:id',
+                method: 'GET',
+                body: {
+                    foo: 'bar'
+                },
+                headers: {
+                    'content-length': '25'
+                }
+            });
+            req.socket = {};
+            req.route = {
+                path: '/:id'
+            };
+            res = httpMocks.createResponse({
+                eventEmitter: EventEmitter
+            });
+            delete req.baseUrl;
+            res.statusCode = 200;
+            func = middleware({
+                additionalLabels: ['label1', 'label2'],
+                extractAdditionalLabelValuesFn: () => ({ label1: 'valueLabel1', label2: 'valueLabel2' })
+            });
+            endTimerStub = sinon.stub();
+            requestTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
+            func(req, res, next);
+            requestSizeObserve = sinon.spy(Prometheus.register.getSingleMetric('http_request_size_bytes'), 'observe');
+            res.emit('finish');
+        });
+        it('metrics should include additional metrics', () => {
+            sinon.assert.calledWithExactly(requestSizeObserve, {
+                label1: 'valueLabel1',
+                label2: 'valueLabel2',
+                method: 'GET',
+                route: '/path/:id',
+                code: 200
+            }, 25);
+            sinon.assert.called(requestTimeObserve);
+            sinon.assert.calledWith(endTimerStub, {
+                label1: 'valueLabel1',
+                label2: 'valueLabel2',
+                method: 'GET',
+                route: '/path/:id',
+                code: 200
+            });
+            sinon.assert.calledOnce(requestTimeObserve);
+            sinon.assert.calledOnce(endTimerStub);
+        });
+        after(() => {
+            requestSizeObserve.restore();
+            requestTimeObserve.restore();
+            Prometheus.register.clear();
         });
     });
 });
