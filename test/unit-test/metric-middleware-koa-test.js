@@ -788,5 +788,77 @@ describe('metrics-middleware', () => {
                 Prometheus.register.clear();
             });
         });
+        describe('when calling the function with excludeDefaultMetricLabels option', () => {
+            it('or it\'s undefined', () => {
+                middleware();
+                expect(Prometheus.register.getSingleMetric('http_request_size_bytes').labelNames).to.have.members(['method', 'route', 'code']);
+            });
+            it('and it\'s false', () => {
+                middleware({
+                    excludeDefaultMetricLabels: false
+                });
+                expect(Prometheus.register.getSingleMetric('http_request_size_bytes').labelNames).to.have.members(['method', 'route', 'code']);
+            });
+            it('and it\'s true', () => {
+                middleware({
+                    excludeDefaultMetricLabels: true
+                });
+                expect(Prometheus.register.getSingleMetric('http_request_size_bytes').labelNames).to.have.members([]);
+            });
+            it('and it\'s an array', () => {
+                middleware({
+                    excludeDefaultMetricLabels: ['route', 'code']
+                });
+                expect(Prometheus.register.getSingleMetric('http_request_size_bytes').labelNames).to.have.members(['method']);
+            });
+            it('and it\'s other type', () => {
+                expect(() => {
+                    middleware({
+                        excludeDefaultMetricLabels: 'invalid',
+                    });
+                }).to.throw('excludeDefaultMetricLabels should be an array or a boolean');
+            });
+            afterEach(() => {
+                Prometheus.register.clear();
+            });
+        });
+        describe('when calling the function with useCountersForRequestSizeMetric option', () => {
+            before(() => {
+                middleware({
+                    useCountersForRequestSizeMetric: true
+                });
+            });
+            it('shouldn\'t have http_request_size_bytes metric', () => {
+                expect(Prometheus.register.getSingleMetric('http_request_size_bytes')).to.equal(undefined);
+            });
+            it('should have http_request_size_bytes_sum with the right labels', () => {
+                expect(Prometheus.register.getSingleMetric('http_request_size_bytes_sum').labelNames).to.have.members(['method', 'route', 'code']);
+            });
+            it('should have http_request_size_bytes_count with the right labels', () => {
+                expect(Prometheus.register.getSingleMetric('http_request_size_bytes_count').labelNames).to.have.members(['method', 'route', 'code']);
+            });
+            after(() => {
+                Prometheus.register.clear();
+            });
+        });
+        describe('when calling the function with useCountersForResponseSizeMetric option', () => {
+            before(() => {
+                middleware({
+                    useCountersForResponseSizeMetric: true
+                });
+            });
+            it('shouldn\'t have http_response_size_bytes metric', () => {
+                expect(Prometheus.register.getSingleMetric('http_response_size_bytes')).to.equal(undefined);
+            });
+            it('should have http_response_size_bytes_sum with the right labels', () => {
+                expect(Prometheus.register.getSingleMetric('http_response_size_bytes_sum').labelNames).to.have.members(['method', 'route', 'code']);
+            });
+            it('should have http_response_size_bytes_count with the right labels', () => {
+                expect(Prometheus.register.getSingleMetric('http_response_size_bytes_count').labelNames).to.have.members(['method', 'route', 'code']);
+            });
+            after(() => {
+                Prometheus.register.clear();
+            });
+        });
     });
 });

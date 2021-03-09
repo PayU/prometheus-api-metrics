@@ -18,14 +18,25 @@
   - [Access the metrics](#access-the-metrics)
 - [Custom Metrics](#custom-metrics)
   - [Note](#note)
+- [Additional Metric Labels](#additional-metric-labels)
 - [Request.js HTTP request duration collector](#requestjs-http-request-duration-collector)
   - [Usage](#usage-1)
+    - [Initialize](#initialize)
+    - [Options](#options-1)
     - [request](#request)
     - [request-promise-native](#request-promise-native)
     - [axios](#axios)
-- [Test](#test)
 - [Usage in koa](#usage-in-koa)
+- [Test](#test)
 - [Prometheus Examples Queries](#prometheus-examples-queries)
+  - [Apdex](#apdex)
+  - [95th Response Time by specific route and status code](#95th-response-time-by-specific-route-and-status-code)
+  - [Median Response Time Overall](#median-response-time-overall)
+  - [Median Request Size Overall](#median-request-size-overall)
+  - [Median Response Size Overall](#median-response-size-overall)
+  - [Avarage Memory Usage - All services](#avarage-memory-usage---all-services)
+  - [Avarage Eventloop Latency - All services](#avarage-eventloop-latency---all-services)
+- [Changelog](#changelog)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -55,24 +66,28 @@ API and process monitoring with [Prometheus](https://prometheus.io) for Node.js 
 
 ```js
 const apiMetrics = require('prometheus-api-metrics');
-app.use(apiMetrics())
+app.use(apiMetrics());
 ```
 
 ### Options
 
-| Option                   | Type      | Description | Default Value |
-|--------------------------|-----------|-------------|---------------|
-| `metricsPath`            | `String`  | Path to access the metrics | `/metrics` |
-| `defaultMetricsInterval` | `Number`  | Interval to collect the process metrics in milliseconds | `10000` |
-| `durationBuckets`        | `Array<Number>` | Buckets for response time in seconds | `[0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]` |
-| `requestSizeBuckets`     | `Array<Number>` | Buckets for request size in bytes | `[5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]` |
-| `responseSizeBuckets`    | `Array<Number>` | Buckets for response size in bytes | `[5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]` |
-| `useUniqueHistogramName` | `Boolean` | Add to metrics names the project name as a prefix (from package.json) | `false` |
-| `metricsPrefix`          | `String`  | A custom metrics names prefix, the package will add underscore between your prefix to the metric name | |
-| `excludeRoutes`          | `Array<String>` | Array of routes to exclude. Routes should be in your framework syntax | |
-| `includeQueryParams`     | `Boolean` | Indicate if to include query params in route, the query parameters will be sorted in order to eliminate the number of unique labels | `false` |
-| `additionalLabels`       | `Array<String>` | Indicating custom labels that can be included on each `http_*` metric. Use in conjunction with `extractAdditionalLabelValuesFn`. |
-| `extractAdditionalLabelValuesFn` | `Function` | A function that can be use to generate the value of custom labels for each of the `http_*` metrics. When using koa, the function takes `ctx`, when using express, it takes `req, res` as arguments | |
+| Option                             | Type                         | Description                                                                                                                                                                                        | Default Value                                             |
+| ---------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `metricsPath`                      | `String`                     | Path to access the metrics                                                                                                                                                                         | `/metrics`                                                |
+| `defaultMetricsInterval`           | `Number`                     | Interval to collect the process metrics in milliseconds                                                                                                                                            | `10000`                                                   |
+| `durationBuckets`                  | `Array<Number>`              | Buckets for response time in seconds                                                                                                                                                               | `[0.001, 0.005, 0.015, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]`    |
+| `requestSizeBuckets`               | `Array<Number>`              | Buckets for request size in bytes                                                                                                                                                                  | `[5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]` |
+| `responseSizeBuckets`              | `Array<Number>`              | Buckets for response size in bytes                                                                                                                                                                 | `[5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]` |
+| `useUniqueHistogramName`           | `Boolean`                    | Add to metrics names the project name as a prefix (from package.json)                                                                                                                              | `false`                                                   |
+| `metricsPrefix`                    | `String`                     | A custom metrics names prefix, the package will add underscore between your prefix to the metric name                                                                                              |                                                           |
+| `httpMetricsPrefix`                | `String`                     | A custom prefix for HTTP metrics only, the package will add underscore between your prefix to the metric name                                                                                      |                                                           |
+| `excludeRoutes`                    | `Array<String>`              | Array of routes to exclude. Routes should be in your framework syntax                                                                                                                              |                                                           |
+| `includeQueryParams`               | `Boolean`                    | Indicate if to include query params in route, the query parameters will be sorted in order to eliminate the number of unique labels                                                                | `false`                                                   |
+| `additionalLabels`                 | `Array<String>`              | Indicating custom labels that can be included on each `http_*` metric. Use in conjunction with `extractAdditionalLabelValuesFn`.                                                                   |
+| `extractAdditionalLabelValuesFn`   | `Function`                   | A function that can be use to generate the value of custom labels for each of the `http_*` metrics. When using koa, the function takes `ctx`, when using express, it takes `req, res` as arguments |                                                           |
+| `excludeDefaultMetricLabels`       | `Boolean` or `Array<String>` | Excludes the metric labels added by default (`code`, `method`, `route`). If `true` is passed, it will exclude them all. An array of the labels that you need to exclude can also be passed         |                                                           |
+| `useCountersForRequestSizeMetric`  | `Boolean`                    | Uses two counters for Request Size (`_sum` and `_count`) instead of Histogram                                                                                                                      | `false`                                                   |
+| `useCountersForResponseSizeMetric` | `Boolean`                    | Uses two counters for Response Size (`_sum` and `_count`) instead of Histogram                                                                                                                     | `false`                                                   |
 
 ### Access the metrics
 
@@ -111,7 +126,7 @@ Create new metric from the kind that you like
 const checkoutsTotal = new Prometheus.Counter({
   name: 'checkouts_total',
   help: 'Total number of checkouts',
-  labelNames: ['payment_method']
+  labelNames: ['payment_method'],
 });
 ```
 
@@ -119,8 +134,8 @@ Update it:
 
 ```js
 checkoutsTotal.inc({
-  payment_method: paymentMethod
-})
+  payment_method: paymentMethod,
+});
 ```
 
 The custom metrics will be exposed under the same endpoint as the API metrics.
@@ -139,16 +154,18 @@ For instance:
 
 ```js
 const apiMetrics = require('prometheus-api-metrics');
-app.use(apiMetrics({
-  additionalLabels: ['customer', 'cluster'],
-  extractAdditionalLabelValuesFn: (req, res) => {
+app.use(
+  apiMetrics({
+    additionalLabels: ['customer', 'cluster'],
+    extractAdditionalLabelValuesFn: (req, res) => {
       const { headers } = req.headers;
       return {
         customer: headers['x-custom-header-customer'],
-        cluster: headers['x-custom-header-cluster']
-      }
-  }
-}))
+        cluster: headers['x-custom-header-cluster'],
+      };
+    },
+  })
+);
 ```
 
 ## Request.js HTTP request duration collector
@@ -164,7 +181,8 @@ You can choose to initialized this functionality as a Class or not
 **Class:**
 
 ```js
-const HttpMetricsCollector = require('prometheus-api-metrics').HttpMetricsCollector;
+const HttpMetricsCollector = require('prometheus-api-metrics')
+  .HttpMetricsCollector;
 const collector = new HttpMetricsCollector();
 collector.init();
 ```
@@ -172,7 +190,8 @@ collector.init();
 **Singelton:**
 
 ```js
-const HttpMetricsCollector = require('prometheus-api-metrics').HttpMetricsCollector;
+const HttpMetricsCollector = require('prometheus-api-metrics')
+  .HttpMetricsCollector;
 HttpMetricsCollector.init();
 ```
 
@@ -189,18 +208,26 @@ For Example:
 
 ```js
 request({ url: 'http://www.google.com', time: true }, (err, response) => {
-    Collector.collect(err || response);
+  Collector.collect(err || response);
 });
 ```
 
 #### request-promise-native
 
 ```js
-return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', route: 'v2/:id', time: true, resolveWithFullResponse: true }).then((response) => {
+return requestPromise({
+  method: 'POST',
+  url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd',
+  route: 'v2/:id',
+  time: true,
+  resolveWithFullResponse: true,
+})
+  .then((response) => {
     Collector.collect(response);
-}).catch((error) => {
+  })
+  .catch((error) => {
     Collector.collect(error);
-});
+  });
 ```
 
 **Notes:**
@@ -208,6 +235,7 @@ return requestPromise({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f0
 1. In order to use this feature you must use `{ time: true }` as part of your request configuration and then pass to the collector the response or error you got.
 2. In order to use the timing feature in request-promise/request-promise-native you must also use `resolveWithFullResponse: true`
 3. Override - you can override the `route` and `target` attribute instead of taking them from the request object. In order to do that you should set a `metrics` object on your request with those attribute:
+
 ```js
 request({ method: 'POST', url: 'http://www.mocky.io/v2/5bd9984b2f00006d0006d1fd', metrics: { target: 'www.google.com', route: 'v2/:id' }, time: true }, (err, response) => {...};
 });
@@ -222,10 +250,14 @@ const axiosTime = require('axios-time');
 axiosTime(axios);
 
 try {
-    const response = await axios({ baseURL: 'http://www.google.com', method: 'get', url: '/' });
-    Collector.collect(response);
+  const response = await axios({
+    baseURL: 'http://www.google.com',
+    method: 'get',
+    url: '/',
+  });
+  Collector.collect(response);
 } catch (error) {
-    Collector.collect(error);
+  Collector.collect(error);
 }
 ```
 
@@ -238,9 +270,9 @@ try {
 This package supports koa server that uses [`koa-router`](https://www.npmjs.com/package/koa-router) and [`koa-bodyparser`](https://www.npmjs.com/package/koa-bodyparser)
 
 ```js
-const { koaMiddleware } = require('prometheus-api-metrics')
+const { koaMiddleware } = require('prometheus-api-metrics');
 
-app.use(koaMiddleware())
+app.use(koaMiddleware());
 ```
 
 ## Test
@@ -292,6 +324,10 @@ avg(nodejs_external_memory_bytes / 1024 / 1024) by (<SERVICE_LABLE_FIELD)
 ```
 avg(nodejs_eventloop_lag_seconds) by (<SERVICE_LABLE_FIELD)
 ```
+
+## Changelog
+
+Please see the changelog [here](CHANGELOG.md)
 
 [npm-image]: https://img.shields.io/npm/v/prometheus-api-metrics.svg?style=flat
 [npm-url]: https://npmjs.org/package/prometheus-api-metrics
