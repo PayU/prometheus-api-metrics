@@ -6,7 +6,7 @@
 
 - Add support for custom labels addition to metrics
 
-### Breaking Changes
+### Improvements
 
 - Add support for `prom-client v13`, which includes a few breaking changes, mainly the following functions are now async (return a promise):
   ```

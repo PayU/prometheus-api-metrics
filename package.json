@@ -41,7 +41,7 @@
     "pkginfo": "^0.4.1"
   },
   "peerDependencies": {
-    "prom-client": "13.x"
+    "prom-client": ">=12 <14"
   },
   "devDependencies": {
     "@nestjs/common": "^7.4.4",
@@ -75,18 +75,13 @@
     "nock": "^10.0.6",
     "node-mocks-http": "^1.9.0",
     "nyc": "^15.1.0",
-    "prom-client": "^13.0.0",
+    "prom-client": "^13.1.0",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.9",
     "rewire": "^4.0.1",
-    "rxjs": "^5.5.12",
+    "rxjs": "^6.6.6",
     "sinon": "^5.0.10",
-    "stryker": "^0.30.1",
-    "stryker-api": "^0.21.5",
-    "stryker-javascript-mutator": "^0.14.1",
-    "stryker-mocha-framework": "^0.12.5",
-    "stryker-mocha-runner": "^0.14.6",
     "supertest": "^3.4.2",
     "ts-node": "^7.0.1",
     "typescript": "^3.9.7"
