@@ -24,3 +24,9 @@ jobs:
       node_js: node
       script:
         - npm run lint
+    - language: node_js
+      name: prom-client-12
+      node_js: node
+      script:
+        - npm i -D prom-client@12
+        - npm run lint
