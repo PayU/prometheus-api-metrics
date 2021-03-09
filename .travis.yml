@@ -29,4 +29,4 @@ jobs:
       node_js: node
       script:
         - npm i -D prom-client@12
-        - npm run lint
+        - npm run test
