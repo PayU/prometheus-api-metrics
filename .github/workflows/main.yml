@@ -42,9 +42,41 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+      - uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ matrix.node }}-node-${{ hashFiles('**/package-lock.json') }}
       - name: install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
-      - name: units tests
+      - name: unit tests
         run: npm run unit-tests
       - name: integration tests
         run: npx npm run integration-tests
+      - name: prepare coveralls
+        run: npm run coveralls
+      - name: coveralls
+        uses: coverallsapp/github-action@master
+        if: ${{ matrix.node == '14' }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  prom-client-test:
+    strategy:
+      matrix:
+        node: [ '12', '14' ]
+        prom-client: [ '12' ]
+    needs: [ 'lockfile-lint', 'quality-checks' ]
+    name: Prom Client v.${{ matrix.prom-client }} Tests (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - name: install dependencies
+        run: npm ci
+      - name: install prom client
+        run: npm i prom-client@${{ matrix.prom-client }}
+      - name: run tests
+        run: npm test
