@@ -13,3 +13,18 @@ jobs:
           node-version: '14'
       - name: lint lock file
         run: npx lockfile-lint --path package-lock.json --allowed-hosts npm --validate-https
+
+  quality:
+    name: Quality checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: install dependencies
+        run: npm ci
+      - name: types check
+        run: npm run types-check
+      - name: lint check
+        run: npm run lint
