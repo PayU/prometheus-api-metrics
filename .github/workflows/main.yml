@@ -14,7 +14,7 @@ jobs:
       - name: lint lock file
         run: npx lockfile-lint --path package-lock.json --allowed-hosts npm --validate-https
 
-  quality:
+  quality-checks:
     name: Quality checks
     runs-on: ubuntu-latest
     steps:
@@ -28,3 +28,21 @@ jobs:
         run: npm run types-check
       - name: lint check
         run: npm run lint
+
+  test:
+    strategy:
+      matrix:
+        platform: [ ubuntu-latest ]
+        node: [ '10', '12', '14', '16' ]
+    needs: [ 'lockfile-lint', 'quality-checks' ]
+    name: Unit Tests - node:${{ matrix.node }}, platform:(${{ matrix.platform }})
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - name: install dependencies
+        run: npm ci
+      - name: units tests
+        run: npm run unit-tests
