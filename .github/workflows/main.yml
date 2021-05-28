@@ -1,0 +1,15 @@
+name: CI
+
+on: [ push, pull_request ]
+
+jobs:
+  lockfile-lint:
+    name: Lockfile lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: lint lock file
+        run: npx lockfile-lint --path package-lock.json --allowed-hosts npm --validate-https
