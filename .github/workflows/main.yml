@@ -53,8 +53,6 @@ jobs:
         run: npm run unit-tests
       - name: integration tests
         run: npx npm run integration-tests
-      - name: prepare coveralls
-        run: npm run coveralls
       - name: coveralls
         uses: coverallsapp/github-action@master
         if: ${{ matrix.node == '14' }}
@@ -80,3 +78,21 @@ jobs:
         run: npm i prom-client@${{ matrix.prom-client }}
       - name: run tests
         run: npm test
+
+  release:
+    name: release
+    needs: [ test, prom-client-test, lockfile-lint ]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: install dependencies
+        run: npm ci --ignore-scripts
+      - name: release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
