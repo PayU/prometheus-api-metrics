@@ -1,0 +1,110 @@
+name: CI
+
+on: [ push, pull_request ]
+
+jobs:
+  lockfile-lint:
+    name: Lockfile lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: lint lock file
+        run: npx lockfile-lint --path package-lock.json --allowed-hosts npm --validate-https
+
+  quality-checks:
+    needs: [ 'lockfile-lint' ]
+    name: Quality checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: install dependencies
+        run: npm ci
+      - name: types check
+        run: npm run types-check
+      - name: lint check
+        run: npm run lint
+
+  test:
+    strategy:
+      matrix:
+        platform: [ ubuntu-latest ]
+        node: [ '10', '12', '14', '16' ]
+    needs: [ 'quality-checks' ]
+    name: Node v.${{ matrix.node }} Tests (${{ matrix.platform }})
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ matrix.node }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: unit tests
+        run: npm run unit-tests
+      - name: integration tests
+        run: npm run integration-tests
+      - name: coveralls
+        uses: coverallsapp/github-action@master
+        if: ${{ matrix.node == '14' }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  prom-client-test:
+    strategy:
+      matrix:
+        node: [ '12', '14' ]
+        prom-client: [ '12' ]
+    needs: [ 'lockfile-lint', 'quality-checks' ]
+    name: Prom Client v.${{ matrix.prom-client }} Tests (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - name: install dependencies
+        run: npm ci
+      - name: install prom client
+        run: npm i prom-client@${{ matrix.prom-client }}
+      - name: run tests
+        run: npm test
+
+  release:
+    permissions:
+      actions: write
+      checks: write
+      contents: write
+      deployments: write
+      issues: write
+      packages: write
+      pull-requests: write
+      repository-projects: write
+      security-events: write
+      statuses: write
+    name: release
+    needs: [ test, prom-client-test, lockfile-lint ]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: install dependencies
+        run: npm ci --ignore-scripts
+      - name: release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NPM_TOKEN: ${{secrets.NPM_TOKEN}}

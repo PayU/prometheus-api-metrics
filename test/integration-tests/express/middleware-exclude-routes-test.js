@@ -4,7 +4,8 @@ const expect = require('chai').expect;
 const supertest = require('supertest');
 let app, config;
 
-describe('when using express framework (exclude route)', () => {
+describe('when using express framework (exclude route)', function() {
+    this.timeout(4000);
     before(() => {
         config = require('./server/config');
         config.useUniqueHistogramName = true;
