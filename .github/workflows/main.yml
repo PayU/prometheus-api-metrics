@@ -15,6 +15,7 @@ jobs:
         run: npx lockfile-lint --path package-lock.json --allowed-hosts npm --validate-https
 
   quality-checks:
+    needs: [ 'lockfile-lint' ]
     name: Quality checks
     runs-on: ubuntu-latest
     steps:
@@ -34,7 +35,7 @@ jobs:
       matrix:
         platform: [ ubuntu-latest ]
         node: [ '10', '12', '14', '16' ]
-    needs: [ 'lockfile-lint', 'quality-checks' ]
+    needs: [ 'quality-checks' ]
     name: Node v.${{ matrix.node }} Tests (${{ matrix.platform }})
     runs-on: ${{ matrix.platform }}
     steps:
@@ -52,7 +53,7 @@ jobs:
       - name: unit tests
         run: npm run unit-tests
       - name: integration tests
-        run: npx npm run integration-tests
+        run: npm run integration-tests
       - name: coveralls
         uses: coverallsapp/github-action@master
         if: ${{ matrix.node == '14' }}
