@@ -78,4 +78,10 @@ router.post('/test', async (ctx, next) => {
     return next();
 });
 
+router.get('/wild-path/(.*)', (ctx, next) => {
+    ctx.status = 200;
+    ctx.body = { message: 'Wildcard route reached!' };
+    return next();
+});
+
 module.exports = app;

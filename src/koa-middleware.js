@@ -33,7 +33,7 @@ class KoaMiddleware {
         }
     }
 
-    _handleResponse (ctx) {
+    _handleResponse(ctx) {
         const responseLength = parseInt(ctx.response.get('Content-Length')) || 0;
 
         const route = this._getRoute(ctx) || 'N/A';
@@ -92,6 +92,12 @@ class KoaMiddleware {
                 return route;
             }
         });
+
+        // If proper route is not found, send an undefined route
+        // The caller is responsible for setting a default "N/A" route in this case
+        if (!properRoute) {
+            return undefined;
+        }
 
         let route = properRoute.path;
         route = route.endsWith('/') ? route.substring(0, route.length - 1) : route;

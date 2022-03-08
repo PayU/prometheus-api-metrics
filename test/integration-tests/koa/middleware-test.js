@@ -679,6 +679,23 @@ describe('when using koa framework', () => {
                     });
             });
         });
+        describe('when calling wildcard endpoint', function () {
+            before(() => {
+                const wildcardPath = '/wild-path/' + Math.floor(Math.random() * 10);
+                return supertest(app)
+                    .get(wildcardPath)
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('method="GET",route="N/A",code="200"');
+                    });
+            });
+        });
         it('should get metrics as json', () => {
             return supertest(app)
                 .get('/metrics.json')
