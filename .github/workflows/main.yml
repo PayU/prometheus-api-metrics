@@ -58,7 +58,7 @@ jobs:
         run: npm run integration-tests
       - name: coveralls
         uses: coverallsapp/github-action@master
-        if: ${{ matrix.node == "$NODE_VERSION" }}
+        if: ${{ matrix.node == "16" }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
