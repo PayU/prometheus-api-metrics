@@ -63,6 +63,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
   prom-client-test:
+    needs: [ 'lockfile-lint' ]
     strategy:
       matrix:
         prom-client: [ '12', '13', '14' ]
