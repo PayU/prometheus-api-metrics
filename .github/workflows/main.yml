@@ -3,7 +3,7 @@ name: CI
 on: [ push, pull_request ]
 
 env:
-  c: 16
+  node-version: 16
 
 jobs:
   lockfile-lint:
