@@ -2,9 +2,6 @@ name: CI
 
 on: [ push, pull_request ]
 
-env:
-  NODE_VERSION: 16
-
 jobs:
   lockfile-lint:
     name: Lockfile lint
@@ -13,7 +10,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: $NODE_VERSION
+          node-version: 16
       - name: lint lock file
         run: npx lockfile-lint --path package-lock.json --allowed-hosts npm --validate-https
 
@@ -25,7 +22,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: $NODE_VERSION
+          node-version: 16
       - name: install dependencies
         run: npm ci
       - name: types check
@@ -73,7 +70,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: $NODE_VERSION
+          node-version: 16
       - name: install dependencies
         run: npm ci
       - name: install prom client
