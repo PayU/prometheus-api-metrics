@@ -653,6 +653,57 @@ describe('metrics-middleware', () => {
                 Prometheus.register.clear();
             });
         });
+        describe('when using middleware request and path not matched to any specific route', () => {
+            let match, func, req, res, ctx, next, requestSizeObserve, requestTimeObserve, endTimerStub;
+            before(async () => {
+                match = sinon.stub();
+                match.onFirstCall().returns({ path: [] });
+                match.onSecondCall().returns({ path: [{ path: '/(.*)' }] });
+                next = sinon.stub();
+                req = httpMocks.createRequest({
+                    url: '/not-path',
+                    method: 'GET',
+                    body: {
+                        foo: 'bar'
+                    },
+                    headers: {
+                        'content-length': '25'
+                    }
+                });
+                req.socket = {};
+                res = httpMocks.createResponse({
+                    eventEmitter: EventEmitter
+                });
+                res.statusCode = 404;
+                ctx = { req: req, res: res, request: req, response: res, router: { match: match }, _matchedRoute: '/(.*)', originalUrl: '/not-path' };
+                func = await middleware();
+                endTimerStub = sinon.stub();
+                requestTimeObserve = sinon.stub(Prometheus.register.getSingleMetric('http_request_duration_seconds'), 'startTimer').returns(endTimerStub);
+                func(ctx, next);
+                requestSizeObserve = sinon.spy(Prometheus.register.getSingleMetric('http_request_size_bytes'), 'observe');
+                res.emit('finish');
+            });
+            it('should update the histogram with the elapsed time and size', () => {
+                sinon.assert.calledWithExactly(requestSizeObserve, {
+                    method: 'GET',
+                    route: 'N/A',
+                    code: 404
+                }, 25);
+                sinon.assert.called(requestTimeObserve);
+                sinon.assert.calledWith(endTimerStub, {
+                    method: 'GET',
+                    route: 'N/A',
+                    code: 404
+                });
+                sinon.assert.calledOnce(requestTimeObserve);
+                sinon.assert.calledOnce(endTimerStub);
+            });
+            after(() => {
+                requestSizeObserve.restore();
+                requestTimeObserve.restore();
+                Prometheus.register.clear();
+            });
+        });
         describe('when _getConnections called', () => {
             let Middleware, server, numberOfConnectionsGauge, koaMiddleware, prometheusStub;
             before(() => {
