@@ -2,7 +2,7 @@ name: CI
 
 on: [ push, pull_request ]
 
-variables:
+env:
   NODE_VERSION: 16
 
 jobs:
