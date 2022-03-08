@@ -67,7 +67,6 @@ jobs:
     strategy:
       matrix:
         prom-client: [ '12', '13', '14' ]
-    needs: [ 'lockfile-lint', 'quality-checks' ]
     name: Prom Client v.${{ matrix.prom-client }} Tests (node ${{ matrix.NODE_VERSION }})
     runs-on: ubuntu-latest
     steps:
