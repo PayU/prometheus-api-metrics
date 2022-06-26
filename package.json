@@ -75,7 +75,7 @@
     "nock": "^10.0.6",
     "node-mocks-http": "^1.9.0",
     "nyc": "^15.1.0",
-    "prom-client": "^13.1.0",
+    "prom-client": "^13.2.0",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.9",
