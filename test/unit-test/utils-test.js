@@ -6,11 +6,21 @@ const utils = require('../../src/utils');
 describe('utils', () => {
     describe('getMetricNames', () => {
         it('should include project name', () => {
-            const metricNames = ['metric1'];
+            const metricNames = { metric: 'metric', http_metric: 'http_metric' };
             const useUniqueHistogramName = true;
-            const metricsPrefix = true;
+            const metricsPrefix = 'prefix';
             const projectName = 'mock_project';
-            expect(utils.getMetricNames(metricNames, useUniqueHistogramName, metricsPrefix, projectName)[0]).to.equal('mock_project_metric1');
+            const newMetricNames = utils.getMetricNames({ metricNames, useUniqueHistogramName, metricsPrefix, projectName });
+            expect(Object.values(newMetricNames)).to.have.members(['mock_project_metric', 'mock_project_http_metric']);
+        });
+        it('should include prefix and http prefix', () => {
+            const metricNames = { metric: 'metric', http_metric: 'http_metric' };
+            const useUniqueHistogramName = false;
+            const metricsPrefix = 'prefix';
+            const projectName = 'mock_project';
+            const httpMetricsPrefix = 'http_prefix';
+            const newMetricNames = utils.getMetricNames({ metricNames, useUniqueHistogramName, metricsPrefix, httpMetricsPrefix, projectName });
+            expect(Object.values(newMetricNames)).to.have.members(['prefix_metric', 'http_prefix_http_metric']);
         });
     });
     describe('isArray', () => {

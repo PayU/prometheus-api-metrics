@@ -43,9 +43,19 @@ class ExpressMiddleware {
                 code: res.statusCode,
                 ...this.setupOptions.extractAdditionalLabelValuesFn(req, res)
             };
-            this.setupOptions.requestSizeHistogram.observe(labels, req.metrics.contentLength);
+            if (this.setupOptions.useCountersForRequestSizeMetric) {
+                this.setupOptions.requestSizeSum.inc(labels, req.metrics.contentLength);
+                this.setupOptions.requestSizeCount.inc(labels);
+            } else {
+                this.setupOptions.requestSizeHistogram.observe(labels, req.metrics.contentLength);
+            }
+            if (this.setupOptions.useCountersForResponseSizeMetric) {
+                this.setupOptions.responseSizeSum.inc(labels, responseLength);
+                this.setupOptions.responseSizeCount.inc(labels);
+            } else {
+                this.setupOptions.responseSizeHistogram.observe(labels, responseLength);
+            }
             req.metrics.timer(labels);
-            this.setupOptions.responseSizeHistogram.observe(labels, responseLength);
             debug(`metrics updated, request length: ${req.metrics.contentLength}, response length: ${responseLength}`);
         }
     }

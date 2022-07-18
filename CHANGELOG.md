@@ -5,6 +5,10 @@
 ### Features
 
 - Add support for custom labels addition to metrics
+- Add `httpMetricsPrefix` option to optionally add a prefix to HTTP metrics.
+- Add `excludeDefaultMetricLabels` option to exclude all or certain metrics that are added by default.
+- Add `useCountersForRequestSizeMetric` option to expose two counters for Request Size (`_sum` and `_count`) instead of Histogram.
+- Add `useCountersForResponseSizeMetric` option to expose two counters for Response Size (`_sum` and `_count`) instead of Histogram.
 
 ### Improvements
 

@@ -45,9 +45,19 @@ class KoaMiddleware {
                 code: ctx.res.statusCode,
                 ...this.setupOptions.extractAdditionalLabelValuesFn(ctx)
             };
-            this.setupOptions.requestSizeHistogram.observe(labels, ctx.req.metrics.contentLength);
+            if (this.setupOptions.useCountersForRequestSizeMetric) {
+                this.setupOptions.requestSizeSum.inc(labels, ctx.req.metrics.contentLength);
+                this.setupOptions.requestSizeCount.inc(labels);
+            } else {
+                this.setupOptions.requestSizeHistogram.observe(labels, ctx.req.metrics.contentLength);
+            }
+            if (this.setupOptions.useCountersForResponseSizeMetric) {
+                this.setupOptions.responseSizeSum.inc(labels, responseLength);
+                this.setupOptions.responseSizeCount.inc(labels);
+            } else {
+                this.setupOptions.responseSizeHistogram.observe(labels, responseLength);
+            }
             ctx.req.metrics.timer(labels);
-            this.setupOptions.responseSizeHistogram.observe(labels, responseLength);
             debug(`metrics updated, request length: ${ctx.req.metrics.contentLength}, response length: ${responseLength}`);
         }
     }

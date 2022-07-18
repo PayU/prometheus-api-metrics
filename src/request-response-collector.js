@@ -96,7 +96,7 @@ function _init(options = {}) {
     };
 
     const { durationBuckets, countClientErrors, useUniqueHistogramName, prefix } = options;
-    metricNames = utils.getMetricNames(metricNames, useUniqueHistogramName, prefix, projectName);
+    metricNames = utils.getMetricNames({ metricNames, useUniqueHistogramName, metricsPrefix: prefix, projectName });
 
     southboundResponseTimeHistogram = Prometheus.register.getSingleMetric(metricNames.southbound_request_duration_seconds) ||
         new Prometheus.Histogram({
