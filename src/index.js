@@ -1,8 +1,7 @@
 'use strict';
-
-const Path = require('path');
+var appRoot = require('app-root-path');
 const metricsMiddleware = { exports: {} };
-require('pkginfo')(metricsMiddleware, { dir: Path.dirname(module.parent.filename), include: ['name', 'version'] });
+require('pkginfo')(metricsMiddleware, { dir: appRoot.path, include: ['name', 'version'] });
 const appVersion = metricsMiddleware.exports.version;
 const projectName = metricsMiddleware.exports.name.replace(/-/g, '_');
 
