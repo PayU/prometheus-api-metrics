@@ -7,9 +7,10 @@
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 [![Apache 2.0 License][license-image]][license-url]
 
+<!-- **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)* -->
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-<!-- **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)* -->
+
 
 - [Goal](#goal)
 - [Features](#features)
@@ -18,14 +19,24 @@
   - [Access the metrics](#access-the-metrics)
 - [Custom Metrics](#custom-metrics)
   - [Note](#note)
+- [Additional Metric Labels](#additional-metric-labels)
 - [Request.js HTTP request duration collector](#requestjs-http-request-duration-collector)
   - [Usage](#usage-1)
+    - [Initialize](#initialize)
+    - [Options](#options-1)
     - [request](#request)
     - [request-promise-native](#request-promise-native)
     - [axios](#axios)
-- [Test](#test)
 - [Usage in koa](#usage-in-koa)
+- [Test](#test)
 - [Prometheus Examples Queries](#prometheus-examples-queries)
+  - [Apdex](#apdex)
+  - [95th Response Time by specific route and status code](#95th-response-time-by-specific-route-and-status-code)
+  - [Median Response Time Overall](#median-response-time-overall)
+  - [Median Request Size Overall](#median-request-size-overall)
+  - [Median Response Size Overall](#median-response-size-overall)
+  - [Average Memory Usage - All services](#average-memory-usage---all-services)
+  - [Average Eventloop Latency - All services](#average-eventloop-latency---all-services)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -169,7 +180,7 @@ const collector = new HttpMetricsCollector();
 collector.init();
 ```
 
-**Singelton:**
+**Singleton:**
 
 ```js
 const HttpMetricsCollector = require('prometheus-api-metrics').HttpMetricsCollector;
@@ -254,43 +265,43 @@ npm test
 ### [Apdex](https://en.wikipedia.org/wiki/Apdex)
 
 ```
-(sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>">, route="<ROUTE_NAME>", le="0.05"}[10m])) by (<SERVICE_LABLE_FIELD>) + sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>", le="0.1"}[10m])) by (<SERVICE_LABLE_FIELD>)) / 2 / sum(rate(http_request_duration_seconds_count{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>"}[10m])) by (<SERVICE_LABLE_FIELD>)
+(sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABEL_FIELD>="<SERVICE_LABEL>">, route="<ROUTE_NAME>", le="0.05"}[10m])) by (<SERVICE_LABEL_FIELD>) + sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABEL_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>", le="0.1"}[10m])) by (<SERVICE_LABEL_FIELD>)) / 2 / sum(rate(http_request_duration_seconds_count{<SERVICE_LABEL_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>"}[10m])) by (<SERVICE_LABEL_FIELD>)
 ```
 
 ### 95th Response Time by specific route and status code
 
 ```
-histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>", code="200"}[10m])) by (le))
+histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABEL_FIELD>="<SERVICE_LABEL>", route="<ROUTE_NAME>", code="200"}[10m])) by (le))
 ```
 
 ### Median Response Time Overall
 
 ```
-histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
+histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{<SERVICE_LABEL_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
 ```
 
 ### Median Request Size Overall
 
 ```
-histogram_quantile(0.50, sum(rate(http_request_size_bytes_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
+histogram_quantile(0.50, sum(rate(http_request_size_bytes_bucket{<SERVICE_LABEL_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
 ```
 
 ### Median Response Size Overall
 
 ```
-histogram_quantile(0.50, sum(rate(http_response_size_bytes_bucket{<SERVICE_LABLE_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
+histogram_quantile(0.50, sum(rate(http_response_size_bytes_bucket{<SERVICE_LABEL_FIELD>="<SERVICE_LABEL>"}[10m])) by (le))
 ```
 
-### Avarage Memory Usage - All services
+### Average Memory Usage - All services
 
 ```
-avg(nodejs_external_memory_bytes / 1024 / 1024) by (<SERVICE_LABLE_FIELD)
+avg(nodejs_external_memory_bytes / 1024 / 1024) by (<SERVICE_LABEL_FIELD)
 ```
 
-### Avarage Eventloop Latency - All services
+### Average Eventloop Latency - All services
 
 ```
-avg(nodejs_eventloop_lag_seconds) by (<SERVICE_LABLE_FIELD)
+avg(nodejs_eventloop_lag_seconds) by (<SERVICE_LABEL_FIELD)
 ```
 
 [npm-image]: https://img.shields.io/npm/v/prometheus-api-metrics.svg?style=flat
