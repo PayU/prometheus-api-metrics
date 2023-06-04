@@ -57,11 +57,16 @@ class ExpressMiddleware {
                 route = route ? route + req.route.path : req.route.path;
             }
 
+            let originalUrl = req.originalUrl;
+            if (originalUrl.substr(originalUrl.length - 1) === '/'){
+                originalUrl = originalUrl.substr(0, originalUrl.length - 1);
+            }
+
             if (!route || route === '' || typeof route !== 'string') {
-                route = req.originalUrl.split('?')[0];
+                route = originalUrl.split('?')[0];
             } else {
                 const splittedRoute = route.split('/');
-                const splittedUrl = req.originalUrl.split('?')[0].split('/');
+                const splittedUrl = originalUrl.split('?')[0].split('/');
                 const routeIndex = splittedUrl.length - splittedRoute.length + 1;
 
                 const baseUrl = splittedUrl.slice(0, routeIndex).join('/');

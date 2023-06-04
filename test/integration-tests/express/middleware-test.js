@@ -700,5 +700,39 @@ describe('when using express framework', () => {
                     JSON.parse(res.text);
                 });
         });
+        describe('when calling a GET endpoint with suffix /', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/hello/')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('method="GET",route="/hello",code="200"');
+                    });
+            });
+        });
+        describe('when calling a POST endpoint with suffix /', () => {
+            before(() => {
+                return supertest(app)
+                    .post('/test/')
+                    .send({ name: 'john' })
+                    .set('Accept', 'application/json')
+                    .expect(201)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('method="POST",route="/test",code="201"');
+                    });
+            });
+        });
     });
 });
