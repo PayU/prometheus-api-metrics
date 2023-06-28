@@ -57,6 +57,11 @@ class ExpressMiddleware {
                 route = route ? route + req.route.path : req.route.path;
             }
 
+            // #112 - aggregated express default route
+            if (route === '*') {
+                return route;
+            }
+
             if (!route || route === '' || typeof route !== 'string') {
                 route = req.originalUrl.split('?')[0];
             } else {
