@@ -20,10 +20,10 @@ describe('when using express framework (default route)', function() {
     });
 
     describe('when start up with default route', () => {
-        describe('when calling a GET endpoint', () => {
+        describe('when calling default endpoint', () => {
             before(() => {
                 return supertest(app)
-                    .get('/hello')
+                    .get('/dne')
                     .expect(200)
                     .then((res) => {});
             });
@@ -36,6 +36,24 @@ describe('when using express framework (default route)', function() {
                     });
             });
         });
+
+        describe('when calling existing GET endpoint', () => {
+            before(() => {
+                return supertest(app)
+                    .get('/hello')
+                    .expect(200)
+                    .then((res) => {});
+            });
+            it('should add it to the histogram', () => {
+                return supertest(app)
+                    .get('/metrics')
+                    .expect(200)
+                    .then((res) => {
+                        expect(res.text).to.contain('method="GET",route="/hello",code="200"');
+                    });
+            });
+        });
+
         describe('when calling a GET endpoint with one query param', () => {
             before(() => {
                 return supertest(app)
