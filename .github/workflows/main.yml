@@ -36,7 +36,7 @@ jobs:
   test:
     strategy:
       matrix:
-        NODE_VERSION: [ '10', '12', '14', '16' ]
+        NODE_VERSION: [ '10', '12', '14', '16', '18', '20' ]
     needs: [ 'lockfile-lint' ]
     name: Node v.${{ matrix.NODE_VERSION }} Tests
     runs-on: ubuntu-latest
@@ -66,7 +66,7 @@ jobs:
     needs: [ 'lockfile-lint' ]
     strategy:
       matrix:
-        prom-client: [ '12', '13', '14' ]
+        prom-client: [ '12', '13', '14', '15' ]
     name: Prom Client v.${{ matrix.prom-client }} Tests (node ${{ matrix.NODE_VERSION }})
     runs-on: ubuntu-latest
     steps:
