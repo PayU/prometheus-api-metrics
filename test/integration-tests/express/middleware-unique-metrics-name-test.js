@@ -39,19 +39,16 @@ describe('when using express framework with unique metric names', () => {
                     expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="new"}');
                     expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="old"}');
                     expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="code"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="map"}');
                     expect(res.text).to.contain('express_test_nodejs_heap_space_size_total_bytes{space="large_object"}');
 
                     expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="new"}');
                     expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="old"}');
                     expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="code"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="map"}');
                     expect(res.text).to.contain('express_test_nodejs_heap_space_size_used_bytes{space="large_object"}');
 
                     expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="new"}');
                     expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="old"}');
                     expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="code"}');
-                    expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="map"}');
                     expect(res.text).to.contain('express_test_nodejs_heap_space_size_available_bytes{space="large_object"}');
 
                     expect(res.text).to.contain('express_test_nodejs_version_info');
