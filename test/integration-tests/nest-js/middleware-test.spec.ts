@@ -61,6 +61,27 @@ describe('when using nest-js framework', () => {
                 });
         });
     });
+
+    describe('route should be unaltered by user inputs (#114)', () => {
+        before(() => {
+            return request(server)
+                .get('/users/s/app-id/p')
+                .expect(200)
+                .expect({
+                    app_id: 'some_app_id'
+                });
+        });
+
+        it('should add it to the histogram', () => {
+            return request(server)
+                .get('/metrics')
+                .expect(200)
+                .then((res) => {
+                    expect(res.text).to.contain('method="GET",route="/users/:user_id/app-id/:app_id",code="200"');
+                });
+        });
+    });
+
     describe('When calling a GET user/:user_id/app-id/:app_id with user_id and app_id as pattern and query params', () => {
         before(() => {
             return request(server)

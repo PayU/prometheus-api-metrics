@@ -73,13 +73,6 @@ class ExpressMiddleware {
             }
         }
 
-        // nest.js - build request url pattern if exists
-        if (typeof req.params === 'object') {
-            Object.keys(req.params).forEach((paramName) => {
-                route = route.replace(req.params[paramName], ':' + paramName);
-            });
-        }
-
         // this condition will evaluate to true only in
         // express framework and no route was found for the request. if we log this metrics
         // we'll risk in a memory leak since the route is not a pattern but a hardcoded string.
