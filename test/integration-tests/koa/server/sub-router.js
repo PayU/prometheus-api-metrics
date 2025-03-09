@@ -13,7 +13,7 @@ router.get('/hello', bad);
 router.get('/hello/:time', helloTime);
 
 async function test(ctx, next) {
-    await sleep(ctx.request.body.delay || 1);
+    await sleep(Number.parseInt(ctx.request.body.delay || 1));
 
     ctx.status = 201;
     ctx.body = { message: 'Hello World!' };
@@ -21,7 +21,7 @@ async function test(ctx, next) {
 };
 
 async function helloTime (ctx, next) {
-    await sleep(ctx.params.time);
+    await sleep(Number.parseInt(ctx.params.time));
     ctx.status = 200;
     ctx.boy = { message: 'Hello World!' };
     next();

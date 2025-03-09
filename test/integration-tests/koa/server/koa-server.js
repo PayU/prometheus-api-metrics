@@ -50,7 +50,7 @@ router.get('/hello', async (ctx, next) => {
 });
 
 router.get('/hello/:time', async (ctx, next) => {
-    await sleep(ctx.params.time);
+    await sleep(Number.parseInt(ctx.params.time));
     ctx.status = 200;
     ctx.body = { message: 'Hello World!' };
     return next();
@@ -72,7 +72,7 @@ router.get('/checkout', (ctx, next) => {
 });
 
 router.post('/test', async (ctx, next) => {
-    await sleep(ctx.request.body.delay || 1);
+    await sleep(Number.parseInt(ctx.request.body.delay || 1));
     ctx.status = 201;
     ctx.body = { message: 'Test World!' };
     return next();
