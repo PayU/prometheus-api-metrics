@@ -35,7 +35,7 @@ app.get('/hello/:time', (req, res, next) => {
     setTimeout(() => {
         res.json({ message: 'Hello World!' });
         next();
-    }, parseInt(req.param.time));
+    }, parseInt(req.params.time));
 });
 
 app.get('/bad', (req, res, next) => {

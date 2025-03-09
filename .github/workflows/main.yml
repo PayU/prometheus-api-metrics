@@ -3,15 +3,15 @@ name: CI
 on: [ push, pull_request ]
 
 env:
-  NODE_VERSION: 16
+  NODE_VERSION: 22
 
 jobs:
   lockfile-lint:
     name: Lockfile lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: lint lock file
@@ -22,12 +22,12 @@ jobs:
     name: Quality checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts --no-audit --no-funds
       - name: types check
         run: npm run types-check
       - name: lint check
@@ -36,22 +36,22 @@ jobs:
   test:
     strategy:
       matrix:
-        NODE_VERSION: [ '10', '12', '14', '16', '18', '20' ]
+        NODE_VERSION: [ '18', '20', '22' ]
     needs: [ 'lockfile-lint' ]
     name: Node v.${{ matrix.NODE_VERSION }} Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.NODE_VERSION }}
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: '**/node_modules'
           key: ${{ matrix.NODE_VERSION }}-node-${{ hashFiles('**/package-lock.json') }}
       - name: install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts --no-audit --no-funds
       - name: unit tests
         run: npm run unit-tests
       - name: integration tests
@@ -70,12 +70,12 @@ jobs:
     name: Prom Client v.${{ matrix.prom-client }} Tests (node ${{ matrix.NODE_VERSION }})
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts --no-audit --no-funds
       - name: install prom client
         run: npm i prom-client@${{ matrix.prom-client }}
       - name: run tests

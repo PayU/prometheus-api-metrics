@@ -38,14 +38,14 @@ router.get('/hello', async (ctx, next) => {
 });
 
 router.get('/health', async (ctx, next) => {
-    await sleep(ctx.request.body.delay || 1);
+    await sleep(Number.parseInt(ctx.request.body.delay || 1));
     ctx.body = { message: 'Hello World!' };
     ctx.status = 200;
     next();
 });
 
 router.get('/health/:id', async (ctx, next) => {
-    await sleep(ctx.request.body.delay || 1);
+    await sleep(Number.parseInt(ctx.request.body.delay || 1));
     ctx.body = { message: 'Hello World!' };
     ctx.status = 200;
     next();
