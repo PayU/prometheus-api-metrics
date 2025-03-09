@@ -36,7 +36,7 @@ jobs:
   test:
     strategy:
       matrix:
-        NODE_VERSION: [ '10', '12', '14', '16', '18', '20' ]
+        NODE_VERSION: [ '10', '12', '14', '16', '18', '20', '22' ]
     needs: [ 'lockfile-lint' ]
     name: Node v.${{ matrix.NODE_VERSION }} Tests
     runs-on: ubuntu-latest
